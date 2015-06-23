@@ -1,14 +1,17 @@
 #!/bin/env node
 
 var express  = require('express'),
-	app      = express(),
-	postmark = require('postmark'),
-	client   = new postmark.Client('75cdd97a-2c40-4319-a6a9-4576d0948d57');
+	server   = express(),
+	Postmark = require('postmark'),
+	postmark = new Postmark.Client('75cdd97a-2c40-4319-a6a9-4576d0948d57');
 
-app.post('/api/v1/notify/email', function (req, res) {
-	
-	
-	client.sendEmail({
+// web app
+server.use(express.static('html'));
+server.get('/', express.static('html/index.html'));
+
+// api
+server.post('/api/v1/notify/email', function (req, res) {
+	postmark.sendEmail({
 		From: 'rsvp@rstr.io',
 		To: 'murray@mismith.info',
 		Subject: 'Test', 
@@ -23,4 +26,4 @@ app.post('/api/v1/notify/email', function (req, res) {
 	});
 });
 
-app.listen(process.env.PORT || 3030);
+server.listen(process.env.PORT || 3030);
