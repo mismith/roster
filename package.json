@@ -46,7 +46,7 @@
     "merge": "^1.2.0",
     "node-notifier": "^4.1.2",
     "yargs": "^3.8.0"
-  }
+  },
   "bundleDependencies": [],
   "private": true,
   "main": "server.js"
