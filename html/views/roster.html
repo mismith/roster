@@ -17,12 +17,12 @@
 					<p>{{ event.name }}</p>
 					
 					<span class="counter">
-						<md-tooltip md-direction="right">Guys</md-tooltip>
-						<md-icon md-font-set="fa" class="fa-mars"></md-icon> {{ participants | filterByRsvp:event.rsvps:1 | gender:'male' | length }}
-					</span>
-					<span class="counter">
 						<md-tooltip md-direction="right">Girls</md-tooltip>
 						<md-icon class="fa fa-venus"></md-icon> {{ participants | filterByRsvp:event.rsvps:1 | gender:'female' | length }}
+					</span>
+					<span class="counter">
+						<md-tooltip md-direction="right">Guys</md-tooltip>
+						<md-icon md-font-set="fa" class="fa-mars"></md-icon> {{ participants | filterByRsvp:event.rsvps:1 | gender:'male' | length }}
 					</span>
 					<span class="counter">
 						<md-tooltip md-direction="right">Total</md-tooltip>
@@ -34,14 +34,24 @@
 					</md-button>
 				</md-list-item>
 			</md-list>
-			
-			<md-fab-speed-dial class="md-scale" style="position: fixed; bottom: 16px; right: 16px;">
+		</md-card>
+		
+<!--
+		<md-fab-speed-dial md-direction="up" class="md-scale" style="position: fixed; bottom: 16px; right: 16px;">
+			<md-fab-trigger>
 				<md-button ng-click="newEvent()" class="md-fab" aria-label="Add new event">
 					<md-tooltip md-direction="left">Add new event</md-tooltip>
 					<md-icon>add</md-icon>
 				</md-button>
-			</md-fab-speed-dial>
-		</md-card>
+			</md-fab-trigger>
+			<md-fab-actions>
+				<md-button class="md-icon-button md-mini md-raised md-primary" aria-label="Edit roster details">
+					<md-tooltip md-direction="left">Edit roster details</md-tooltip>
+					<md-icon>create</md-icon>
+				</md-button>
+			</md-fab-actions>
+		</md-fab-speed-dial>
+-->
 	</section>
 	<section>
 		<md-subheader class="md-no-sticky">
@@ -49,12 +59,12 @@
 				<span flex>Participants</span>
 				
 				<span class="counter">
-					<md-tooltip>Guys</md-tooltip>
-					<md-icon md-font-set="fa" class="fa-mars"></md-icon> {{ participants | gender:'male' | length }}
-				</span>
-				<span class="counter">
 					<md-tooltip>Girls</md-tooltip>
 					<md-icon class="fa fa-venus"></md-icon> {{ participants | gender:'female' | length }}
+				</span>
+				<span class="counter">
+					<md-tooltip>Guys</md-tooltip>
+					<md-icon md-font-set="fa" class="fa-mars"></md-icon> {{ participants | gender:'male' | length }}
 				</span>
 				<span class="counter">
 					<md-tooltip>Total</md-tooltip>

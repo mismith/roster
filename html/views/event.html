@@ -5,12 +5,12 @@
 				<span flex ng-bind="status.name"></span>
 				
 				<span class="counter">
-					<md-tooltip md-direction="left">Guys</md-tooltip>
-					<md-icon md-font-set="fa" class="fa-mars"></md-icon> {{ status.$participants | gender:'male' | length }}
-				</span>
-				<span class="counter">
 					<md-tooltip md-direction="left">Girls</md-tooltip>
 					<md-icon class="fa fa-venus"></md-icon> {{ status.$participants | gender:'female' | length }}
+				</span>
+				<span class="counter">
+					<md-tooltip md-direction="left">Guys</md-tooltip>
+					<md-icon md-font-set="fa" class="fa-mars"></md-icon> {{ status.$participants | gender:'male' | length }}
 				</span>
 				<span class="counter">
 					<md-tooltip md-direction="left">Total</md-tooltip>
