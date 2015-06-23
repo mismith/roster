@@ -1,0 +1,152 @@
+// vars
+@u: 8px;
+@bg: #DDD;
+@facebook: #3b5998;
+
+// modifications
+md-content {
+	background-color: transparent;
+}
+md-card {
+	md-list {
+		padding: 0;
+	}
+	@media (max-width: 600px) {
+		margin-left: 0;
+		margin-right: 0;
+	}
+}
+md-tooltip {
+	@media (max-width: 600px) {
+		display: none;
+	}
+}
+.md-button {
+	&.md-facebook {
+		&:not(:disabled) {
+			&,
+			&:hover {
+				background-color: @facebook;
+			}
+		}
+	}
+	&.md-success {
+		&:not(:disabled) {
+			&:not(.md-icon-button) {
+				&,
+				&:hover {
+					background-color: green;
+				}
+			}
+			&.md-icon-button {
+				&,
+				&:hover {
+					md-icon {
+						color: green;
+					}
+				}
+			}
+		}
+	}
+}
+md-list-item {
+	.md-avatar {
+		margin-left: @u*2;
+		
+		+ p {
+			margin-right: @u*2;
+		}
+	}
+	&:not(:first-child) {
+		border-top: solid 1px @bg;
+	}
+}
+md-icon {
+	&.fa {
+		font-size: 18px;
+		line-height: 24px;
+		text-align: center;
+		vertical-align: middle;
+	}
+}
+.md-subheader {
+	&.md-no-sticky {
+		background-color: transparent;
+		line-height: 24px;
+		
+		.md-subheader-inner {
+			padding-bottom: 0;
+		}
+	}
+}
+
+// custom
+html,
+body {
+	background-color: @bg !important;;
+}
+.list-unstyled {
+	list-style: none;
+	padding: 0;
+	margin: 0;
+}
+.list-avatars {
+	.list-unstyled;
+	padding: @u 0 @u @u*2;
+	
+	> * {
+		display: inline-block;
+		
+		.md-avatar {
+			border-radius: 50%;
+			margin-left: 4px;
+			vertical-align: middle;
+		}
+	}
+}
+.counter {
+	font-size: 14px;
+	padding-left: 24px;
+	opacity: .75;
+	
+	md-icon {
+		&.fa {
+			font-size: 12px;
+		}
+	}
+}
+.calendar-day {
+	text-align: center;
+	margin-left: 0 !important;
+	overflow: hidden;
+	
+	.month {
+		line-height: 16px;
+		font-size: 10px;
+		text-transform: uppercase;
+	}
+	.day {
+		line-height: 20px;
+		font-size: 20px;
+	}
+	&.md-primary {
+		background-color: rgb(63,81,181);
+		color: #FFF;
+	}
+}
+.breadcrumbs {
+	> * {
+		&:not(:first-child) {
+			&:before {
+				content: " \203A  ";
+			}
+		}
+	}
+}
+
+#main {
+	> * {
+		width: 100%;
+		max-width: 920px;
+	}
+}

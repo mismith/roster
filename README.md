@@ -1,3 +1,4 @@
-The OpenShift `nodejs` cartridge documentation can be found at:
+Roster IO
+========================
 
-http://openshift.github.io/documentation/oo_cartridge_guide.html#nodejs
+Quickly poll your team roster's availability.

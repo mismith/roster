@@ -1,0 +1,76 @@
+<div ng-controller="RosterCtrl" layout-gt-sm="row">
+	<section flex>
+		<md-subheader class="md-no-sticky">
+			<div layout="row">
+				<span flex>Events</span>
+			</div>
+		</md-subheader>
+		<md-card>
+			<md-list>
+				<md-list-item ng-repeat="event in events | orderBy:'date'" ng-click="$state.go('event', {roster: roster.$id, event: event.$id})">
+					<figure class="md-avatar calendar-day md-primary">
+						<md-tooltip md-direction="right">{{ event.date | date }}</md-tooltip>
+						<div class="month" ng-bind="event.date | date:'MMM'"></div>
+						<div class="day" ng-bind="event.date | date:'d'"></div>
+					</figure>
+					
+					<p>{{ event.name }}</p>
+					
+					<span class="counter">
+						<md-tooltip md-direction="right">Guys</md-tooltip>
+						<md-icon md-font-set="fa" class="fa-mars"></md-icon> {{ participants | filterByRsvp:event.rsvps:1 | gender:'male' | length }}
+					</span>
+					<span class="counter">
+						<md-tooltip md-direction="right">Girls</md-tooltip>
+						<md-icon class="fa fa-venus"></md-icon> {{ participants | filterByRsvp:event.rsvps:1 | gender:'female' | length }}
+					</span>
+					<span class="counter">
+						<md-tooltip md-direction="right">Total</md-tooltip>
+						<md-icon class="fa fa-venus-mars"></md-icon> {{ participants | filterByRsvp:event.rsvps:1 | length }}
+					</span>
+					
+					<md-button ng-if="canEdit(roster.admin)" class="md-icon-button md-warn" aria-label="Remove">
+						<md-icon>close</md-icon>
+					</md-button>
+				</md-list-item>
+			</md-list>
+			
+			<md-fab-speed-dial class="md-scale" style="position: fixed; bottom: 16px; right: 16px;">
+				<md-button ng-click="newEvent()" class="md-fab" aria-label="Add new event">
+					<md-tooltip md-direction="left">Add new event</md-tooltip>
+					<md-icon>add</md-icon>
+				</md-button>
+			</md-fab-speed-dial>
+		</md-card>
+	</section>
+	<section>
+		<md-subheader class="md-no-sticky">
+			<div layout="row">
+				<span flex>Participants</span>
+				
+				<span class="counter">
+					<md-tooltip>Guys</md-tooltip>
+					<md-icon md-font-set="fa" class="fa-mars"></md-icon> {{ participants | gender:'male' | length }}
+				</span>
+				<span class="counter">
+					<md-tooltip>Girls</md-tooltip>
+					<md-icon class="fa fa-venus"></md-icon> {{ participants | gender:'female' | length }}
+				</span>
+				<span class="counter">
+					<md-tooltip>Total</md-tooltip>
+					<md-icon class="fa fa-venus-mars"></md-icon> {{ participants | length }}
+				</span>
+			</div></md-subheader>
+		<md-card>
+			<md-list>
+				<md-list-item ng-repeat="participant in participants | orderBy:'name'">
+					<img ng-src="//graph.facebook.com/{{ participant.id }}/picture?type=square" width="32" height="32" class="md-avatar" alt="{{ participant.name }}" />
+					<p>{{ participant.name }}</p>
+					<md-button ng-if="canEdit(roster.admin)" class="md-icon-button md-warn" aria-label="Remove">
+						<md-icon>close</md-icon>
+					</md-button>
+				</md-list-item>
+			</md-list>
+		</md-card>
+	</section>
+</div>
