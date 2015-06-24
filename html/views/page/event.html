@@ -4,7 +4,7 @@
 			<section flex>
 				<div ng-show="event.date">
 					<md-subheader class="md-no-sticky">Date &amp; Time</md-subheader>
-					<h2 layout-margin ng-bind="(event.date | date:'shortTime') + ', ' + (event.date | date:'fullDate')"></h2>
+					<h2 layout-margin><span ng-bind="event.date | date:'shortTime'"></span>, <span ng-bind="event.date | date:'EEEE'"></span> <span ng-bind="event.date | date:'MMMM d, y'" style="white-space: nowrap;"></span></h2>
 				</div>
 				
 				<div ng-show="event.notes">
