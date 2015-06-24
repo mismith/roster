@@ -46,6 +46,10 @@ server.get('/api/v1/email/:template', function (req, res) {
 				event   = roster.events[req.query.event],
 				subject = 'Reminder: RSVP Required - ' + roster.name + ' - ' + event.name;
 			
+			// setup special vars
+			roster.url = '#/roster/' + req.query.roster;
+			event.url  = roster.url + '/' + req.query.event;
+			
 			// render template
 			var template = ejs.compile(file.toString());
 			var html = template({
@@ -53,18 +57,25 @@ server.get('/api/v1/email/:template', function (req, res) {
 				roster:  roster,
 				event:   event,
 				
+				user: {
+					email: 'murray@mismith.info',
+				},
+				
 				url:     '#/roster/' + req.query.roster + '/' + req.query.event,
 				query:   req.query,
 				moment:  moment,
 			});
 			
 			// juice email
-			juice.juiceResources(html, {}, function (err, html2) {
+			juice.juiceResources(html, {}, function (err, juiced) {
 				if (err) {
 					console.error(err);
 					return;
 				}
 				
+				if (1) {
+					html = juiced;
+				}
 				if (1) {
 					// gather recipients
 					var to = 'Murray Smith <murray@mismith.info>';
