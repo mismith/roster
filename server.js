@@ -37,4 +37,4 @@ server.get('/api/v1/email/reminder', function (req, res) {
 	});
 });
 
-server.listen(process.env.OPENSHIFT_NODEJS_PORT || process.env.PORT || 3030);
+server.listen(process.env.OPENSHIFT_NODEJS_PORT || 3030, process.env.OPENSHIFT_NODEJS_IP || '127.0.0.1');
