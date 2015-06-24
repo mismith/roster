@@ -137,7 +137,6 @@ angular.module('roster-io', ['ui.router', 'ngMaterial', 'firebaseHelper'])
 						
 						$mdToast.showSimple({
 							content: 'Roster created.',
-							position: 'top right',
 						});
 					});
 				},
@@ -155,7 +154,6 @@ angular.module('roster-io', ['ui.router', 'ngMaterial', 'firebaseHelper'])
 					
 					$mdToast.showSimple({
 						content: 'Roster deleted.',
-						position: 'top right',
 					});
 				});
 			}
@@ -174,7 +172,6 @@ angular.module('roster-io', ['ui.router', 'ngMaterial', 'firebaseHelper'])
 						
 						$mdToast.showSimple({
 							content: 'Roster saved.',
-							position: 'top right',
 						});
 					});
 				},
@@ -197,7 +194,6 @@ angular.module('roster-io', ['ui.router', 'ngMaterial', 'firebaseHelper'])
 						
 						$mdToast.showSimple({
 							content: 'Event created.',
-							position: 'top right',
 						});
 					});
 				},
@@ -224,7 +220,6 @@ angular.module('roster-io', ['ui.router', 'ngMaterial', 'firebaseHelper'])
 					
 					$mdToast.showSimple({
 						content: 'Event deleted.',
-						position: 'top right',
 					});
 				});
 			}
@@ -248,7 +243,6 @@ angular.module('roster-io', ['ui.router', 'ngMaterial', 'firebaseHelper'])
 						
 						$mdToast.showSimple({
 							content: 'Event saved.',
-							position: 'top right',
 						});
 					});
 				},
