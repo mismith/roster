@@ -24,7 +24,11 @@
     "npm": ">= 1.0.0"
   },
   "dependencies": {
+    "ejs": "^2.3.1",
     "express": "^3.4.8",
+    "firebase": "^2.2.7",
+    "juice": "^1.2.0",
+    "moment": "^2.10.3",
     "postmark": "^1.0.0"
   },
   "devDependencies": {
