@@ -8,15 +8,15 @@
 </md-input-container>
 <md-input-container>
 	<label>Location</label>
-	<input type="text" ng-model="event.location" />
+	<textarea ng-model="event.location"></textarea>
 </md-input-container>
 <md-input-container>
-	<label>Address</label>
-	<input type="text" ng-model="event.address" />
+	<label>Location Map URL</label>
+	<input type="url" ng-model="event.locationUrl" />
 </md-input-container>
 <md-input-container>
-	<label>Map URL</label>
-	<input type="url" ng-model="event.addressUrl" />
+	<label>Location Pin Coordinates</label>
+	<input type="text" ng-model="event.locationPin" />
 </md-input-container>
 <md-input-container>
 	<label>Notes</label>
