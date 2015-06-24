@@ -4,6 +4,7 @@
 @md:       960px;
 @primary:  #3f51b5;
 @accent:   rgb(255,64,129);
+@warn:     rgb(244,67,54);
 @bg:       #DDD;
 @facebook: #3b5998;
 
@@ -46,10 +47,17 @@ md-dialog {
 		}
 	}
 }
-md-tooltip {
-	@media (max-width: @sm) {
-		display: none;
-	}
+.tooltip {
+	display: inline-block;
+	background: rgba(70,70,70,.9);
+	color: #ececec;
+	box-shadow: 0 1px 2px rgba(0,0,0,.15);
+	font-size: 14px;
+	font-weight: bold;
+	line-height: 1em;
+	text-overflow: ellipsis;
+	padding: 6px 8px;
+	border-radius: 2px;
 }
 md-fab-speed-dial {
 	&.md-fab-speed-dial-bottom-right {
@@ -65,20 +73,12 @@ md-fab-speed-dial {
 				width: 0;
 				
 				div {
+					.tooltip;
 					display: block;
 					position: absolute;
 					top: 50%;
 					right: 100%;
 					max-width: 200px;
-					background: rgba(70,70,70,.9);
-					color: #ececec;
-					box-shadow: 0 1px 2px rgba(0,0,0,.15);
-					font-size: 14px;
-					font-weight: bold;
-					line-height: 1em;
-					text-overflow: ellipsis;
-					padding: 6px 8px;
-					border-radius: 2px;
 					margin-top: -13px;
 					white-space: nowrap;
 					overflow: hidden;
@@ -107,19 +107,9 @@ md-fab-speed-dial {
 	}
 	&.md-success {
 		&:not(:disabled) {
-			&:not(.md-icon-button) {
-				&,
-				&:hover {
-					background-color: green;
-				}
-			}
-			&.md-icon-button {
-				&,
-				&:hover {
-					md-icon {
-						color: green;
-					}
-				}
+			&,
+			&:hover {
+				background-color: green;
 			}
 		}
 	}
