@@ -1,6 +1,6 @@
 angular.module('roster-io', ['ui.router', 'ngMaterial', 'firebaseHelper'])
 	
-	.config(["$urlRouterProvider", "$stateProvider", "$firebaseHelperProvider", function ($urlRouterProvider, $stateProvider, $firebaseHelperProvider) {
+	.config(["$urlRouterProvider", "$stateProvider", "$firebaseHelperProvider", "$sceProvider", function ($urlRouterProvider, $stateProvider, $firebaseHelperProvider, $sceProvider) {
 		// routing
 		$urlRouterProvider.when('',  '/');
 		$urlRouterProvider.when('/',  '/rosters'); // @TEMP
@@ -8,7 +8,7 @@ angular.module('roster-io', ['ui.router', 'ngMaterial', 'firebaseHelper'])
 			// pages
 			.state('rosters', {
 				url: '/rosters',
-				templateUrl: 'views/rosters.html',
+				templateUrl: 'views/page/rosters.html',
 				controller: ["$rootScope", "$firebaseHelper", function ($rootScope, $firebaseHelper) {
 					$rootScope.rosters = $firebaseHelper.array('rosters');
 					$rootScope.roster = $rootScope.event = undefined;
@@ -16,7 +16,7 @@ angular.module('roster-io', ['ui.router', 'ngMaterial', 'firebaseHelper'])
 			})
 			.state('roster', {
 				url: '/roster/:roster',
-				templateUrl: 'views/roster.html',
+				templateUrl: 'views/page/roster.html',
 				controller: ["$rootScope", "$firebaseHelper", "$stateParams", function ($rootScope, $firebaseHelper, $stateParams) {
 					$rootScope.roster = $firebaseHelper.object('rosters', $stateParams.roster);
 					$rootScope.event  = undefined;
@@ -24,7 +24,7 @@ angular.module('roster-io', ['ui.router', 'ngMaterial', 'firebaseHelper'])
 			})
 			.state('event', {
 				url: '/roster/:roster/:event',
-				templateUrl: 'views/event.html',
+				templateUrl: 'views/page/event.html',
 				controller: ["$rootScope", "$firebaseHelper", "$stateParams", function ($rootScope, $firebaseHelper, $stateParams) {
 					$rootScope.roster = $firebaseHelper.object('rosters', $stateParams.roster);
 					$rootScope.event  = $firebaseHelper.object($rootScope.roster, 'events', $stateParams.event);
@@ -33,14 +33,22 @@ angular.module('roster-io', ['ui.router', 'ngMaterial', 'firebaseHelper'])
 		
 		// data
 		$firebaseHelperProvider.namespace('roster-io');
+		
+		// security
+		$sceProvider.enabled(false);
 	}])
 	
 	.factory('Auth', ["$firebaseHelper", function ($firebaseHelper) {
 		return $firebaseHelper.auth();
 	}])
 	.controller('AppCtrl', ["$rootScope", "$state", "$firebaseHelper", "Auth", function ($rootScope, $state, $firebaseHelper, Auth) {
-		$rootScope.$state = $state;
+		$rootScope.$state          = $state;
 		$rootScope.$firebaseHelper = $firebaseHelper;
+		
+		$rootScope.$on('$stateChangeSuccess', function(e, toState, toParams, fromState, fromParams){
+			$state.$previous = fromState;
+			$state.$previous.params = fromParams;
+		});
 		
 		// auth
 		var refreshAuthState = function () {
@@ -82,7 +90,7 @@ angular.module('roster-io', ['ui.router', 'ngMaterial', 'firebaseHelper'])
 			return uid ? uid === $rootScope.$me.uid : $rootScope.$me.admin;
 		};
 	}])
-	.controller('RostersCtrl', ["$scope", "$firebaseHelper", function ($scope, $firebaseHelper) {
+	.controller('RostersCtrl', ["$scope", "$firebaseHelper", "$mdDialogForm", "$mdToast", function ($scope, $firebaseHelper, $mdDialogForm, $mdToast) {
 		$scope.threads = [];
 		$scope.loadThreads = function () {
 			$scope.$authThen(function (authData) {
@@ -96,7 +104,7 @@ angular.module('roster-io', ['ui.router', 'ngMaterial', 'firebaseHelper'])
 			});
 		};
 		
-		$scope.newRoster = function (thread) {
+		$scope.importParticipants = function (thread) {
 			var participants = {};
 			angular.forEach(thread.participants.data, function (participant) {
 				participants['facebook:' + participant.id] = {
@@ -113,12 +121,90 @@ angular.module('roster-io', ['ui.router', 'ngMaterial', 'firebaseHelper'])
 				participants: participants
 			});
 		};
+		
+		$scope.newRoster = function () {
+			$scope.roster = {};
+			$mdDialogForm.show({
+				scope:         $scope,
+				title:         'Add new roster',
+				contentUrl:    'views/template/roster.html',
+				ok:            'Create',
+				onSubmit: function (scope) {
+					this.loading = true;
+					
+					return $scope.rosters.$add(scope.roster).then(function () {
+						this.loading = false;
+						
+						$mdToast.showSimple({
+							content: 'Roster created.',
+							position: 'top right',
+						});
+					});
+				},
+			});
+		};
 	}])
-	.controller('RosterCtrl', ["$scope", "$firebaseHelper", "$state", function ($scope, $firebaseHelper, $state) {
+	.controller('RosterCtrl', ["$scope", "$firebaseHelper", "$mdDialogForm", "$state", "$mdToast", function ($scope, $firebaseHelper, $mdDialogForm, $state, $mdToast) {
 		$scope.participants = $firebaseHelper.array($scope.roster, 'participants');
-		$scope.events       = $firebaseHelper.array($scope.roster, 'events');		
+		$scope.events       = $firebaseHelper.array($scope.roster, 'events');	
+		
+		$scope.deleteRoster = function (skipConfirm) {
+			if (skipConfirm || confirm('Are you sure you want to permanently delete this roster?')) {
+				$scope.roster.$remove().then(function () {
+					$state.go('rosters');
+					
+					$mdToast.showSimple({
+						content: 'Roster deleted.',
+						position: 'top right',
+					});
+				});
+			}
+		};
+		$scope.editRoster = function () {
+			$mdDialogForm.show({
+				scope:         $scope,
+				title:         'Edit roster',
+				contentUrl:    'views/template/roster.html',
+				ok:            'Save',
+				onSubmit: function () {
+					this.loading = true;
+					
+					return $scope.roster.$save().then(function () {
+						this.loading = false;
+						
+						$mdToast.showSimple({
+							content: 'Roster saved.',
+							position: 'top right',
+						});
+					});
+				},
+			});
+		};
+		$scope.newEvent = function () {
+			$scope.event = {};
+			$mdDialogForm.show({
+				scope:         $scope,
+				title:         'Add new event',
+				contentUrl:    'views/template/event.html',
+				ok:            'Create',
+				onSubmit: function (scope) {
+					this.loading = true;
+					
+					scope.event.date = moment(scope.event.$date).format();
+					
+					return $scope.events.$add(scope.event).then(function () {
+						this.loading = false;
+						
+						$mdToast.showSimple({
+							content: 'Event created.',
+							position: 'top right',
+						});
+					});
+				},
+			});
+		};
 	}])
-	.controller('EventCtrl', ["$scope", "$firebaseHelper", "$state", function ($scope, $firebaseHelper, $state) {
+	.controller('EventCtrl', ["$scope", "$firebaseHelper", "$mdDialogForm", "$state", "$mdToast", function ($scope, $firebaseHelper, $mdDialogForm, $state, $mdToast) {
 		$scope.participants = $firebaseHelper.array($scope.roster, 'participants');
 		$scope.rsvps        = $firebaseHelper.object($scope.event, 'rsvps');
 		$scope.statuses     = $firebaseHelper.array('statuses'); // constant
@@ -126,10 +212,50 @@ angular.module('roster-io', ['ui.router', 'ngMaterial', 'firebaseHelper'])
 		$scope.rsvp = function (participantId, to) {
 			return $firebaseHelper.object($scope.event, 'rsvps', participantId).$loaded().then(function ($rsvp) {
 				$rsvp.status = $rsvp.status === to ? null : to;
+				$rsvp.updated = moment().format();
 				return $rsvp.$save();
 			});
 		};
+		
+		$scope.deleteEvent = function (skipConfirm) {
+			if (skipConfirm || confirm('Are you sure you want to permanently delete this event?')) {
+				$scope.event.$remove().then(function () {
+					$state.go('roster', {roster: $scope.roster.$id});
+					
+					$mdToast.showSimple({
+						content: 'Event deleted.',
+						position: 'top right',
+					});
+				});
+			}
+		};
+		$scope.editEvent = function () {
+			
+			$scope.event.$date = moment($scope.event.date).toDate();
+			
+			$mdDialogForm.show({
+				scope:         $scope,
+				title:         'Edit event',
+				contentUrl:    'views/template/event.html',
+				ok:            'Save',
+				onSubmit: function (scope) {
+					this.loading = true;
+					
+					scope.event.date = moment(scope.event.$date).format();
+					
+					return $scope.event.$save().then(function () {
+						this.loading = false;
+						
+						$mdToast.showSimple({
+							content: 'Event saved.',
+							position: 'top right',
+						});
+					});
+				},
+			});
+		};
 	}])
+	
 	
 	.filter('filterByRsvp', function () {
 		return function (array, rsvps, rsvp) {
@@ -155,4 +281,51 @@ angular.module('roster-io', ['ui.router', 'ngMaterial', 'firebaseHelper'])
 			if (angular.isArray(array)) return array.length;
 			return 0;
 		};
-	});
+	})
+	
+	
+	.factory('$mdDialogForm', ["$mdDialog", "$q", function ($mdDialog, $q) {
+		return {
+			show: function (options) {
+				return $mdDialog.show($mdDialog.confirm(angular.extend({
+					preserveScope: true,
+					ok:            'Submit',
+					cancel:        'Cancel',
+					template:      [
+						'<md-dialog ng-form="dialogForm" md-theme="{{ dialog.theme }}" aria-label="{{ dialog.ariaLabel }}" ng-class="{loading: dialog.loading}">',
+							'<md-dialog-content role="document" tabIndex="-1">',
+								'<h2 class="md-title">{{ dialog.title }}</h2>',
+								'<p ng-if="dialog.content">{{ dialog.content }}</p>',
+								'<div ng-if="dialog.contentUrl" ng-include="dialog.contentUrl"></div>',
+							'</md-dialog-content>',
+							'<div class="md-actions">',
+								'<md-button ng-if="dialog.$type == \'confirm\'" ng-click="dialog.abort()" class="md-primary">',
+									'{{ dialog.cancel }}',
+								'</md-button>',
+								'<md-button type="submit" ng-disabled="dialogForm.$invalid || dialog.loading" ng-click="dialog.onSubmit(this).then(dialog.hide)" class="md-primary">',
+									'{{ dialog.ok }}',
+								'</md-button>',
+							'</div>',
+							'<md-dialog-footer>',
+								'<md-progress-circular md-mode="indeterminate"></md-progress-circular>',
+							'</md-dialog-footer>',
+						'</md-dialog>'
+					].join(''),
+					onSubmit:      function onSubmit(scope) {
+						var deferred = $q.defer();
+						this.loading = true;
+						
+						if (scope.dialogForm.$valid) {
+							this.loading = false;
+							deferred.resolve();
+						} else {
+							this.loading = false;
+							deferred.reject();
+						}
+						
+						return deferred.promise;
+					},
+				}, options || {})));
+			},
+		};
+	}]);

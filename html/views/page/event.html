@@ -1,0 +1,95 @@
+<div ng-controller="EventCtrl" layout="column" flex>
+	<md-content>
+		<header layout="column" layout-gt-md="row" class="content-wrap">
+			<section flex>
+				<div ng-show="event.date">
+					<md-subheader class="md-no-sticky">Date &amp; Time</md-subheader>
+					<h2 layout-margin ng-bind="(event.date | date:'shortTime') + ', ' + (event.date | date:'fullDate')"></h2>
+				</div>
+				
+				<div ng-show="event.notes">
+					<md-subheader class="md-no-sticky">Notes</md-subheader>
+					<div layout-padding style="white-space: pre-wrap;">{{ event.notes }}</div>
+				</div>
+			</section>
+			<section ng-show="event.location || event.address || event.addressUrl">
+				<md-subheader class="md-no-sticky">Location</md-subheader>
+				<h3 layout-margin ng-show="event.location" ng-bind="event.location"></h3>
+				<h4 layout-margin ng-show="event.address" ng-bind="event.address"></h4>
+				<md-card ng-if="event.addressUrl || event.address">
+					<iframe ng-src="{{ event.addressUrl || 'https://www.google.com/maps/embed/v1/search?key=AIzaSyDEv_8sBO8E9_431rl_PamUBW4MuhaGpEA&q=' + event.address }}" width="300" height="200" allowfullscreen></iframe>
+				</md-card>
+			</section>
+		</header>
+		<section ng-repeat="status in statuses" ng-show="status.$participants | length" class="content-wrap">
+			<md-subheader class="md-no-sticky">
+				<div layout="row">
+					<span flex ng-bind="status.name"></span>
+					
+					<span class="counter">
+						<md-icon class="fa fa-venus"></md-icon> {{ status.$participants | gender:'female' | length }}
+					</span>
+					<span class="counter">
+						<md-icon md-font-set="fa" class="fa-mars"></md-icon> {{ status.$participants | gender:'male' | length }}
+					</span>
+					<span class="counter">
+						<md-icon class="fa fa-venus-mars"></md-icon> {{ status.$participants | length }}
+					</span>
+				</div>
+			</md-subheader>
+			<md-card>
+				<md-list>
+					<md-list-item ng-repeat="participant in status.$participants = (participants | filterByRsvp:rsvps:status.$id | orderBy:'name')" layout="row">
+						<img ng-src="//graph.facebook.com/{{ participant.id }}/picture?type=square" width="40" height="40" class="md-avatar" alt="{{ participant.name }}" />
+						<p>{{ participant.name }}</p>
+						<md-fab-speed-dial ng-if="canEdit(participant.$id, roster.admins)" md-direction="left" class="md-scale">
+							<md-fab-trigger>
+								<md-button class="md-fab" ng-class="{'md-success': rsvps[participant.$id].status === 1, 'md-primary': rsvps[participant.$id].status === -1, 'md-warn': rsvps[participant.$id].status === 0}" aria-label="RSVP" ng-switch="rsvps[participant.$id].status">
+									<md-icon ng-switch-when="1">check</md-icon>
+									<md-icon ng-switch-when="-1">swap_calls</md-icon>
+									<md-icon ng-switch-when="0">close</md-icon>
+									<md-icon ng-switch-default>more_horiz</md-icon>
+								</md-button>
+							</md-fab-trigger>
+							<md-fab-actions>
+								<md-button ng-click="rsvp(participant.$id, 1)" class="md-fab md-mini md-success" ng-class="{active: rsvps[participant.$id].status === 1}">
+									<md-icon>check</md-icon>
+								</md-button>
+								<md-button ng-click="rsvp(participant.$id, -1)" class="md-fab md-mini md-primary" ng-class="{active: rsvps[participant.$id].status === -1}">
+									<md-icon>swap_calls</md-icon>
+								</md-button>
+								<md-button ng-click="rsvp(participant.$id, 0)" class="md-fab md-mini md-warn" ng-class="{active: rsvps[participant.$id].status === 0}">
+									<md-icon>close</md-icon>
+								</md-button>
+							</md-fab-actions>
+						</md-fab-speed-dial>
+						<md-button ng-if=" ! canEdit(participant.$id, roster.admins) && rsvps[participant.$id].status !== undefined" class="md-fab" ng-class="{'md-success': rsvps[participant.$id].status === 1, 'md-primary': rsvps[participant.$id].status === -1, 'md-warn': rsvps[participant.$id].status === 0}" aria-label="RSVP" ng-switch="rsvps[participant.$id].status">
+							<md-icon ng-switch-when="1">check</md-icon>
+							<md-icon ng-switch-when="-1">swap_calls</md-icon>
+							<md-icon ng-switch-when="0">close</md-icon>
+							<md-icon ng-switch-default>more_horiz</md-icon>
+						</md-button>
+					</md-list-item>
+				</md-list>
+			</md-card>
+		</section>
+	</md-content>
+	<md-fab-speed-dial ng-if="canEdit(undefined, roster.admins)" md-direction="up" class="md-scale md-fab-speed-dial-bottom-right">
+		<md-fab-trigger>
+			<div layout="row">
+				<label><div>Edit event</div></label>
+				<md-button ng-click="editEvent()" class="md-fab md-primary" aria-label="Edit event">
+					<md-icon>create</md-icon>
+				</md-button>
+			</div>
+		</md-fab-trigger>
+		<md-fab-actions>
+			<div layout="row">
+				<label><div>Delete event</div></label>
+				<md-button ng-click="deleteEvent($event.shiftKey)" class="md-fab md-mini md-raised md-warn" aria-label="Delete event">
+					<md-icon>delete</md-icon>
+				</md-button>
+			</div>
+		</md-fab-actions>
+	</md-fab-speed-dial>
+</div>

@@ -1,0 +1,47 @@
+<div ng-controller="RostersCtrl" layout="column" flex>
+	<md-content flex>
+		<section class="content-wrap">
+			<md-subheader class="md-no-sticky">Active</md-subheader>
+			<md-card>
+				<md-card-content style="padding: 0;">
+					<md-list>
+						<md-list-item ng-repeat="roster in rosters | orderBy:'name'" ng-click="$state.go('roster', {roster: roster.$id})" ng-class="{previous: $state.$previous.params.roster === roster.$id}">
+							<p style="min-width: 100px;">{{ roster.name }}</p>
+							<ul class="list-avatars">
+								<li ng-repeat="participant in roster.participants">
+									<img ng-src="//graph.facebook.com/{{ participant.id }}/picture?type=square" width="32" height="32" class="md-avatar" alt="{{ participant.name }}" />
+								</li>
+							</ul>
+						</md-list-item>
+					</md-list>
+				</md-card-content>
+			</md-card>
+		</section>
+	</md-content>
+	
+	<md-fab-speed-dial ng-if="canEdit()" md-direction="up" class="md-scale md-fab-speed-dial-bottom-right">
+		<md-fab-trigger>
+			<div layout="row">
+				<label><div>Add new roster</div></label>
+				<md-button ng-click="newRoster()" class="md-fab" aria-label="Add new roster">
+					<md-icon>add</md-icon>
+				</md-button>
+			</div>
+		</md-fab-trigger>
+	</md-fab-speed-dial>
+<!--
+	<div ng-if="threads">
+		<md-list>
+			<md-list-item ng-repeat="thread in threads" ng-click="newRoster(thread)">
+				<p>{{ thread.id }}</p>
+				<md-list>
+					<md-list-item ng-repeat="participant in thread.participants.data">
+						<img ng-src="//graph.facebook.com/{{ participant.id }}/picture?type=square" width="32" height="32" class="md-avatar" alt="{{ participant.name }}" />
+						<span class="md-list-item-text">{{ participant.name }}</span>
+					</md-list-item>
+				</md-list>
+			</md-list-item>
+		</md-list>
+	</div>
+-->
+</div>
