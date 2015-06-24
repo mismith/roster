@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<title><%= subject %></title>
+	<base href="http://www.rstr.io/" />
+	
+	<meta charset="UTF-8">
+	<meta name="viewport" content="initial-scale=1">
+	
+	<link rel="stylesheet" href="http://ajax.googleapis.com/ajax/libs/angular_material/0.10.0/angular-material.min.css">
+	<link rel="stylesheet" href="http://fonts.googleapis.com/icon?family=Material+Icons">
+	<link rel="stylesheet" href="/assets/css/base.css" type="text/css">
+	<style>
+		a {
+			text-decoration: none;
+		}
+	</style>
+</head>
+<body style="height: auto; padding: 20px;">
+
+	<div style="max-width: 600px; margin: 8px auto; text-align: center;">
+		<div class="md-subheader" style="text-align: left">
+			<div class="md-subheader-inner">Event</div>
+		</div>
+		<div class="md-whiteframe-z1" style="background-color: #FFF;">
+			<md-toolbar class="md-primary"style="background-color: #3f51b5; color: #FFF;">
+				<h2><%= moment(event.date).format('h:mm A, dddd') %>, <span style="white-space: nowrap;"><%= moment(event.date).format('MMMM D, YYYY') %></span></h2>
+			</md-toolbar>
+			<div style="padding: 8px;">
+				<h3 style="margin-bottom: 8px;"><%= roster.name %></h3>
+				<h1 style="margin-top: 0;"><%= event.name %></h1>
+			</div>
+		</div>
+		<div class="md-subheader" style="text-align: left">
+			<div class="md-subheader-inner">RSVP</div>
+		</div>
+		<div class="md-whiteframe-z1" style="background-color: #FFF; padding: 16px 8px 8px 8px;">
+			<table width="100%" style="max-width: 480px; margin: 0 auto;">
+				<tr>
+					<td width="25%" valign="top">
+						<a href="<%= url %>?v=1">
+							<img src="/emails/assets/img/status1.png" width="70" height="70" alt="Attending" />
+						</a>
+						<br />
+						<a href="<%= url %>?v=1" class="tooltip">Attending</a>
+					</td>
+					<td width="25%" valign="top">
+						<a href="<%= url %>?v=-1">
+							<img src="/emails/assets/img/status-1.png" width="70" height="70" alt="Maybe" />
+						</a>
+						<br />
+						<a href="<%= url %>?v=-1" class="tooltip">Maybe</a>
+					</td>
+					<td width="25%" valign="top">
+						<a href="<%= url %>?v=0">
+							<img src="/emails/assets/img/status0.png" width="70" height="70" alt="Not Attending" />
+						</a>
+						<br />
+						<a href="<%= url %>?v=0" class="tooltip">Not Attending</a>
+					</td>
+					<td width="25%" valign="top">
+						<a href="<%= url %>">
+							<img src="/emails/assets/img/status-2.png" width="70" height="70" alt="More Info" />
+						</a>
+						<br />
+						<a href="<%= url %>" class="tooltip">More Info</a>
+					</td>
+				</tr>
+			</table>
+			<br />
+		</div>
+	</div>
+
+</body>
+</html>
