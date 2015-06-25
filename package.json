@@ -29,6 +29,7 @@
     "firebase": "^2.2.7",
     "juice": "^1.2.0",
     "moment": "^2.10.3",
+    "object-merge": "^2.5.1",
     "postmark": "^1.0.0"
   },
   "devDependencies": {
