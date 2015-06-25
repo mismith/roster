@@ -77,7 +77,7 @@
 		</div>
 		<br />
 		<br />
-		<small style="font-size: 12px; color: #999;">This email was sent to <a href="mailto:<%= user.email %>"><%= user.email %></a> by <a href="/">Roster IO</a> because you're on the <a href="<%= roster.url %>"><%= roster.name %></a> roster.</small>
+		<small style="font-size: 12px; color: #999;">This email was sent to <% if (locals.user) { %><a href="mailto:<%= user.email %>"><%= user.email %></a><% } else { %>you<% } %> by <a href="/">Roster IO</a> because you're on the <a href="<%= roster.url %>"><%= roster.name %></a> roster.</small>
 	</div>
 
 </body>
