@@ -29,8 +29,9 @@
     "firebase": "^2.2.7",
     "juice": "^1.2.0",
     "moment": "^2.10.3",
-    "object-merge": "^2.5.1",
-    "postmark": "^1.0.0"
+    "node.extend": "^1.1.5",
+    "postmark": "^1.0.0",
+    "q": "^1.4.1"
   },
   "devDependencies": {
     "browser-sync": "^1.3.0",

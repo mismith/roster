@@ -11,7 +11,8 @@ var fs       = require('fs'),
 	juice    = require('juice'),
 	moment   = require('moment'),
 	Firebase = require('firebase'),
-	merge    = require('object-merge');
+	extend   = require('node.extend'),
+	Q        = require('q');
 
 // web app
 server.use(express.static('html'));
@@ -96,37 +97,48 @@ server.post('/api/v1/email/reminder', function (req, res) {
 					// helpers
 					moment:   moment,
 				},
-				response = {success: true};
+				response = {success: true, sent: [], failed: []};
 			
+			var deferreds = [];
 			Object.keys(roster.participants).forEach(function (userId) {
-				var user = merge(roster.participants[userId]); // @TODO / @FIX: get real user
-				
-				if (user.email && ( ! event.rsvps || ! event.rsvps[userId] || event.rsvps[userId].status < 0)) {
-					console.log(user, data);
-					var userData = merge(data, {user: user});
-					
-					getJuicedEmail(template, userData, function (html) {
-						// send email
-						postmark.sendEmail({
-							From:       'rsvp@rstr.io',
-							To:         user.name + ' <' + user.email + '>',
-							Subject:    subject, 
-							HtmlBody:   html,
-							TrackOpens: true,
-						}, function (err) {
-							if (err) {
-								response.failed.push({data: user, error: err});
-								response.success = false;
-								return;
-							}
-							response.sent.push({data: user});
-						});
+				var deferred = Q.defer();
+				deferreds.push(deferred.promise);
+				(function (deferred) {
+					new Firebase(FB_BASE_URL + '/users/' + userId).on('value', function (userSnap) {
+						var user = userSnap.val();
+						if (user.email && ( ! event.rsvps || ! event.rsvps[userId] || event.rsvps[userId].status < 0)) {
+							// clone the data for each user so we don't mess anything up
+							var userData = extend({}, data, {user: user});
+							
+							getJuicedEmail(template, userData, function (html) {
+								// send email
+								postmark.sendEmail({
+									From:       'rsvp@rstr.io',
+									To:         user.name + ' <' + user.email + '>',
+									Subject:    subject,
+									HtmlBody:   html,
+									TrackOpens: true,
+								}, function (err) {
+									if (err) {
+										response.failed.push({userId: userId, error: err});
+										response.success = false;
+										
+										deferred.resolve();
+										return;
+									}
+									response.sent.push({userId: userId});
+									deferred.resolve();
+								});
+							});
+						} else {
+							deferred.resolve();
+						}
 					});
-					
-				}
+				})(deferred);
 			});
-			
-			res.json({success: true});
+			Q.all(deferreds).then(function () {
+				res.json(response);
+			});
 		});
 	});
 });
