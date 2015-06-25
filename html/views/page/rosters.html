@@ -5,10 +5,10 @@
 			<md-card>
 				<md-card-content style="padding: 0;">
 					<md-list>
-						<md-list-item ng-repeat="roster in rosters | orderBy:'name'" ng-click="$state.go('roster', {roster: roster.$id})" ng-class="{previous: $state.$previous.params.roster === roster.$id}">
+						<md-list-item ng-repeat="roster in rosters | orderBy:'name'" ng-init="participants = $firebaseHelper.join(['rosters', roster.$id, 'participants'], 'users')" ng-click="$state.go('roster', {roster: roster.$id})" ng-class="{previous: $state.$previous.params.roster === roster.$id}">
 							<p style="min-width: 100px;">{{ roster.name }}</p>
 							<ul class="list-avatars">
-								<li ng-repeat="participant in roster.participants">
+								<li ng-repeat="participant in participants">
 									<img ng-src="//graph.facebook.com/{{ participant.id }}/picture?type=square" width="32" height="32" class="md-avatar" alt="{{ participant.name }}" />
 								</li>
 							</ul>
