@@ -1,0 +1,28 @@
+<div ng-controller="InviteCtrl" layout="column" flex>
+	<div ng-if=" ! notFound && ! invite.$$loaded" flex layout="column" layout-align="center center">
+		<md-progress-circular md-mode="indeterminate"></md-progress-circular>
+	</div>
+	<md-content ng-if=" ! notFound && invite.$$loaded" class="content-wrap">
+		<md-subheader class="md-no-sticky">Invitation</md-subheader>
+		<md-card>
+			<h3 style="padding: 8px; margin: 0;">You've been invited to join:</h3>
+			<md-card-content layout="column" layout-align="center center">
+				<h1 ng-bind="roster.name"></h1>
+				<div>
+					<small>by</small>
+					<img ng-src="{{ avatar(inviter.facebook.id) }}" width="32" height="32" class="md-avatar" alt="{{ inviter.name }}" style="margin: 8px;" />
+					<span ng-bind="inviter.name"></span>
+				</div>
+			</md-card-content>
+			<div class="md-actions" layout="row" layout-align="end" layout-padding>
+				<md-button ng-click="acceptInvite()" class="md-facebook" aria-label="Accept invitation">
+					<md-icon md-font-set="fa" class="fa-facebook"></md-icon>
+					Accept Invitation
+				</md-button>
+			</div>
+		</md-card>
+	</md-content>
+	<md-content ng-if="notFound" layout="column" layout-align="center center" flex>
+		<md-subheader class="md-no-sticky">Invitation not found.</md-subheader>
+	</md-content>
+</div>

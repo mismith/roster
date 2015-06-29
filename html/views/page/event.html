@@ -39,7 +39,7 @@
 			<md-card>
 				<md-list>
 					<md-list-item ng-repeat="participant in status.$participants = (participants | filterByRsvp:rsvps:status.$id | orderBy:'name')" layout="row">
-						<img ng-src="//graph.facebook.com/{{ participant.id }}/picture?type=square" width="40" height="40" class="md-avatar" alt="{{ participant.name }}" />
+						<img ng-src="{{ avatar(participant.facebook.id) }}" width="40" height="40" class="md-avatar" alt="{{ participant.name }}" />
 						<p>{{ participant.name }}</p>
 						<md-fab-speed-dial ng-if="canEdit(participant.$id, roster.admins)" md-direction="left" class="md-scale">
 							<md-fab-trigger>

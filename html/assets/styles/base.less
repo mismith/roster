@@ -6,6 +6,7 @@
 @accent:   rgb(255,64,129);
 @warn:     rgb(244,67,54);
 @bg:       #DDD;
+@lightest: #FFF;
 @facebook: #3b5998;
 
 // modifications
@@ -123,6 +124,11 @@ md-icon {
 			&,
 			&:hover {
 				background-color: @facebook;
+				
+				&,
+				md-icon {
+					color: @lightest;
+				}
 			}
 		}
 	}
@@ -144,6 +150,9 @@ md-icon {
 			padding-bottom: 0;
 		}
 	}
+}
+.md-avatar {
+	border-radius: 50%;
 }
 .tooltip {
 	display: inline-block;
@@ -231,7 +240,7 @@ a.passthru {
 	}
 	&.md-primary {
 		background-color: @primary;
-		color: #FFF;
+		color: @lightest;
 		margin-right: @u !important;
 	}
 	&.md-accent {

@@ -9,7 +9,7 @@
 							<p style="min-width: 100px;">{{ roster.name }}</p>
 							<ul class="list-avatars">
 								<li ng-repeat="participant in participants">
-									<img ng-src="//graph.facebook.com/{{ participant.id }}/picture?type=square" width="32" height="32" class="md-avatar" alt="{{ participant.name }}" />
+									<img ng-src="{{ avatar(participant.facebook.id) }}" width="32" height="32" class="md-avatar" alt="{{ participant.name }}" />
 								</li>
 							</ul>
 						</md-list-item>
@@ -29,19 +29,4 @@
 			</div>
 		</md-fab-trigger>
 	</md-fab-speed-dial>
-<!--
-	<div ng-if="threads">
-		<md-list>
-			<md-list-item ng-repeat="thread in threads" ng-click="newRoster(thread)">
-				<p>{{ thread.id }}</p>
-				<md-list>
-					<md-list-item ng-repeat="participant in thread.participants.data">
-						<img ng-src="//graph.facebook.com/{{ participant.id }}/picture?type=square" width="32" height="32" class="md-avatar" alt="{{ participant.name }}" />
-						<span class="md-list-item-text">{{ participant.name }}</span>
-					</md-list-item>
-				</md-list>
-			</md-list-item>
-		</md-list>
-	</div>
--->
 </div>

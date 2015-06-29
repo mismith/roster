@@ -38,33 +38,71 @@
 				</md-card>
 			</section>
 			<section>
-				<md-subheader class="md-no-sticky">
-					<div layout="row">
-						<span flex>Participants</span>
-						
-						<span class="counter">
-							<md-icon class="fa fa-venus"></md-icon> {{ participants | gender:'female' | length }}
-						</span>
-						<span class="counter">
-							<md-icon md-font-set="fa" class="fa-mars"></md-icon> {{ participants | gender:'male' | length }}
-						</span>
-						<span class="counter">
-							<md-icon class="fa fa-venus-mars"></md-icon> {{ participants | length }}
-						</span>
-					</div>
-				</md-subheader>
-				<md-card>
-					<md-list>
-						<md-list-item ng-repeat="participant in participants | orderBy:'name'">
-							<img ng-src="//graph.facebook.com/{{ participant.id }}/picture?type=square" width="32" height="32" class="md-avatar" alt="{{ participant.name }}" />
+				<div>
+					<md-subheader class="md-no-sticky">
+						<div layout="row">
+							<span flex>Participants</span>
 							
-							<p>{{ participant.name }}</p>
-						</md-list-item>
-						<md-list-item ng-if=" ! (participants | length)" class="no-results">
-							No participants found.
-						</md-list-item>
-					</md-list>
-				</md-card>
+							<span class="counter">
+								<md-icon class="fa fa-venus"></md-icon> {{ participants | gender:'female' | length }}
+							</span>
+							<span class="counter">
+								<md-icon md-font-set="fa" class="fa-mars"></md-icon> {{ participants | gender:'male' | length }}
+							</span>
+							<span class="counter">
+								<md-icon class="fa fa-venus-mars"></md-icon> {{ participants | length }}
+							</span>
+						</div>
+					</md-subheader>
+					<md-card>
+						<md-list>
+							<md-list-item ng-repeat="participant in participants | orderBy:'name'">
+								<img ng-src="{{ avatar(participant.facebook.id) }}" width="32" height="32" class="md-avatar" alt="{{ participant.name }}" />
+								
+								<p>{{ participant.name }}</p>
+								<div ng-if="canEdit(undefined, roster.admins)">
+									<md-button ng-click="removeUser($event.shiftKey, participant)" class="md-icon-button md-warn">
+										<md-icon>close</md-icon>
+									</md-button>
+								</div>
+							</md-list-item>
+							<md-list-item ng-if=" ! (participants | length)" class="no-results">
+								No participants found.
+							</md-list-item>
+						</md-list>
+					</md-card>
+				</div>
+				<div ng-if="invites.length">
+					<md-subheader class="md-no-sticky">
+						<div layout="row">
+							<span flex>Invitees</span>
+							
+							<span class="counter">
+								<md-icon class="fa fa-venus"></md-icon> {{ invites | gender:'female' | length }}
+							</span>
+							<span class="counter">
+								<md-icon md-font-set="fa" class="fa-mars"></md-icon> {{ invites | gender:'male' | length }}
+							</span>
+							<span class="counter">
+								<md-icon class="fa fa-venus-mars"></md-icon> {{ invites | length }}
+							</span>
+						</div>
+					</md-subheader>
+					<md-card>
+						<md-list>
+							<md-list-item ng-repeat="participant in invites | orderBy:'name'">
+								<img ng-src="{{ avatar(participant.facebook.id) }}" width="32" height="32" class="md-avatar" alt="{{ participant.name }}" />
+								
+								<p>{{ participant.name }}</p>
+								<div ng-if="canEdit(undefined, roster.admins)">
+									<md-button ng-click="removeUser($event.shiftKey, participant, invites)" class="md-icon-button md-warn">
+										<md-icon>close</md-icon>
+									</md-button>
+								</div>
+							</md-list-item>
+						</md-list>
+					</md-card>
+				</div>
 			</section>
 		</div>
 	</md-content>
@@ -89,6 +127,20 @@
 				<label><div>Delete roster</div></label>
 				<md-button ng-click="deleteRoster($event.shiftKey)" class="md-fab md-mini md-raised md-warn" aria-label="Delete roster">
 					<md-icon>delete</md-icon>
+				</md-button>
+			</div>
+<!--
+			<div layout="row">
+				<label><div>Add user</div></label>
+				<md-button ng-click="addUser()" class="md-fab md-mini md-raised md-accent" aria-label="Add user">
+					<md-icon>person_add</md-icon>
+				</md-button>
+			</div>
+-->
+			<div layout="row">
+				<label><div>Invite new user</div></label>
+				<md-button ng-click="inviteUser()" class="md-fab md-mini md-raised md-accent" aria-label="Invite new user">
+					<md-icon>person_add</md-icon>
 				</md-button>
 			</div>
 		</md-fab-actions>

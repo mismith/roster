@@ -1,3 +1,5 @@
+window.STRICT_INVITE_CHECK = false;
+
 angular.module('roster-io', ['ui.router', 'ngMaterial', 'firebaseHelper'])
 	
 	.config(["$urlRouterProvider", "$stateProvider", "$firebaseHelperProvider", "$sceProvider", function ($urlRouterProvider, $stateProvider, $firebaseHelperProvider, $sceProvider) {
@@ -29,6 +31,26 @@ angular.module('roster-io', ['ui.router', 'ngMaterial', 'firebaseHelper'])
 					$rootScope.roster = $firebaseHelper.object('rosters', $stateParams.roster);
 					$rootScope.event  = $firebaseHelper.object($rootScope.roster, 'events', $stateParams.event);
 				}],
+			})
+			.state('invite', {
+				url: '/invite/:invite',
+				templateUrl: 'views/page/invite.html',
+				controller: ["$rootScope", "$firebaseHelper", "$stateParams", "$q", function ($rootScope, $firebaseHelper, $stateParams, $q) {
+					$rootScope.invite = $firebaseHelper.object('invites', $stateParams.invite);
+					$rootScope.invite.$loaded().then(function (invite) {
+						if (invite.$value !== null) {
+							$rootScope.roster  = $firebaseHelper.object('rosters', invite.to.params.roster);
+							$rootScope.inviter = $firebaseHelper.object('users', invite.by);
+							
+							$q.all([$rootScope.roster.$loaded(), $rootScope.inviter.$loaded()]).then(function () {
+								$rootScope.invite.$$loaded = true;
+							});
+						} else {
+							// invite doesn't exist
+							$rootScope.notFound = true;
+						}
+					});
+				}],
 			});
 		
 		// data
@@ -53,11 +75,13 @@ angular.module('roster-io', ['ui.router', 'ngMaterial', 'firebaseHelper'])
 		
 		// auth
 		var refreshAuthState = function () {
+/*
 			if ( ! $rootScope.$me || ! $rootScope.$me.$loaded) return;
 			
 			$rootScope.$me.$loaded().then(function (me) {
 				
 			});
+*/
 		};
 		$rootScope.$me = {};
 		$rootScope.$unauth = Auth.$unauth;
@@ -75,7 +99,7 @@ angular.module('roster-io', ['ui.router', 'ngMaterial', 'firebaseHelper'])
 		$rootScope.$authThen = function (callback) {
 			var authData = Auth.$getAuth();
 			if ( ! authData) {
-				Auth['$authWithOAuth' + (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ? 'Redirect' : 'Popup')]('facebook', {scope: 'read_mailbox'}).then(function (authData) {
+				Auth['$authWithOAuth' + (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ? 'Redirect' : 'Popup')]('facebook', {scope: 'email'}).then(function (authData) {
 					if(angular.isFunction(callback)) callback(authData);
 				}).catch(function (error) {
 					console.error(error);
@@ -89,6 +113,10 @@ angular.module('roster-io', ['ui.router', 'ngMaterial', 'firebaseHelper'])
 			if (angular.isArray(adminUids) && adminUids.indexOf($rootScope.$me.uid) >= 0) return true;
 			if (angular.isObject(adminUids) && adminUids[$rootScope.$me.uid]) return true;
 			return uid ? uid === $rootScope.$me.uid : $rootScope.$me.admin;
+		};
+		
+		$rootScope.avatar = function (userId) {
+			return '//graph.facebook.com/' + (userId ? userId + '/' : '') + 'picture?type=square';
 		};
 	}])
 	.controller('RostersCtrl', ["$scope", "$firebaseHelper", "$mdDialogForm", "$mdToast", function ($scope, $firebaseHelper, $mdDialogForm, $mdToast) {
@@ -145,8 +173,12 @@ angular.module('roster-io', ['ui.router', 'ngMaterial', 'firebaseHelper'])
 		};
 	}])
 	.controller('RosterCtrl', ["$scope", "$firebaseHelper", "$mdDialogForm", "$state", "$mdToast", function ($scope, $firebaseHelper, $mdDialogForm, $state, $mdToast) {
+		$scope.invitees     = $firebaseHelper.object($scope.roster, 'invites');
+		$scope.invites      = $firebaseHelper.join([$scope.roster, 'invites'], 'invites');
 		$scope.participants = $firebaseHelper.join([$scope.roster, 'participants'], 'users');
 		$scope.events       = $firebaseHelper.array($scope.roster, 'events');	
+		$scope.users        = $firebaseHelper.array('users');	
+
 		
 		$scope.deleteRoster = function (skipConfirm) {
 			if (skipConfirm || confirm('Are you sure you want to permanently delete this roster?')) {
@@ -200,7 +232,77 @@ angular.module('roster-io', ['ui.router', 'ngMaterial', 'firebaseHelper'])
 				},
 			});
 		};
+		
+		$scope.inviteUser = function (name) {
+			$scope.invite = {
+				by: $scope.$me.uid,
+				to: {
+					name: $state.current.name,
+					params: $state.params,
+				},
+				name: (name || '').replace(/\b\w+/g, function (text) { return text.charAt(0).toUpperCase() + text.substr(1); }), // Title Case in case of illiterate users
+			};
+			
+			$mdDialogForm.show({
+				scope:         $scope,
+				title:         'Invite new user',
+				contentUrl:    'views/template/invite.html',
+				ok:            'Invite',
+				onSubmit: function (scope) {
+					this.loading = true;
+					
+					return $firebaseHelper.array('invites').$add($scope.invite).then(function (inviteSnap) {
+						var inviteId = inviteSnap.key();
+						$scope.invitees[inviteId] = inviteId;
+						$scope.invitees.$save().then(function () {
+							this.loading = false;
+							
+							$mdToast.showSimple({
+								content: 'Invitation email sent to "' + scope.invite.name + ' <' + scope.invite.email + '>".',
+							});
+						});
+					});
+				},
+			});
+		};
+		
+/*
+		$scope.addUser = function () {
+			$scope.users = $firebaseHelper.array('users');
+			
+			$mdDialogForm.show({
+				scope:         $scope,
+				title:         'Add user',
+				contentUrl:    'views/template/user.html',
+				ok:            'Add',
+				onSubmit: function (scope) {
+					this.loading = true;
+					
+					return $scope.participants.$ref().child(scope.selectedUser.$id).set(scope.selectedUser.$id, function () {
+						this.loading = false;
+						
+						$mdToast.showSimple({
+							content: '"' + $scope.user.name + '" added.',
+						});
+					});
+				},
+			});
+		};
+*/
+		$scope.removeUser = function (skipConfirm, participant, participants) {
+			participants = participants || $scope.participants;
+			
+			if (skipConfirm || confirm('Are you sure you want to remove this user from this roster?')) {
+				var name = participant.name;
+				participants.$unlink(participant).then(function () {
+					$mdToast.showSimple({
+						content: '"' + name + '" removed.',
+					});
+				});
+			}
+		};
 	}])
+		
 	.controller('EventCtrl', ["$scope", "$firebaseHelper", "$mdDialogForm", "$state", "$mdToast", function ($scope, $firebaseHelper, $mdDialogForm, $state, $mdToast) {
 		$scope.urlencode = window.encodeURIComponent;
 		
@@ -252,6 +354,69 @@ angular.module('roster-io', ['ui.router', 'ngMaterial', 'firebaseHelper'])
 			});
 		};
 	}])
+	.controller('InviteCtrl', ["$scope", "$firebaseHelper", "Auth", "$state", "$mdToast", "$mdDialog", function ($scope, $firebaseHelper, Auth, $state, $mdToast, $mdDialog) {
+		$scope.acceptInvite = function () {
+			$scope.$authThen();
+		};
+		Auth.$onAuth(function (authData) {
+			$scope.invite.$loaded().then(function (invite) {
+				if (invite.accepted) {
+					// notify user
+					$mdToast.showSimple({
+						content: 'Invitation already accepted.',
+					});
+					
+					// redirect
+					return $state.go(invite.to.name, invite.to.params);
+				}
+				if (authData) {
+					if( ! $scope.notFound) {
+						$scope.$me.$loaded().then(function (me) {
+							if ((STRICT_INVITE_CHECK && invite.email === me.email) || ! STRICT_INVITE_CHECK) {
+								$scope.roster.$loaded().then(function () {
+									// update user model
+									var rosters = {};
+									rosters[invite.to.params.roster] = invite.to.params.roster;
+									$scope.$me.$ref().update({
+										name:    invite.name,
+										email:   invite.email,
+										gender:  invite.gender,
+										rosters: rosters,
+									});
+									
+									// update roster
+									if($scope.roster.invites) delete $scope.roster.invites[invite.$id];
+									if( ! $scope.roster.participants) $scope.roster.participants = {};
+									$scope.roster.participants[me.uid] = me.uid;
+									$scope.roster.$save().then(function () {
+										// update invite
+										$scope.invite.accepted = moment().format();
+										$scope.invite.$save().then(function () {
+											// notify user
+											$mdToast.showSimple({
+												content: 'Invitation accepted.',
+											});
+											
+											// redirect
+											return $state.go(invite.to.name, invite.to.params);
+										});
+									});
+								});
+							} else {
+								// emails don't match
+								
+								// notify user
+								$mdDialog.show($mdDialog.alert({
+									content: 'Sorry, your Facebook email (' + me.email + ') does not match the email this invite was sent to (' + invite.email + ').',
+									ok: 'OK',
+								}));
+							}
+						});
+					}
+				}
+			});
+		});
+	}])
 	
 	
 	.filter('filterByRsvp', function () {
@@ -285,6 +450,7 @@ angular.module('roster-io', ['ui.router', 'ngMaterial', 'firebaseHelper'])
 		return {
 			show: function (options) {
 				return $mdDialog.show($mdDialog.confirm(angular.extend({
+					focusOnOpen:   false,
 					preserveScope: true,
 					ok:            'Submit',
 					cancel:        'Cancel',
