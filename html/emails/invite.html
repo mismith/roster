@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<title><%= subject %></title>
+	<base href="http://rstr.io/" />
+	
+	<meta charset="UTF-8">
+	<meta name="viewport" content="initial-scale=1">
+	
+	<link rel="stylesheet" href="http://ajax.googleapis.com/ajax/libs/angular_material/0.10.0/angular-material.min.css">
+	<link rel="stylesheet" href="http://localhost:3030/assets/css/base.css" type="text/css">
+	<style>
+		a {
+			text-decoration: none;
+		}
+		a.passthru {
+			color: inherit;
+		}
+		small a {
+			color: #666;
+			text-decoration: underline;
+		}
+	</style>
+</head>
+<body style="height: auto; padding: 20px;">
+
+	<div style="max-width: 600px; margin: 8px auto; text-align: center;">
+		<div class="md-subheader" style="text-align: left">
+			<div class="md-subheader-inner">Invite</div>
+		</div>
+		<div class="md-whiteframe-z1" style="background-color: #FFF;">
+			<a href="<%= invite.url %>">Accept Invite</a>
+		</div>
+		<br />
+		<br />
+		<small style="font-size: 12px; color: #999;">This email was sent to <% if (locals.invite) { %><a href="mailto:<%= invite.email %>"><%= invite.email %></a><% } else { %>you<% } %> by <a href="/">Roster IO</a>.</small>
+	</div>
+
+</body>
+</html>

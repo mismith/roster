@@ -73,29 +73,15 @@
 					</md-card>
 				</div>
 				<div ng-if="invites.length">
-					<md-subheader class="md-no-sticky">
-						<div layout="row">
-							<span flex>Invitees</span>
-							
-							<span class="counter">
-								<md-icon class="fa fa-venus"></md-icon> {{ invites | gender:'female' | length }}
-							</span>
-							<span class="counter">
-								<md-icon md-font-set="fa" class="fa-mars"></md-icon> {{ invites | gender:'male' | length }}
-							</span>
-							<span class="counter">
-								<md-icon class="fa fa-venus-mars"></md-icon> {{ invites | length }}
-							</span>
-						</div>
-					</md-subheader>
+					<md-subheader class="md-no-sticky">Invitees</md-subheader>
 					<md-card>
 						<md-list>
 							<md-list-item ng-repeat="participant in invites | orderBy:'name'">
 								<img ng-src="{{ avatar(participant.facebook.id) }}" width="32" height="32" class="md-avatar" alt="{{ participant.name }}" />
 								
-								<p>{{ participant.name }}</p>
+								<p>{{ participant.name || participant.email }}</p>
 								<div ng-if="canEdit(undefined, roster.admins)">
-									<md-button ng-click="removeUser($event.shiftKey, participant, invites)" class="md-icon-button md-warn">
+									<md-button ng-click="rescindInvite($event.shiftKey, participant)" class="md-icon-button md-warn" aria-label="Rescind invite">
 										<md-icon>close</md-icon>
 									</md-button>
 								</div>

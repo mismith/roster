@@ -159,11 +159,7 @@ angular.module('roster-io', ['ui.router', 'ngMaterial', 'firebaseHelper'])
 				contentUrl:    'views/template/roster.html',
 				ok:            'Create',
 				onSubmit: function (scope) {
-					this.loading = true;
-					
 					return $scope.rosters.$add(scope.roster).then(function () {
-						this.loading = false;
-						
 						$mdToast.showSimple({
 							content: 'Roster created.',
 						});
@@ -172,8 +168,7 @@ angular.module('roster-io', ['ui.router', 'ngMaterial', 'firebaseHelper'])
 			});
 		};
 	}])
-	.controller('RosterCtrl', ["$scope", "$firebaseHelper", "$mdDialogForm", "$state", "$mdToast", function ($scope, $firebaseHelper, $mdDialogForm, $state, $mdToast) {
-		$scope.invitees     = $firebaseHelper.object($scope.roster, 'invites');
+	.controller('RosterCtrl', ["$scope", "$firebaseHelper", "$mdDialogForm", "$state", "$mdToast", "$q", "Api", function ($scope, $firebaseHelper, $mdDialogForm, $state, $mdToast, $q, Api) {
 		$scope.invites      = $firebaseHelper.join([$scope.roster, 'invites'], 'invites');
 		$scope.participants = $firebaseHelper.join([$scope.roster, 'participants'], 'users');
 		$scope.events       = $firebaseHelper.array($scope.roster, 'events');	
@@ -198,11 +193,7 @@ angular.module('roster-io', ['ui.router', 'ngMaterial', 'firebaseHelper'])
 				contentUrl:    'views/template/roster.html',
 				ok:            'Save',
 				onSubmit: function () {
-					this.loading = true;
-					
 					return $scope.roster.$save().then(function () {
-						this.loading = false;
-						
 						$mdToast.showSimple({
 							content: 'Roster saved.',
 						});
@@ -218,48 +209,11 @@ angular.module('roster-io', ['ui.router', 'ngMaterial', 'firebaseHelper'])
 				contentUrl:    'views/template/event.html',
 				ok:            'Create',
 				onSubmit: function (scope) {
-					this.loading = true;
-					
 					scope.event.date = moment(scope.event.$date).format();
 					
 					return $scope.events.$add(scope.event).then(function () {
-						this.loading = false;
-						
 						$mdToast.showSimple({
 							content: 'Event created.',
-						});
-					});
-				},
-			});
-		};
-		
-		$scope.inviteUser = function (name) {
-			$scope.invite = {
-				by: $scope.$me.uid,
-				to: {
-					name: $state.current.name,
-					params: $state.params,
-				},
-				name: (name || '').replace(/\b\w+/g, function (text) { return text.charAt(0).toUpperCase() + text.substr(1); }), // Title Case in case of illiterate users
-			};
-			
-			$mdDialogForm.show({
-				scope:         $scope,
-				title:         'Invite new user',
-				contentUrl:    'views/template/invite.html',
-				ok:            'Invite',
-				onSubmit: function (scope) {
-					this.loading = true;
-					
-					return $firebaseHelper.array('invites').$add($scope.invite).then(function (inviteSnap) {
-						var inviteId = inviteSnap.key();
-						$scope.invitees[inviteId] = inviteId;
-						$scope.invitees.$save().then(function () {
-							this.loading = false;
-							
-							$mdToast.showSimple({
-								content: 'Invitation email sent to "' + scope.invite.name + ' <' + scope.invite.email + '>".',
-							});
 						});
 					});
 				},
@@ -276,11 +230,7 @@ angular.module('roster-io', ['ui.router', 'ngMaterial', 'firebaseHelper'])
 				contentUrl:    'views/template/user.html',
 				ok:            'Add',
 				onSubmit: function (scope) {
-					this.loading = true;
-					
 					return $scope.participants.$ref().child(scope.selectedUser.$id).set(scope.selectedUser.$id, function () {
-						this.loading = false;
-						
 						$mdToast.showSimple({
 							content: '"' + $scope.user.name + '" added.',
 						});
@@ -297,6 +247,64 @@ angular.module('roster-io', ['ui.router', 'ngMaterial', 'firebaseHelper'])
 				participants.$unlink(participant).then(function () {
 					$mdToast.showSimple({
 						content: '"' + name + '" removed.',
+					});
+				});
+			}
+		};
+		
+		
+		$scope.inviteUser = function (name) {
+			$scope.invite = {
+				by: $scope.$me.uid,
+				to: {
+					name: $state.current.name,
+					params: $state.params,
+				},
+			};
+			if (name){
+				// Title Case in case of illiterate users
+				$scope.invite.name = name.replace(/\b\w+/g, function (text) {
+					return text.charAt(0).toUpperCase() + text.substr(1);
+				});
+			}
+			
+			$mdDialogForm.show({
+				scope:         $scope,
+				title:         'Invite new user',
+				contentUrl:    'views/template/invite.html',
+				ok:            'Invite',
+				onSubmit: function (scope) {
+					var deferred = $q.defer();
+					
+					$firebaseHelper.array('invites').$add($scope.invite).then(function (inviteSnap) {
+						var inviteId = inviteSnap.key();
+						
+						Api.post('email/invite', undefined, {params: {invite: inviteId}}).then(function () {
+							$firebaseHelper.object($scope.roster, 'invites').$loaded().then(function (invites) {
+								invites[inviteId] = inviteId;
+								invites.$save().then(function () {
+									deferred.resolve();
+									
+									$mdToast.showSimple({
+										content: 'Invitation email sent to "' + (scope.invite.name ? scope.invite.name + ' ' : '') + '<' + scope.invite.email + '>".',
+									});
+								});
+							});
+						});
+					});
+					
+					return deferred.promise;
+				},
+			});
+		};
+		$scope.rescindInvite = function (skipConfirm, participant, invites) {
+			invites = invites || $scope.invites;
+			
+			if (skipConfirm || confirm('Are you sure you want to rescind this user\'s invite?')) {
+				var name = participant.name || participant.email;
+				invites.$remove(participant).then(function () {
+					$mdToast.showSimple({
+						content: '"' + name + '" rescinded.',
 					});
 				});
 			}
@@ -339,13 +347,9 @@ angular.module('roster-io', ['ui.router', 'ngMaterial', 'firebaseHelper'])
 				contentUrl:    'views/template/event.html',
 				ok:            'Save',
 				onSubmit: function (scope) {
-					this.loading = true;
-					
 					scope.event.date = moment(scope.event.$date).format();
 					
 					return $scope.event.$save().then(function () {
-						this.loading = false;
-						
 						$mdToast.showSimple({
 							content: 'Event saved.',
 						});
@@ -465,7 +469,7 @@ angular.module('roster-io', ['ui.router', 'ngMaterial', 'firebaseHelper'])
 								'<md-button ng-if="dialog.$type == \'confirm\'" ng-click="dialog.abort()" class="md-primary">',
 									'{{ dialog.cancel }}',
 								'</md-button>',
-								'<md-button type="submit" ng-disabled="dialogForm.$invalid || dialog.loading" ng-click="dialog.onSubmit(this).then(dialog.hide)" class="md-primary">',
+								'<md-button type="submit" ng-disabled="dialogForm.$invalid || dialog.loading" ng-click="dialog.startLoading(); dialog.onSubmit(this).then(dialog.hide).finally(dialog.stopLoading)" class="md-primary">',
 									'{{ dialog.ok }}',
 								'</md-button>',
 							'</div>',
@@ -474,21 +478,38 @@ angular.module('roster-io', ['ui.router', 'ngMaterial', 'firebaseHelper'])
 							'</md-dialog-footer>',
 						'</md-dialog>'
 					].join(''),
+					startLoading:  function startLoading(){ this.loading = true; },
+					stopLoading:   function stopLoading(){  this.loading = false; },
 					onSubmit:      function onSubmit(scope) {
 						var deferred = $q.defer();
-						this.loading = true;
 						
-						if (scope.dialogForm.$valid) {
-							this.loading = false;
-							deferred.resolve();
-						} else {
-							this.loading = false;
-							deferred.reject();
-						}
+						deferred.resolve();
 						
 						return deferred.promise;
 					},
 				}, options || {})));
+			},
+		};
+	}])
+	.factory('Api', ["$http", "$q", function ($http, $q) {
+		var BASE_URL = '/api/v1/';
+		return {
+			post: function (method, data, config) {
+				var deferred = $q.defer();
+				
+				$http.post(BASE_URL + method.replace(/^\/+/, ''), data, config)
+					.success(function (res) {
+						if (res && res.success) {
+							deferred.resolve(res);
+						} else {
+							deferred.reject(res);
+						}
+					})
+					.error(function (res) {
+						deferred.reject(res);
+					});
+				
+				return deferred.promise;
 			},
 		};
 	}]);

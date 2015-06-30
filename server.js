@@ -19,6 +19,13 @@ server.use(express.static('html'));
 server.get('/', express.static('html/index.html'));
 
 // api
+function authed(req, res, next) {
+	if (req.headers.authorization) {
+		next();
+	} else {
+		res.send(403);
+	}
+}
 
 function getCompiledTemplate(templateId, callback) {
 	// read template
@@ -33,20 +40,6 @@ function getCompiledTemplate(templateId, callback) {
 		
 		// return it
 		callback(compiled);
-	});
-}
-function getEventInfo(rosterId, eventId, callback) {
-	// fetch data
-	new Firebase(FB_BASE_URL + '/rosters/' + rosterId).on('value', function (snapshot) {
-		var roster  = snapshot.val(),         // @TODO: make sure this roster exists
-			event   = roster.events[eventId]; // @TODO: make sure this event exists
-		
-		roster.$id = rosterId;
-		roster.url = '#/roster/' + rosterId;
-		event.$id  = eventId;
-		event.url  = roster.url + '/' + eventId;
-		
-		callback(roster, event);
 	});
 }
 function getJuicedEmail(template, data, callback) {
@@ -64,6 +57,22 @@ function getJuicedEmail(template, data, callback) {
 	});
 }
 
+
+
+function getEventInfo(rosterId, eventId, callback) {
+	// fetch data
+	new Firebase(FB_BASE_URL + '/rosters/' + rosterId).on('value', function (snapshot) {
+		var roster  = snapshot.val(),         // @TODO: make sure this roster exists
+			event   = roster.events[eventId]; // @TODO: make sure this event exists
+		
+		roster.$id = rosterId;
+		roster.url = '#/roster/' + roster.$id;
+		event.$id  = eventId;
+		event.url  = roster.url + '/' + event.$id;
+		
+		callback(roster, event);
+	});
+}
 server.get('/api/v1/email/reminder', function (req, res) {
 	getCompiledTemplate('reminder', function (template) {
 		getEventInfo(req.query.roster, req.query.event, function (roster, event) {
@@ -138,6 +147,73 @@ server.post('/api/v1/email/reminder', function (req, res) {
 			});
 			Q.all(deferreds).then(function () {
 				res.json(response);
+			});
+		});
+	});
+});
+
+
+
+function getInviteInfo(inviteId, callback) {
+	// fetch data
+	new Firebase(FB_BASE_URL + '/invites/' + inviteId).on('value', function (inviteSnap) {
+		var invite = inviteSnap.val();
+		if (invite) {
+			invite.$id = inviteId;
+			invite.url = '#/invite/' + invite.$id;
+			
+			new Firebase(FB_BASE_URL + '/users/' + invite.by).on('value', function (userSnap) {
+				var user = userSnap.val();
+				
+				user.$id = userSnap.key();
+	
+				new Firebase(FB_BASE_URL + '/rosters/' + invite.to.params.roster).on('value', function (rosterSnap) {
+					var roster = rosterSnap.val();
+				
+					roster.$id = rosterSnap.key();
+					roster.url = '#/roster/' + roster.$id;
+					
+					callback(invite, user, roster);
+				});
+			});
+		} else {
+			// @TODO
+		}
+	});
+}
+server.post('/api/v1/email/invite', function (req, res) {
+	getCompiledTemplate('invite', function (template) {
+		getInviteInfo(req.query.invite, function (invite, user, roster) {
+			var subject = 'Invitation: Join ' + user.name + ' on the "' + roster.name + '" roster',
+				data = {
+					subject:  subject,
+					invite:   invite,
+					user:     user,
+					roster:   roster,
+				};
+			
+			getJuicedEmail(template, data, function (html) {
+				// send email
+				postmark.sendEmail({
+					From:       'invite@rstr.io',
+					To:         invite.name ? invite.name + ' <' + invite.email + '>' : invite.email,
+					Subject:    subject,
+					HtmlBody:   html,
+					TrackOpens: true,
+				}, function (err) {
+					if (err) {
+						console.error(err);
+						// @TODO: why is the next line throwig an error after successfully sending the email?
+/*
+						res.json({
+							success: false,
+							error:   err,
+						});
+*/
+						return;
+					}
+					res.json({success: true});
+				});
 			});
 		});
 	});
