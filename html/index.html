@@ -25,7 +25,7 @@
 		<md-toolbar id="header">
 			<div class="md-toolbar-tools">
 				<h1 flex class="breadcrumbs">
-					<a ui-sref="rosters">Rosters</a>
+					<a ui-sref="rosters">Roster IO</a>
 					<a ng-if="roster" ui-sref="roster({roster: roster.$id})" ng-bind="roster.name"></a>
 					<a ng-if="roster && event" ui-sref="event({roster: roster.$id, event: event.$id})" ng-bind="event.name"></a>
 				</h1>
