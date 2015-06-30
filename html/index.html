@@ -31,7 +31,7 @@
 				</h1>
 				<nav>
 					<div ng-if=" ! $me.uid">
-						<md-button ng-click="$authThen()" class="md-facebook">
+						<md-button ng-click="$authThen()" class="md-facebook" aria-label="Login with Facebook">
 							<md-icon md-font-set="fa" class="fa-facebook"></md-icon>
 							Login
 						</md-button>
@@ -39,15 +39,15 @@
 					<div ng-if="$me.uid">
 						<md-menu>
 							<div ng-click="$mdOpenMenu()" layout="row" layout-align="center center" aria-label="Open user menu">
-								<small hide-sm ng-bind="$me.facebook.displayName"></small>
+								<small hide-sm ng-bind="$me.name"></small>
 								&nbsp;
-								<md-button class="md-icon-button">
+								<md-button class="md-icon-button" aria-label="Open user menu">
 									<img ng-src="{{ avatar($me.facebook.id) }}" width="48" height="48" class="md-avatar" />
 								</md-button>
 							</div>
 							<md-menu-content width="4">
 								<md-menu-item>
-									<md-button ng-click="$unauth()" class="md-warn">Logout</md-button>
+									<md-button ng-click="$unauth()" class="md-warn" aria-label="Logout">Logout</md-button>
 								</md-menu-item>
 							</md-menu-content>
 						</md-menu>

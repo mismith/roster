@@ -61,7 +61,7 @@
 								
 								<p>{{ participant.name }}</p>
 								<div ng-if="canEdit(undefined, roster.admins)">
-									<md-button ng-click="removeUser($event.shiftKey, participant)" class="md-icon-button md-warn">
+									<md-button ng-click="removeUser($event.shiftKey, participant)" class="md-icon-button md-warn" aria-label="Remove participant">
 										<md-icon>close</md-icon>
 									</md-button>
 								</div>

@@ -12,7 +12,7 @@ angular.module('roster-io', ['ui.router', 'ngMaterial', 'firebaseHelper'])
 				url: '/rosters',
 				templateUrl: 'views/page/rosters.html',
 				controller: ["$rootScope", "$firebaseHelper", function ($rootScope, $firebaseHelper) {
-					$rootScope.rosters = $firebaseHelper.array('rosters');
+					$rootScope.rosters = $firebaseHelper.join([$rootScope.$me, 'rosters'], 'rosters');
 					$rootScope.roster = $rootScope.event = undefined;
 				}],
 			})
@@ -378,9 +378,9 @@ angular.module('roster-io', ['ui.router', 'ngMaterial', 'firebaseHelper'])
 									var rosters = {};
 									rosters[invite.to.params.roster] = invite.to.params.roster;
 									$scope.$me.$ref().update({
-										name:    invite.name,
-										email:   invite.email,
-										gender:  invite.gender,
+										email:   invite.email || me.facebook.email,
+										name:    invite.name || me.facebook.displayName,
+										gender:  me.facebook.gender || 'male',
 										rosters: rosters,
 									});
 									
