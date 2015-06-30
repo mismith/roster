@@ -2,7 +2,7 @@
 	<md-content>
 		<div layout="column" layout-gt-md="row" class="content-wrap">
 			<section flex>
-				<div ng-repeat="timegroup in timegroups">
+				<div ng-repeat="timegroup in timegroups" ng-show="timegroup.$id === 'upcoming' || (timegroup.$events | length)">
 					<md-subheader class="md-no-sticky">
 						<div layout="row">
 							<span flex ng-bind="timegroup.name"></span>
@@ -10,7 +10,7 @@
 					</md-subheader>
 					<md-card>
 						<md-list>
-							<md-list-item ng-repeat="event in events | filterByTimegroup:timegroup.$id | orderBy:timegroup.orderBy" ng-click="$state.go('event', {roster: roster.$id, event: event.$id})" ng-class="{previous: $state.$previous.params.roster === roster.$id && $state.$previous.params.event === event.$id}">
+							<md-list-item ng-repeat="event in timegroup.$events = (events | filterByTimegroup:timegroup.$id | orderBy:timegroup.orderBy)" ng-click="$state.go('event', {roster: roster.$id, event: event.$id})" ng-class="{previous: $state.$previous.params.roster === roster.$id && $state.$previous.params.event === event.$id}">
 								<figure class="md-avatar calendar-day md-primary">
 									<div class="month" ng-bind="event.date | date:'MMM'"></div>
 									<div class="day" ng-bind="event.date | date:'d'"></div>
