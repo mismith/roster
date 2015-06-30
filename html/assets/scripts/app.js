@@ -12,7 +12,7 @@ angular.module('roster-io', ['ui.router', 'ngMaterial', 'firebaseHelper'])
 				url: '/rosters',
 				templateUrl: 'views/page/rosters.html',
 				controller: function ($rootScope, $firebaseHelper) {
-					$rootScope.rosters = $firebaseHelper.join([$rootScope.$me, 'rosters'], 'rosters');
+					$rootScope.rosters = $firebaseHelper.join([$rootScope.$me, 'rosters'], 'data/rosters');
 					$rootScope.roster = $rootScope.event = undefined;
 				},
 			})
@@ -20,7 +20,7 @@ angular.module('roster-io', ['ui.router', 'ngMaterial', 'firebaseHelper'])
 				url: '/roster/:roster',
 				templateUrl: 'views/page/roster.html',
 				controller: function ($rootScope, $firebaseHelper, $stateParams) {
-					$rootScope.roster = $firebaseHelper.object('rosters', $stateParams.roster);
+					$rootScope.roster = $firebaseHelper.object('data/rosters', $stateParams.roster);
 					$rootScope.event  = undefined;
 				},
 			})
@@ -28,7 +28,7 @@ angular.module('roster-io', ['ui.router', 'ngMaterial', 'firebaseHelper'])
 				url: '/roster/:roster/:event',
 				templateUrl: 'views/page/event.html',
 				controller: function ($rootScope, $firebaseHelper, $stateParams) {
-					$rootScope.roster = $firebaseHelper.object('rosters', $stateParams.roster);
+					$rootScope.roster = $firebaseHelper.object('data/rosters', $stateParams.roster);
 					$rootScope.event  = $firebaseHelper.object($rootScope.roster, 'events', $stateParams.event);
 				},
 			})
@@ -36,11 +36,11 @@ angular.module('roster-io', ['ui.router', 'ngMaterial', 'firebaseHelper'])
 				url: '/invite/:invite',
 				templateUrl: 'views/page/invite.html',
 				controller: function ($rootScope, $firebaseHelper, $stateParams, $q) {
-					$rootScope.invite = $firebaseHelper.object('invites', $stateParams.invite);
+					$rootScope.invite = $firebaseHelper.object('data/invites', $stateParams.invite);
 					$rootScope.invite.$loaded().then(function (invite) {
 						if (invite.$value !== null) {
-							$rootScope.roster  = $firebaseHelper.object('rosters', invite.to.params.roster);
-							$rootScope.inviter = $firebaseHelper.object('users', invite.by);
+							$rootScope.roster  = $firebaseHelper.object('data/rosters', invite.to.params.roster);
+							$rootScope.inviter = $firebaseHelper.object('data/users', invite.by);
 							
 							$q.all([$rootScope.roster.$loaded(), $rootScope.inviter.$loaded()]).then(function () {
 								$rootScope.invite.$$loaded = true;
@@ -88,7 +88,7 @@ angular.module('roster-io', ['ui.router', 'ngMaterial', 'firebaseHelper'])
 		Auth.$onAuth(function (authData) {
 			if (authData) {
 				// logging in
-				$rootScope.$me = $firebaseHelper.object('users/' + authData.uid); // fetch existing user profile
+				$rootScope.$me = $firebaseHelper.object('data/users/' + authData.uid); // fetch existing user profile
 				$rootScope.$me.$ref().update(authData); // update it w/ any changes since last login
 				refreshAuthState();
 			} else {
@@ -144,7 +144,7 @@ angular.module('roster-io', ['ui.router', 'ngMaterial', 'firebaseHelper'])
 			
 			var admins = {};
 			admins[$scope.$me.uid] = $scope.$me.uid;
-			$firebaseHelper.array('rosters').$add({
+			$firebaseHelper.array('data/rosters').$add({
 				admins:       admins,
 				thread:       thread.id,
 				participants: participants
@@ -169,10 +169,12 @@ angular.module('roster-io', ['ui.router', 'ngMaterial', 'firebaseHelper'])
 		};
 	})
 	.controller('RosterCtrl', function ($scope, $firebaseHelper, $mdDialogForm, $state, $mdToast, $q, Api) {
-		$scope.invites      = $firebaseHelper.join([$scope.roster, 'invites'], 'invites');
-		$scope.participants = $firebaseHelper.join([$scope.roster, 'participants'], 'users');
+		$scope.timegroups   = $firebaseHelper.array('constants/timegroups'); // constant
+		
+		$scope.invites      = $firebaseHelper.join([$scope.roster, 'invites'], 'data/invites');
+		$scope.participants = $firebaseHelper.join([$scope.roster, 'participants'], 'data/users');
 		$scope.events       = $firebaseHelper.array($scope.roster, 'events');	
-		$scope.users        = $firebaseHelper.array('users');	
+		$scope.users        = $firebaseHelper.array('data/users');	
 
 		
 		$scope.deleteRoster = function (skipConfirm) {
@@ -222,7 +224,7 @@ angular.module('roster-io', ['ui.router', 'ngMaterial', 'firebaseHelper'])
 		
 /*
 		$scope.addUser = function () {
-			$scope.users = $firebaseHelper.array('users');
+			$scope.users = $firebaseHelper.array('data/users');
 			
 			$mdDialogForm.show({
 				scope:         $scope,
@@ -276,7 +278,7 @@ angular.module('roster-io', ['ui.router', 'ngMaterial', 'firebaseHelper'])
 				onSubmit: function (scope) {
 					var deferred = $q.defer();
 					
-					$firebaseHelper.array('invites').$add($scope.invite).then(function (inviteSnap) {
+					$firebaseHelper.array('data/invites').$add($scope.invite).then(function (inviteSnap) {
 						var inviteId = inviteSnap.key();
 						
 						Api.post('email/invite', undefined, {params: {invite: inviteId}}).then(function () {
@@ -312,20 +314,13 @@ angular.module('roster-io', ['ui.router', 'ngMaterial', 'firebaseHelper'])
 	})
 		
 	.controller('EventCtrl', function ($scope, $firebaseHelper, $mdDialogForm, $state, $mdToast) {
-		$scope.urlencode = window.encodeURIComponent;
+		$scope.statuses     = $firebaseHelper.array('constants/statuses'); // constant
+		$scope.participants = $firebaseHelper.join([$scope.roster, 'participants'], 'data/users');
 		
-		$scope.participants = $firebaseHelper.join([$scope.roster, 'participants'], 'users');
-		$scope.rsvps        = $firebaseHelper.object($scope.event, 'rsvps');
-		$scope.statuses     = $firebaseHelper.array('statuses'); // constant
+		// helpers
+		$scope.urlencode = window.encodeURIComponent;		
 		
-		$scope.rsvp = function (participantId, to) {
-			return $firebaseHelper.object($scope.event, 'rsvps', participantId).$loaded().then(function ($rsvp) {
-				$rsvp.status = $rsvp.status === to ? -2 : to;
-				$rsvp.updated = moment().format();
-				return $rsvp.$save();
-			});
-		};
-		
+		// CRUD
 		$scope.deleteEvent = function (skipConfirm) {
 			if (skipConfirm || confirm('Are you sure you want to permanently delete this event?')) {
 				$scope.event.$remove().then(function () {
@@ -422,6 +417,28 @@ angular.module('roster-io', ['ui.router', 'ngMaterial', 'firebaseHelper'])
 		});
 	})
 	
+	.directive('rsvp', function ($parse, $firebaseHelper) {
+		return {
+			scope: {
+				event: '=',
+				participant: '=',
+				readonly: '=',
+			},
+			restrict: 'E',
+			templateUrl: 'views/directive/rsvp.html',
+			link: function ($scope, $element, $attrs) {
+				$scope.rsvps = $firebaseHelper.object($scope.event, 'rsvps');
+				$scope.rsvp = function (participantId, to) {
+					return $firebaseHelper.object($scope.rsvps, participantId).$loaded().then(function ($rsvp) {
+						$rsvp.status = $rsvp.status === to ? -2 : to;
+						$rsvp.updated = moment().format();
+						return $rsvp.$save();
+					});
+				};
+			},
+		};
+	})
+	
 	
 	.filter('filterByRsvp', function () {
 		return function (array, rsvps, rsvp) {
@@ -430,6 +447,15 @@ angular.module('roster-io', ['ui.router', 'ngMaterial', 'firebaseHelper'])
 			
 			return array.filter(function (item) {
 				return rsvps[item.$id] ? rsvps[item.$id].status === rsvp : rsvp === -2;
+			});
+		};
+	})
+	.filter('filterByTimegroup', function () {
+		return function (array, timegroup) {
+			if ( ! angular.isArray(array)) return array;
+			
+			return array.filter(function (item) {
+				return (moment().diff(item.date) < 0 ? 'upcoming' : 'past') === timegroup;
 			});
 		};
 	})
@@ -445,6 +471,7 @@ angular.module('roster-io', ['ui.router', 'ngMaterial', 'firebaseHelper'])
 	.filter('length', function () {
 		return function (array) {
 			if (angular.isArray(array)) return array.length;
+			if (angular.isObject(array)) return Object.keys(array).length;
 			return 0;
 		};
 	})
