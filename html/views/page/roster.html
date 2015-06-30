@@ -2,40 +2,34 @@
 	<md-content>
 		<div layout="column" layout-gt-md="row" class="content-wrap">
 			<section flex>
-				<md-subheader class="md-no-sticky">
-					<div layout="row">
-						<span flex>Events</span>
-					</div>
-				</md-subheader>
-				<md-card>
-					<md-list>
-						<md-list-item ng-repeat="event in events | orderBy:'date'" ng-click="$state.go('event', {roster: roster.$id, event: event.$id})" ng-class="{previous: $state.$previous.params.roster === roster.$id && $state.$previous.params.event === event.$id}">
-							<figure class="md-avatar calendar-day md-primary">
-								<div class="month" ng-bind="event.date | date:'MMM'"></div>
-								<div class="day" ng-bind="event.date | date:'d'"></div>
-							</figure>
-							<figure class="md-avatar calendar-day md-accent">
-								<div class="hour" ng-bind="event.date | date:'h:mm'"></div>
-								<div class="ampm" ng-bind="event.date | date:'a'"></div>
-							</figure>
-							
-							<p>{{ event.name }}</p>
-							
-							<span hide-sm class="counter">
-								<md-icon class="fa fa-venus"></md-icon> {{ participants | filterByRsvp:event.rsvps:1 | gender:'female' | length }}
-							</span>
-							<span hide-sm class="counter">
-								<md-icon md-font-set="fa" class="fa-mars"></md-icon> {{ participants | filterByRsvp:event.rsvps:1 | gender:'male' | length }}
-							</span>
-							<span class="counter">
-								<md-icon class="fa fa-venus-mars"></md-icon> {{ participants | filterByRsvp:event.rsvps:1 | length }}
-							</span>
-						</md-list-item>
-						<md-list-item ng-if=" ! (events | length)" class="no-results">
-							No events found.
-						</md-list-item>
-					</md-list>
-				</md-card>
+				<div ng-repeat="timegroup in timegroups">
+					<md-subheader class="md-no-sticky">
+						<div layout="row">
+							<span flex ng-bind="timegroup.name"></span>
+						</div>
+					</md-subheader>
+					<md-card>
+						<md-list>
+							<md-list-item ng-repeat="event in events | filterByTimegroup:timegroup.$id | orderBy:timegroup.orderBy" ng-click="$state.go('event', {roster: roster.$id, event: event.$id})" ng-class="{previous: $state.$previous.params.roster === roster.$id && $state.$previous.params.event === event.$id}">
+								<figure class="md-avatar calendar-day md-primary">
+									<div class="month" ng-bind="event.date | date:'MMM'"></div>
+									<div class="day" ng-bind="event.date | date:'d'"></div>
+								</figure>
+								<figure class="md-avatar calendar-day md-accent">
+									<div class="hour" ng-bind="event.date | date:'h:mm'"></div>
+									<div class="ampm" ng-bind="event.date | date:'a'"></div>
+								</figure>
+								
+								<p>{{ event.name }}</p>
+								
+								<rsvp event="$firebaseHelper.object(events, event.$id)" participant="$me" ng-click="$event.stopPropagation()"></rsvp>
+							</md-list-item>
+							<md-list-item ng-if=" ! (events | length)" class="no-results">
+								No events found.
+							</md-list-item>
+						</md-list>
+					</md-card>
+				</div>
 			</section>
 			<section>
 				<div>
@@ -44,13 +38,13 @@
 							<span flex>Participants</span>
 							
 							<span class="counter">
-								<md-icon class="fa fa-venus"></md-icon> {{ participants | gender:'female' | length }}
+								<md-icon md-font-set="fa" class="fa-venus"></md-icon> {{ participants | gender:'female' | length }}
 							</span>
 							<span class="counter">
 								<md-icon md-font-set="fa" class="fa-mars"></md-icon> {{ participants | gender:'male' | length }}
 							</span>
 							<span class="counter">
-								<md-icon class="fa fa-venus-mars"></md-icon> {{ participants | length }}
+								<md-icon>people</md-icon> {{ participants | length }}
 							</span>
 						</div>
 					</md-subheader>

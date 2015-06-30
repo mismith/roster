@@ -1,17 +1,21 @@
 <div ng-controller="RostersCtrl" layout="column" flex>
 	<md-content flex>
 		<section class="content-wrap">
-			<md-subheader class="md-no-sticky">Active</md-subheader>
+			<md-subheader class="md-no-sticky">Rosters</md-subheader>
 			<md-card>
 				<md-card-content style="padding: 0;">
 					<md-list>
-						<md-list-item ng-repeat="roster in rosters | orderBy:'name'" ng-init="participants = $firebaseHelper.join(['rosters', roster.$id, 'participants'], 'users')" ng-click="$state.go('roster', {roster: roster.$id})" ng-class="{previous: $state.$previous.params.roster === roster.$id}">
-							<p style="min-width: 100px;">{{ roster.name }}</p>
-							<ul class="list-avatars">
-								<li ng-repeat="participant in participants">
-									<img ng-src="{{ avatar(participant.facebook.id) }}" width="32" height="32" class="md-avatar" alt="{{ participant.name }}" />
-								</li>
-							</ul>
+						<md-list-item ng-repeat="roster in rosters | orderBy:'name'" ng-click="$state.go('roster', {roster: roster.$id})" ng-class="{previous: $state.$previous.params.roster === roster.$id}">
+							<p flex>{{ roster.name }}</p>
+							<span class="counter">
+								<md-icon>event</md-icon> {{ roster.events | length }}
+							</span>
+							<span class="counter">
+								<md-icon>people</md-icon> {{ roster.participants | length }}
+							</span>
+						</md-list-item>
+						<md-list-item ng-if=" ! (rosters | length)" class="no-results">
+							No rosters found.
 						</md-list-item>
 					</md-list>
 				</md-card-content>
