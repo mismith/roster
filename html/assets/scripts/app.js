@@ -25,11 +25,22 @@ angular.module('roster-io', ['ui.router', 'ngMaterial', 'firebaseHelper'])
 				},
 			})
 			.state('event', {
-				url: '/roster/:roster/:event',
+				url: '/roster/:roster/:event?v',
 				templateUrl: 'views/page/event.html',
-				controller: function ($rootScope, $firebaseHelper, $stateParams) {
+				controller: function ($rootScope, $firebaseHelper, $location, $stateParams, Auth, RSVP) {
 					$rootScope.roster = $firebaseHelper.object('data/rosters', $stateParams.roster);
 					$rootScope.event  = $firebaseHelper.object($rootScope.roster, 'events', $stateParams.event);
+					
+					if ($stateParams.v !== undefined) {
+						Auth.$onAuth(function (authData) {
+							if(authData){
+								RSVP($rootScope.event, {toggleStatus: false}).setParticipantStatus(authData.uid, $stateParams.v).then(function () {
+									// remove query string so we don't accidentally re-rsvp
+									$location.url($location.path());
+								});
+							}
+						});
+					}
 				},
 			})
 			.state('invite', {
@@ -68,21 +79,14 @@ angular.module('roster-io', ['ui.router', 'ngMaterial', 'firebaseHelper'])
 		$rootScope.$firebaseHelper = $firebaseHelper;
 		$rootScope.console         = console;
 		
+		// state
 		$rootScope.$on('$stateChangeSuccess', function(e, toState, toParams, fromState, fromParams){
+			// highlight previous state for user convenience/orientation
 			$state.$previous = fromState;
 			$state.$previous.params = fromParams;
 		});
 		
 		// auth
-		var refreshAuthState = function () {
-/*
-			if ( ! $rootScope.$me || ! $rootScope.$me.$loaded) return;
-			
-			$rootScope.$me.$loaded().then(function (me) {
-				
-			});
-*/
-		};
 		$rootScope.$me = {};
 		$rootScope.$unauth = Auth.$unauth;
 		Auth.$onAuth(function (authData) {
@@ -90,7 +94,6 @@ angular.module('roster-io', ['ui.router', 'ngMaterial', 'firebaseHelper'])
 				// logging in
 				$rootScope.$me = $firebaseHelper.object('data/users/' + authData.uid); // fetch existing user profile
 				$rootScope.$me.$ref().update(authData); // update it w/ any changes since last login
-				refreshAuthState();
 			} else {
 				// page loaded or refreshed while not logged in, or logging out
 				$rootScope.$me = {};
@@ -109,12 +112,12 @@ angular.module('roster-io', ['ui.router', 'ngMaterial', 'firebaseHelper'])
 			}
 		};
 		
+		// helpers
 		$rootScope.canEdit = function (uid, adminUids) {
 			if (angular.isArray(adminUids) && adminUids.indexOf($rootScope.$me.uid) >= 0) return true;
 			if (angular.isObject(adminUids) && adminUids[$rootScope.$me.uid]) return true;
 			return uid ? uid === $rootScope.$me.uid : $rootScope.$me.admin;
 		};
-		
 		$rootScope.avatar = function (userId) {
 			return '//graph.facebook.com/' + (userId ? userId + '/' : '') + 'picture?type=square';
 		};
@@ -174,8 +177,7 @@ angular.module('roster-io', ['ui.router', 'ngMaterial', 'firebaseHelper'])
 		$scope.invites      = $firebaseHelper.join([$scope.roster, 'invites'], 'data/invites');
 		$scope.participants = $firebaseHelper.join([$scope.roster, 'participants'], 'data/users');
 		$scope.events       = $firebaseHelper.array($scope.roster, 'events');	
-		$scope.users        = $firebaseHelper.array('data/users');	
-
+		$scope.users        = $firebaseHelper.array('data/users');
 		
 		$scope.deleteRoster = function (skipConfirm) {
 			if (skipConfirm || confirm('Are you sure you want to permanently delete this roster?')) {
@@ -333,7 +335,6 @@ angular.module('roster-io', ['ui.router', 'ngMaterial', 'firebaseHelper'])
 			}
 		};
 		$scope.editEvent = function () {
-			
 			$scope.event.$date = moment($scope.event.date).toDate();
 			
 			$mdDialogForm.show({
@@ -417,7 +418,44 @@ angular.module('roster-io', ['ui.router', 'ngMaterial', 'firebaseHelper'])
 		});
 	})
 	
-	.directive('rsvp', function ($parse, $firebaseHelper) {
+	.factory('RSVP', function ($firebaseHelper, $q, $mdToast) {
+		return function ($event, options) {
+			options = angular.extend({
+				toggleStatus: true,
+				showToast: true,
+			}, options);
+			
+			var statuses = $firebaseHelper.object($event, 'rsvps');
+			
+			return {
+				statuses: statuses,
+				getParticipantStatus: function (participantId) {
+					return statuses && statuses[participantId] ? statuses[participantId].status : undefined;
+				},
+				setParticipantStatus: function (participantId, status) {
+					status = parseInt(status);
+					
+					var deferred = $q.defer();
+					
+					return $firebaseHelper.object(statuses, participantId).$loaded().then(function ($rsvp) {
+						$rsvp.status = (options.toggleStatus && $rsvp.status === status) ? null : status; // clear it if trying to set to same value, or set it otherwise
+						$rsvp.updated = moment().format();
+						
+						return $rsvp.$save().then(function () {
+							deferred.resolve();
+							
+							if(options.showToast) {
+								$mdToast.showSimple({content: 'RSVP saved.'});
+							}
+						});
+					});
+					
+					return deferred.promise;
+				},
+			};
+		};
+	})
+	.directive('rsvp', function () {
 		return {
 			scope: {
 				event: '=',
@@ -426,16 +464,12 @@ angular.module('roster-io', ['ui.router', 'ngMaterial', 'firebaseHelper'])
 			},
 			restrict: 'E',
 			templateUrl: 'views/directive/rsvp.html',
-			link: function ($scope, $element, $attrs) {
-				$scope.rsvps = $firebaseHelper.object($scope.event, 'rsvps');
-				$scope.rsvp = function (participantId, to) {
-					return $firebaseHelper.object($scope.rsvps, participantId).$loaded().then(function ($rsvp) {
-						$rsvp.status = $rsvp.status === to ? -2 : to;
-						$rsvp.updated = moment().format();
-						return $rsvp.$save();
-					});
-				};
+			controller: function ($scope, RSVP) {
+				var rsvp  = RSVP($scope.event);
+				this.getParticipantStatus = rsvp.getParticipantStatus;
+				this.setParticipantStatus = rsvp.setParticipantStatus;
 			},
+			controllerAs: 'RSVP',
 		};
 	})
 	
@@ -446,7 +480,20 @@ angular.module('roster-io', ['ui.router', 'ngMaterial', 'firebaseHelper'])
 			rsvp = parseInt(rsvp);
 			
 			return array.filter(function (item) {
-				return rsvps[item.$id] ? rsvps[item.$id].status === rsvp : rsvp === -2;
+				if (rsvps[item.$id]) {
+					switch (rsvps[item.$id].status) {
+						case 1:
+						case 0:
+						case -1:
+							return rsvp === rsvps[item.$id].status;
+							break;
+						default:
+							return rsvp === -2;
+							break;
+					}
+				} else {
+					return rsvp === -2;
+				}
 			});
 		};
 	})

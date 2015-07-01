@@ -22,7 +22,7 @@
 								
 								<p>{{ event.name }}</p>
 								
-								<rsvp event="$firebaseHelper.object(events, event.$id)" participant="$me" ng-click="$event.stopPropagation()"></rsvp>
+								<rsvp event="$firebaseHelper.object(events, event.$id)" participant="$me" readonly=" ! $me.uid" ng-click="$event.stopPropagation()"></rsvp>
 							</md-list-item>
 							<md-list-item ng-if=" ! (events | length)" class="no-results">
 								No events found.
