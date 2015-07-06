@@ -38,11 +38,37 @@
 			</md-subheader>
 			<md-card>
 				<md-list>
-					<md-list-item ng-repeat="participant in status.$participants = (participants | filterByRsvp:event.rsvps:status.$id | orderBy:'name')" layout="row">
-						<img ng-src="{{ avatar(participant.facebook.id) }}" width="40" height="40" class="md-avatar" alt="{{ participant.name }}" />
-						<p>{{ participant.name }}</p>
-
-						<rsvp event="event" participant="participant" readonly=" ! canEdit(participant.$id, roster.admins)"></rsvp>
+					<md-list-item ng-repeat="participant in status.$participants = (participants | filterByRsvp:event.rsvps:status.$id | orderBy:'name')" md-swipe-item="canEdit(participant.$id, roster.admins)" md-swipe-right-triggered="RSVP(event).setParticipantStatus(participant.$id, 1); mdSwipeItem.close();">
+						<div class="md-list-item-inner md-swipe-item-inner" style="padding-right: 8px;">
+							<img ng-src="{{ avatar(participant.facebook.id) }}" width="40" height="40" class="md-avatar" alt="{{ participant.name }}" />
+							<p>{{ participant.name }}</p>
+							
+							<rsvp hide-sm event="event" participant="participant" readonly=" ! canEdit(participant.$id, roster.admins)"></rsvp>
+							<md-button hide-gt-sm ng-click="mdSwipeItem.triggered.left || mdSwipeItem.triggered.right ? mdSwipeItem.close() : (canEdit(participant.$id, roster.admins) ? mdSwipeItem.teaseLeft() : null)"  class="md-fab" ng-class="{'md-success': RSVP(event).getParticipantStatus(participant.$id) === 1, 'md-primary': RSVP(event).getParticipantStatus(participant.$id) === -1, 'md-warn': RSVP(event).getParticipantStatus(participant.$id) === 0}" aria-label="RSVP" ng-switch="RSVP(event).getParticipantStatus(participant.$id)" ng-disabled=" ! canEdit(participant.$id, roster.admins) && RSVP(event).getParticipantStatus(participant.$id) === -2">
+								<md-icon ng-switch-when="1">check</md-icon>
+								<md-icon ng-switch-when="-1">swap_calls</md-icon>
+								<md-icon ng-switch-when="0">close</md-icon>
+								<md-icon ng-switch-default>more_horiz</md-icon>
+							</md-button>
+						</div>
+						<md-swipe-actions hide-gt-sm layout="row">
+							<div class="md-swipe-action-left md-success" layout="row" layout-align="start center">
+								<md-button class="md-icon-button">
+									<md-icon>check</md-icon>
+								</md-button>
+							</div>
+							<div class="md-swipe-action-right" layout="row" layout-align="end center">
+								<md-button ng-click="RSVP(event).setParticipantStatus(participant.$id, 1); mdSwipeItem.close();" class="md-fab md-mini md-success">
+									<md-icon>check</md-icon>
+								</md-button>
+								<md-button ng-click="RSVP(event).setParticipantStatus(participant.$id, -1); mdSwipeItem.close();" class="md-fab md-mini md-primary">
+									<md-icon>swap_calls</md-icon>
+								</md-button>
+								<md-button ng-click="RSVP(event).setParticipantStatus(participant.$id, 0); mdSwipeItem.close();" class="md-fab md-mini md-warn">
+									<md-icon>close</md-icon>
+								</md-button>
+							</div>
+						</md-swipe-actions>
 					</md-list-item>
 				</md-list>
 			</md-card>

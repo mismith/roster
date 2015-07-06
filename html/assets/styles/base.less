@@ -1,12 +1,15 @@
 // vars
 @u:        8px;
+@t:        300ms;
 @sm:       600px;
 @md:       960px;
 @primary:  #3f51b5;
 @accent:   rgb(255,64,129);
 @warn:     rgb(244,67,54);
+@success:  rgb(0, 128, 0);
 @bg:       #DDD;
 @lightest: #FFF;
+@darker:   #333;
 @facebook: #3b5998;
 
 // modifications
@@ -47,13 +50,11 @@ md-dialog {
 	}
 }
 md-list-item {
-	&:not(.md-no-proxy) {
-		.md-avatar {
-			margin-left: @u*2;
-			
-			+ p {
-				margin-right: @u*2;
-			}
+	> .md-avatar {
+		margin-left: @u*2;
+		
+		+ p {
+			margin-right: @u*2;
 		}
 	}
 	&.no-results {
@@ -136,7 +137,12 @@ md-icon {
 		&:not(:disabled) {
 			&,
 			&:hover {
-				background-color: green;
+				background-color: @success;
+				
+				&,
+				md-icon {
+					color: @lightest;
+				}
 			}
 		}
 	}
@@ -269,4 +275,99 @@ a.passthru {
 	margin-left: auto;
 	margin-right: auto;
 	padding-bottom: @u*2;
+}
+
+
+@keyframes tease-left {
+	0% {
+		transform: translate3d(0, 0, 0);
+	}
+	30% {
+		transform: translate3d(-60px, 0, 0);
+	}
+	60% {
+		transform: translate3d(0, 0, 0);
+	}
+	80% {
+		transform: translate3d(-10px, 0, 0);
+	}
+	100% {
+		transform: translate3d(0, 0, 0);
+	}
+}
+.md-swipe-item {
+	position: relative;
+	overflow: hidden;
+	padding: 0 !important;
+	
+	.md-swipe-item-inner {
+		flex: 1;
+		background-color: @lightest;
+		padding: 0 @u*2;
+		z-index: 1;
+	}
+	md-swipe-actions {
+		position: absolute;
+		top: 0;
+		left: 0;
+		right: 0;
+		bottom: 0;
+		background-color: @darker;
+		transition: background-color 100ms ease-in-out;
+		z-index: 0;
+		
+		&,
+		md-icon {
+			color: @lightest;
+		}
+		> * {
+			flex: 1;
+		}
+		.md-success {
+			background-color: @success;
+		}
+		&.md-primary {
+			background-color: @primary;
+		}
+		&.md-warn {
+			background-color: @warn;
+		}
+	}
+	&.md-swiping-left,
+	&.md-swiping-left-triggered,
+	&.md-teasing-left {
+		.md-swipe-item-inner {
+			border-top-right-radius: @u/2;
+			border-bottom-right-radius: @u/2;
+		}
+		md-swipe-actions {
+			.md-swipe-action-left {
+				display: none;
+			}
+		}
+	}
+	&.md-swiping-right,
+	&.md-swiping-right-triggered,
+	&.md-teasing-right {
+		.md-list-item-inner {
+			border-top-left-radius: @u/2;
+			border-bottom-left-radius: @u/2;
+		}
+		md-swipe-actions {
+			.md-swipe-action-right {
+				display: none;
+			}
+		}
+	}
+	&.md-swipe-item-animating {
+		.md-swipe-item-inner {
+			transition: all 100ms ease-in-out;
+		}
+	}
+	&.md-teasing-left {
+		.md-swipe-item-inner {
+			animation: tease-left 450ms ease-out;
+		}
+	}
+	
 }

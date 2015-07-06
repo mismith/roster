@@ -1,18 +1,23 @@
 window.STRICT_INVITE_CHECK = false;
 
-angular.module('roster-io', ['ui.router', 'ngMaterial', 'firebaseHelper'])
+angular.module('roster-io', ['ui.router', 'ngMaterial', 'firebaseHelper', 'ngTouch'])
 	
 	.config(["$urlRouterProvider", "$stateProvider", "$firebaseHelperProvider", "$sceProvider", function ($urlRouterProvider, $stateProvider, $firebaseHelperProvider, $sceProvider) {
 		// routing
 		$urlRouterProvider.when('',  '/');
-		$urlRouterProvider.when('/',  '/rosters'); // @TEMP
+		$urlRouterProvider.when('/',  '/rosters'); // @TEMP?
 		$stateProvider
 			// pages
 			.state('rosters', {
 				url: '/rosters',
 				templateUrl: 'views/page/rosters.html',
-				controller: ["$rootScope", "$firebaseHelper", function ($rootScope, $firebaseHelper) {
-					$rootScope.rosters = $firebaseHelper.join([$rootScope.$me, 'rosters'], 'data/rosters');
+				resolve: {
+					currentAuth:  ["Auth", function (Auth) {
+						return Auth.$waitForMe();
+					}],
+				},
+				controller: ["$rootScope", "$firebaseHelper", "currentAuth", function ($rootScope, $firebaseHelper, currentAuth) {
+					$rootScope.rosters = $firebaseHelper.join([currentAuth.$me, 'rosters'], 'data/rosters');
 					$rootScope.roster = $rootScope.event = undefined;
 				}],
 			})
@@ -34,7 +39,7 @@ angular.module('roster-io', ['ui.router', 'ngMaterial', 'firebaseHelper'])
 					if ($stateParams.v !== undefined) {
 						Auth.$onAuth(function (authData) {
 							if(authData){
-								RSVP($rootScope.event, {toggleStatus: false}).setParticipantStatus(authData.uid, $stateParams.v).then(function () {
+								RSVP($rootScope.event).setParticipantStatus(authData.uid, $stateParams.v).then(function () {
 									// remove query string so we don't accidentally re-rsvp
 									$location.url($location.path());
 								});
@@ -71,8 +76,41 @@ angular.module('roster-io', ['ui.router', 'ngMaterial', 'firebaseHelper'])
 		$sceProvider.enabled(false);
 	}])
 	
-	.factory('Auth', ["$firebaseHelper", function ($firebaseHelper) {
-		return $firebaseHelper.auth();
+	.factory('Auth', ["$rootScope", "$firebaseHelper", "$q", function ($rootScope, $firebaseHelper, $q) {
+		var Auth = $firebaseHelper.auth();
+		
+		$rootScope.$me = {};
+		Auth.$onAuth(function (authData) {
+			if (authData) {
+				// logging in
+				$rootScope.$me = $firebaseHelper.object('data/users/' + authData.uid); // fetch existing user profile
+				$rootScope.$me.$ref().update(authData); // update it w/ any changes since last login
+			} else {
+				// page loaded or refreshed while not logged in, or logging out
+				$rootScope.$me = {};
+			}
+		});
+		Auth.$waitForMe = function () {
+			var deferred = $q.defer();
+			
+			Auth.$waitForAuth().then(function (authData) {
+				if (authData) {
+					$firebaseHelper.object('data/users/' + authData.uid).$loaded().then(function ($me) {
+						authData.$me = $me;
+						deferred.resolve(authData);
+					});
+				} else {
+					authData.$me = null;
+					deferred.resolve(authData);
+				}
+			});
+			
+			return deferred.promise;
+		};
+		
+		$rootScope.$unauth = Auth.$unauth;
+		
+		return Auth;
 	}])
 	.controller('AppCtrl', ["$rootScope", "$state", "$firebaseHelper", "Auth", function ($rootScope, $state, $firebaseHelper, Auth) {
 		$rootScope.$state          = $state;
@@ -87,18 +125,6 @@ angular.module('roster-io', ['ui.router', 'ngMaterial', 'firebaseHelper'])
 		});
 		
 		// auth
-		$rootScope.$me = {};
-		$rootScope.$unauth = Auth.$unauth;
-		Auth.$onAuth(function (authData) {
-			if (authData) {
-				// logging in
-				$rootScope.$me = $firebaseHelper.object('data/users/' + authData.uid); // fetch existing user profile
-				$rootScope.$me.$ref().update(authData); // update it w/ any changes since last login
-			} else {
-				// page loaded or refreshed while not logged in, or logging out
-				$rootScope.$me = {};
-			}
-		});
 		$rootScope.$authThen = function (callback) {
 			var authData = Auth.$getAuth();
 			if ( ! authData) {
@@ -171,13 +197,14 @@ angular.module('roster-io', ['ui.router', 'ngMaterial', 'firebaseHelper'])
 			});
 		};
 	}])
-	.controller('RosterCtrl', ["$scope", "$firebaseHelper", "$mdDialogForm", "$state", "$mdToast", "$q", "Api", function ($scope, $firebaseHelper, $mdDialogForm, $state, $mdToast, $q, Api) {
+	.controller('RosterCtrl', ["$scope", "$firebaseHelper", "$mdDialogForm", "$state", "$mdToast", "$q", "Api", "RSVP", function ($scope, $firebaseHelper, $mdDialogForm, $state, $mdToast, $q, Api, RSVP) {
 		$scope.timegroups   = $firebaseHelper.array('constants/timegroups'); // constant
 		
 		$scope.invites      = $firebaseHelper.join([$scope.roster, 'invites'], 'data/invites');
 		$scope.participants = $firebaseHelper.join([$scope.roster, 'participants'], 'data/users');
-		$scope.events       = $firebaseHelper.array($scope.roster, 'events');	
+		$scope.events       = $firebaseHelper.array($scope.roster, 'events');
 		$scope.users        = $firebaseHelper.array('data/users');
+		$scope.RSVP         = RSVP;
 		
 		$scope.deleteRoster = function (skipConfirm) {
 			if (skipConfirm || confirm('Are you sure you want to permanently delete this roster?')) {
@@ -315,12 +342,13 @@ angular.module('roster-io', ['ui.router', 'ngMaterial', 'firebaseHelper'])
 		};
 	}])
 		
-	.controller('EventCtrl', ["$scope", "$firebaseHelper", "$mdDialogForm", "$state", "$mdToast", function ($scope, $firebaseHelper, $mdDialogForm, $state, $mdToast) {
+	.controller('EventCtrl', ["$scope", "$firebaseHelper", "$mdDialogForm", "$state", "$mdToast", "RSVP", function ($scope, $firebaseHelper, $mdDialogForm, $state, $mdToast, RSVP) {
 		$scope.statuses     = $firebaseHelper.array('constants/statuses'); // constant
 		$scope.participants = $firebaseHelper.join([$scope.roster, 'participants'], 'data/users');
+		$scope.RSVP         = RSVP;
 		
 		// helpers
-		$scope.urlencode = window.encodeURIComponent;		
+		$scope.urlencode = window.encodeURIComponent;
 		
 		// CRUD
 		$scope.deleteEvent = function (skipConfirm) {
@@ -421,31 +449,34 @@ angular.module('roster-io', ['ui.router', 'ngMaterial', 'firebaseHelper'])
 	.factory('RSVP', ["$firebaseHelper", "$q", "$mdToast", function ($firebaseHelper, $q, $mdToast) {
 		return function ($event, options) {
 			options = angular.extend({
-				toggleStatus: true,
 				showToast: true,
 			}, options);
 			
-			var statuses = $firebaseHelper.object($event, 'rsvps');
+			var $statuses = $firebaseHelper.object('constants/statuses'),// constant
+				$rsvps    = $firebaseHelper.object($event, 'rsvps');
 			
 			return {
-				statuses: statuses,
+				statuses: $statuses,
+				rsvps: $rsvps,
 				getParticipantStatus: function (participantId) {
-					return statuses && statuses[participantId] ? statuses[participantId].status : undefined;
+					return $rsvps && $rsvps[participantId] ? $rsvps[participantId].status : -2;
 				},
 				setParticipantStatus: function (participantId, status) {
 					status = parseInt(status);
 					
 					var deferred = $q.defer();
 					
-					return $firebaseHelper.object(statuses, participantId).$loaded().then(function ($rsvp) {
-						$rsvp.status = (options.toggleStatus && $rsvp.status === status) ? null : status; // clear it if trying to set to same value, or set it otherwise
+					return $firebaseHelper.object($rsvps, participantId).$loaded().then(function ($rsvp) {
+						$rsvp.status = status; // clear it if trying to set to same value, or set it otherwise
 						$rsvp.updated = moment().format();
 						
 						return $rsvp.$save().then(function () {
 							deferred.resolve();
 							
 							if(options.showToast) {
-								$mdToast.showSimple({content: 'RSVP saved.'});
+								$statuses.$loaded().then(function () {
+									$mdToast.showSimple({content: 'Your RSVP saved as: "' + $statuses[$rsvp.status].name + '"'});
+								});
 							}
 						});
 					});
@@ -465,11 +496,8 @@ angular.module('roster-io', ['ui.router', 'ngMaterial', 'firebaseHelper'])
 			restrict: 'E',
 			templateUrl: 'views/directive/rsvp.html',
 			controller: ["$scope", "RSVP", function ($scope, RSVP) {
-				var rsvp  = RSVP($scope.event);
-				this.getParticipantStatus = rsvp.getParticipantStatus;
-				this.setParticipantStatus = rsvp.setParticipantStatus;
-			}],
-			controllerAs: 'RSVP',
+				$scope.RSVP = RSVP;
+			}]
 		};
 	})
 	
@@ -584,6 +612,183 @@ angular.module('roster-io', ['ui.router', 'ngMaterial', 'firebaseHelper'])
 					});
 				
 				return deferred.promise;
+			},
+		};
+	}])
+	
+	
+	.directive('mdSwipeItem', ["$swipe", "$timeout", "$parse", function ($swipe, $timeout, $parse) {
+		return {
+			restrict: 'A',
+			link: function ($scope, $element, $attrs) {
+				$element.addClass('md-swipe-item');
+				
+				var $inner   = angular.element($element.children()[0]), // @HACKY
+					$actions = angular.element($element.children()[1])
+					$left    = angular.element($actions.children()[0]),
+					$right   = angular.element($actions.children()[1]);
+				
+				var width     = {left: 0, right: 0},
+					triggered = {left: false, right: false},
+					moved     = false,
+					startPos  = false,
+					
+					move  = function (to) {
+						if (to === true) {
+							to = 0;
+							triggered.left = triggered.right = false;
+							$element.removeClass('md-swiping-left md-swiping-left-triggered md-swiping-right md-swiping-right-triggered');
+						}
+						var transform = 'translate3d(' + (to || 0)  + 'px, 0, 0)';
+						$inner.css({
+							transform:       transform,
+							webkitTransform: transform,
+						});
+						
+						$element.addClass('md-swipe-item-animating');
+						$timeout(function () {
+							$element.removeClass('md-swipe-item-animating');
+						
+							if ( ! triggered.left)  $element.removeClass('md-swiping-left md-swiping-left-triggered');
+							if ( ! triggered.right) $element.removeClass('md-swiping-right md-swiping-right-triggered');
+						}, 100);
+					},
+					
+					close = function () {
+						return move(true);
+					};
+					
+				var getStyle = function (el, prop) {
+					if (typeof getComputedStyle !== 'undefined') {
+						return getComputedStyle(el, null).getPropertyValue(prop);
+					} else {
+						return el.currentStyle[prop];
+					}
+				};
+				
+				$actions.on('click', function (e) {
+					close();
+				});
+				$swipe.bind($inner, {
+					start: function (pos) {
+						startPos = pos;
+					},
+					move: function (pos) {
+						moved = true;
+						if (startPos && $parse($attrs.mdSwipeItem)($scope)) {
+							var x = pos.x - startPos.x;
+							
+							var transform = 'translate3d(' + x + 'px, 0, 0)';
+							$inner.css({
+								transform:       transform,
+								webkitTransform: transform,
+							});
+							
+							if (x < 0) {
+								// swiping left
+								$element.addClass('md-swiping-left');
+								$element.removeClass('md-swiping-right md-swiping-right-triggered');
+								triggered.right = false;
+								
+								var children   = $right.children();
+									firstChild = children[0];
+								width.right = $actions[0].offsetWidth - firstChild.offsetLeft + parseInt(getStyle(firstChild, 'margin-left'));
+								
+								if (x < -48) {
+									$element.addClass('md-swiping-left-triggered');
+									triggered.left = true;
+								} else {
+									$element.removeClass('md-swiping-left-triggered');
+									triggered.left = false;
+								}
+								
+								angular.forEach($right.children(), function(el) {
+									var $el         = angular.element(el),
+										w           = el.clientWidth,
+										offsetRight = $right[0].offsetWidth - el.offsetLeft - w;
+									
+									var transform = 'scale(' + Math.max(0,  Math.min((Math.abs(x) - offsetRight) / w, 1) ) + ')';
+									$el.css({
+										transform:       transform,
+										webkitTransform: transform,
+									});
+								});
+							} else {
+								// swiping right
+								$element.addClass('md-swiping-right');
+								$element.removeClass('md-swiping-left md-swiping-left-triggered');
+								triggered.left = false;
+								
+								var children  = $left.children(),
+									lastChild = children[children.length - 1];
+								width.left = lastChild.offsetLeft + lastChild.offsetWidth + parseInt(getStyle(lastChild, 'margin-right'));
+								
+								if (x > 48) {
+									$element.addClass('md-swiping-right-triggered');
+									triggered.right = true;
+								} else {
+									$element.removeClass('md-swiping-right-triggered');
+									triggered.right = false;
+								}
+								
+								angular.forEach($left.children(), function(el) {
+									var $el         = angular.element(el),
+										w           = el.clientWidth,
+										offsetRight = $left[0].offsetWidth - el.offsetLeft - w;
+									
+									var transform = 'scale(' + Math.max(0,  Math.min((Math.abs(x) - el.offsetLeft) / w, 1) ) + ')';
+									$el.css({
+										transform:       transform,
+										webkitTransform: transform,
+									});
+								});
+							}
+						}
+					},
+					end: function () {
+						if (moved) {
+							moved = false;
+							
+							// make sure all action buttons are visible
+							var transform = 'scale(1)';
+							angular.forEach([$left.children(), $right.children()], function ($children) {
+								angular.forEach($children, function (el) {
+									angular.element(el).css({
+										transform:       transform,
+										webkitTransform: transform,
+									});
+								});
+							});
+							
+							// fire events
+							if (triggered.left) {
+								move(-width.right);
+							} else if (triggered.right) {
+								$parse($attrs.mdSwipeRightTriggered)($scope);
+							} else {
+								close();
+							}
+							
+						} else {
+							close();
+						}
+					},
+					cancel: function () {
+						moved = false;
+						close();
+					},
+				});
+				
+				$scope.mdSwipeItem = {
+					triggered: triggered,
+					close:     close,
+					teaseLeft: function () {
+						$element.addClass('md-teasing-left');
+						$timeout(function () {
+							$element.removeClass('md-teasing-left');
+						}, 450);
+					},
+				};
 			},
 		};
 	}]);

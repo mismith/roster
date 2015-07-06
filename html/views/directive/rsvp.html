@@ -1,6 +1,6 @@
 <md-fab-speed-dial md-direction="left" class="md-scale">
 	<md-fab-trigger>
-		<md-button class="md-fab" ng-class="{'md-success': RSVP.getParticipantStatus(participant.$id) === 1, 'md-primary': RSVP.getParticipantStatus(participant.$id) === -1, 'md-warn': RSVP.getParticipantStatus(participant.$id) === 0}" aria-label="RSVP" ng-switch="RSVP.getParticipantStatus(participant.$id)" ng-disabled="readonly">
+		<md-button class="md-fab" ng-class="{'md-success': RSVP(event).getParticipantStatus(participant.$id) === 1, 'md-primary': RSVP(event).getParticipantStatus(participant.$id) === -1, 'md-warn': RSVP(event).getParticipantStatus(participant.$id) === 0}" aria-label="RSVP" ng-switch="RSVP(event).getParticipantStatus(participant.$id)" ng-disabled="readonly">
 			<md-icon ng-switch-when="1">check</md-icon>
 			<md-icon ng-switch-when="-1">swap_calls</md-icon>
 			<md-icon ng-switch-when="0">close</md-icon>
@@ -8,13 +8,13 @@
 		</md-button>
 	</md-fab-trigger>
 	<md-fab-actions ng-if=" ! readonly">
-		<md-button ng-click="RSVP.setParticipantStatus(participant.$id, 1)" class="md-fab md-mini md-success">
+		<md-button ng-click="RSVP(event).setParticipantStatus(participant.$id, 1)" class="md-fab md-mini md-success">
 			<md-icon>check</md-icon>
 		</md-button>
-		<md-button ng-click="RSVP.setParticipantStatus(participant.$id, -1)" class="md-fab md-mini md-primary">
+		<md-button ng-click="RSVP(event).setParticipantStatus(participant.$id, -1)" class="md-fab md-mini md-primary">
 			<md-icon>swap_calls</md-icon>
 		</md-button>
-		<md-button ng-click="RSVP.setParticipantStatus(participant.$id, 0)" class="md-fab md-mini md-warn">
+		<md-button ng-click="RSVP(event).setParticipantStatus(participant.$id, 0)" class="md-fab md-mini md-warn">
 			<md-icon>close</md-icon>
 		</md-button>
 	</md-fab-actions>
