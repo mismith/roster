@@ -80,8 +80,8 @@ md-fab-speed-dial {
 	
 	&.md-fab-speed-dial-bottom-right {
 		position: fixed;
-		bottom: 20px;
-		right: 20px;
+		bottom: 16 - 6px;
+		right: 16 - 8px;
 	}
 	md-fab-trigger,
 	md-fab-actions {
@@ -108,6 +108,36 @@ md-fab-speed-dial {
 				label {
 					div {
 						opacity: 1;
+					}
+				}
+			}
+		}
+	}
+	@media (max-width: @sm) {
+		pointer-events: none;
+		
+		md-fab-trigger {
+			pointer-events: auto;
+			
+			> * {
+				pointer-events: none;
+			}
+		}
+		&.md-is-open {
+			pointer-events: auto;
+			
+			md-fab-trigger {
+				> * {
+					pointer-events: auto;
+				}
+			}
+			md-fab-trigger,
+			md-fab-actions {
+				[layout=row] {
+					label {
+						div {
+							opacity: 1;
+						}
 					}
 				}
 			}
