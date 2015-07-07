@@ -1,6 +1,20 @@
-<div ng-controller="RostersCtrl" layout="column" flex>
-	<md-content flex>
-		<section class="content-wrap">
+<div layout="column" flex>
+	<md-content flex layout="column">
+		<section ng-if=" ! $me.$id" class="content-wrap" layout="column" layout-align="center center" layout-fill flex style="padding-bottom: 20%;">
+			<q>Quickly poll your team roster's availability.</q>
+			<p layout-padding>
+				<md-icon class="md-hero">group</md-icon>
+				<md-icon class="md-hero">event</md-icon>
+			</p>
+			<br />
+			<p>To begin, simply</p>
+			<md-button ng-click="$authThen()" class="md-facebook" aria-label="Login with Facebook">
+				<md-icon md-font-set="fa" class="fa-facebook"></md-icon>
+				Login with Facebook
+			</md-button>
+		</section>
+		
+		<section ng-if="$me.$id" class="content-wrap">
 			<md-subheader class="md-no-sticky">Rosters</md-subheader>
 			<md-card>
 				<md-card-content style="padding: 0;">

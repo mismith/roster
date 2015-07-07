@@ -1,7 +1,4 @@
-<div ng-controller="InviteCtrl" layout="column" flex>
-	<div ng-if=" ! notFound && ! invite.$$loaded" flex layout="column" layout-align="center center">
-		<md-progress-circular md-mode="indeterminate"></md-progress-circular>
-	</div>
+<div layout="column" flex>
 	<md-content ng-if=" ! notFound && invite.$$loaded" class="content-wrap">
 		<md-subheader class="md-no-sticky">Invitation</md-subheader>
 		<md-card>
@@ -22,7 +19,12 @@
 			</div>
 		</md-card>
 	</md-content>
+	
 	<md-content ng-if="notFound" layout="column" layout-align="center center" flex>
-		<md-subheader class="md-no-sticky">Invitation not found.</md-subheader>
+		<div layout="column" layout-align="center center">
+			<md-icon class="md-hero">do_not_disturb</md-icon>
+			<md-subheader class="md-no-sticky">Invitation not found.</md-subheader>
+		</div>
 	</md-content>
+	<loading ng-if=" ! notFound && ! invite.$$loaded"></loading>
 </div>

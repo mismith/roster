@@ -30,18 +30,18 @@
 					<a ng-if="roster && event" ui-sref="event({roster: roster.$id, event: event.$id})" ng-bind="event.name"></a>
 				</h1>
 				<nav>
-					<div ng-if=" ! $me.uid">
-						<md-button ng-click="$authThen()" class="md-facebook" aria-label="Login with Facebook">
+					<div ng-if=" ! $me.$id">
+						<md-button ng-click="$authThen()" class="md-facebook md-raised" aria-label="Login with Facebook">
 							<md-icon md-font-set="fa" class="fa-facebook"></md-icon>
 							Login
 						</md-button>
 					</div>
-					<div ng-if="$me.uid">
+					<div ng-if="$me.$id">
 						<md-menu>
 							<div ng-click="$mdOpenMenu()" layout="row" layout-align="center center" aria-label="Open user menu">
 								<small hide-sm ng-bind="$me.name"></small>
 								&nbsp;
-								<md-button class="md-icon-button" aria-label="Open user menu">
+								<md-button class="md-icon-button" aria-label="Open user menu" style="margin-right: 0;">
 									<img ng-src="{{ avatar($me.facebook.id) }}" width="48" height="48" class="md-avatar" />
 								</md-button>
 							</div>
@@ -56,6 +56,7 @@
 			</div>
 		</md-toolbar>
 		<main layout="column" flex ui-view autoscroll="false" id="main"></main>
+		<div id="fb-root"></div>
 	</div>
 
 	<script src="//ajax.googleapis.com/ajax/libs/angularjs/1.4.1/angular.min.js"></script>
