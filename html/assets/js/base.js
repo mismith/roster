@@ -115,12 +115,13 @@ angular.module('roster-io', ['ui.router', 'ngMaterial', 'firebaseHelper', 'ngTou
 	
 	
 	
-	.controller('RostersCtrl', ["$scope", "$firebaseHelper", "Auth", "$mdDialogForm", "$mdToast", function ($scope, $firebaseHelper, Auth, $mdDialogForm, $mdToast) {
+	.controller('RostersCtrl', ["$scope", "$rootScope", "$firebaseHelper", "Auth", "$mdDialogForm", "$mdToast", function ($scope, $rootScope, $firebaseHelper, Auth, $mdDialogForm, $mdToast) {
 		Auth.$onAuth(function (authData) {
 			if (authData) {
 				$scope.rosters = $firebaseHelper.join([$scope.$me, 'rosters'], 'data/rosters');
 			}
 		});
+		$rootScope.roster = $rootScope.event = null;
 /*
 		$scope.threads = [];
 		$scope.loadThreads = function () {
@@ -172,10 +173,11 @@ angular.module('roster-io', ['ui.router', 'ngMaterial', 'firebaseHelper', 'ngTou
 		};
 	}])
 	
-	.controller('RosterCtrl', ["$scope", "$firebaseHelper", "$mdDialogForm", "$state", "$mdToast", "$q", "Api", "RSVP", function ($scope, $firebaseHelper, $mdDialogForm, $state, $mdToast, $q, Api, RSVP) {
+	.controller('RosterCtrl', ["$scope", "$rootScope", "$firebaseHelper", "$mdDialogForm", "$state", "$mdToast", "$q", "Api", "RSVP", function ($scope, $rootScope, $firebaseHelper, $mdDialogForm, $state, $mdToast, $q, Api, RSVP) {
 		$scope.timegroups   = $firebaseHelper.array('constants/timegroups'); // constant
 		
-		$scope.roster       = $firebaseHelper.object('data/rosters', $state.params.roster);
+		$rootScope.roster   = $firebaseHelper.object('data/rosters', $state.params.roster);
+		$rootScope.event    = null;
 		$scope.invites      = $firebaseHelper.join([$scope.roster, 'invites'], 'data/invites');
 		$scope.participants = $firebaseHelper.join([$scope.roster, 'participants'], 'data/users');
 		$scope.events       = $firebaseHelper.array($scope.roster, 'events');
@@ -318,9 +320,9 @@ angular.module('roster-io', ['ui.router', 'ngMaterial', 'firebaseHelper', 'ngTou
 		};
 	}])
 		
-	.controller('EventCtrl', ["$scope", "$firebaseHelper", "$mdDialogForm", "$state", "$mdToast", "Auth", "RSVP", "$location", function ($scope, $firebaseHelper, $mdDialogForm, $state, $mdToast, Auth, RSVP, $location) {
-		$scope.roster = $firebaseHelper.object('data/rosters', $state.params.roster);
-		$scope.event  = $firebaseHelper.object($scope.roster, 'events', $state.params.event);
+	.controller('EventCtrl', ["$scope", "$rootScope", "$firebaseHelper", "$mdDialogForm", "$state", "$mdToast", "Auth", "RSVP", "$location", function ($scope, $rootScope, $firebaseHelper, $mdDialogForm, $state, $mdToast, Auth, RSVP, $location) {
+		$rootScope.roster = $firebaseHelper.object('data/rosters', $state.params.roster);
+		$rootScope.event  = $firebaseHelper.object($scope.roster, 'events', $state.params.event);
 		
 		if ($state.params.v !== undefined) {
 			Auth.$onAuth(function (authData) {
@@ -652,6 +654,7 @@ angular.module('roster-io', ['ui.router', 'ngMaterial', 'firebaseHelper', 'ngTou
 					triggered = {left: false, right: false},
 					moved     = false,
 					startPos  = false,
+					touchSupported = 'ontouchend' in document,
 					
 					move  = function (to) {
 						if (to === true) {
@@ -695,7 +698,7 @@ angular.module('roster-io', ['ui.router', 'ngMaterial', 'firebaseHelper', 'ngTou
 					},
 					move: function (pos) {
 						moved = true;
-						if (startPos && $parse($attrs.mdSwipeItem)($scope)) {
+						if (startPos && touchSupported && $parse($attrs.mdSwipeItem)($scope)) {
 							var x = pos.x - startPos.x;
 							
 							var transform = 'translate3d(' + x + 'px, 0, 0)';

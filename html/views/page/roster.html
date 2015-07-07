@@ -11,7 +11,7 @@
 					<md-card>
 						<md-list>
 							<md-list-item ng-repeat="eventObj in timegroup.$events = (events | filterByTimegroup:timegroup.$id | orderBy:timegroup.orderBy)" ng-init="event = $firebaseHelper.object(events, eventObj.$id)" ng-class="{previous: $state.$previous.params.roster === roster.$id && $state.$previous.params.event === event.$id}" md-swipe-item="canEdit($me.$id)" md-swipe-right-triggered="RSVP(event).setParticipantStatus($me.$id, 1); mdSwipeItem.close();">
-								<div ng-click="$state.go('event', {roster: roster.$id, event: event.$id})" class="md-list-item-inner md-swipe-item-inner" style="padding-right: 8px;">
+								<div md-ink-ripple ng-click="$state.go('event', {roster: roster.$id, event: event.$id})" class="md-list-item-inner md-swipe-item-inner" style="padding-right: 8px;">
 									<figure class="md-avatar calendar-day md-primary">
 										<div class="month" ng-bind="event.date | date:'MMM'"></div>
 										<div class="day" ng-bind="event.date | date:'d'"></div>
@@ -23,8 +23,8 @@
 									
 									<p>{{ event.name }}</p>
 									
-									<rsvp hide-sm event="event" participant="$me" readonly=" ! $me.$id" ng-click="$event.stopPropagation()"></rsvp>
-									<md-button hide-gt-sm ng-click="mdSwipeItem.triggered.left || mdSwipeItem.triggered.right ? mdSwipeItem.close() : (canEdit($me.$id) ? mdSwipeItem.teaseLeft() : null); $event.stopPropagation()"  class="md-fab" ng-class="{'md-success': RSVP(event).getParticipantStatus($me.$id) === 1, 'md-primary': RSVP(event).getParticipantStatus($me.$id) === -1, 'md-warn': RSVP(event).getParticipantStatus($me.$id) === 0}" aria-label="RSVP" ng-switch="RSVP(event).getParticipantStatus($me.$id)" ng-disabled=" ! canEdit($me.$id) && RSVP(event).getParticipantStatus($me.$id) === -2">
+									<rsvp hide-sm event="event" participant="$me" readonly=" ! $me.$id"></rsvp>
+									<md-button hide-gt-sm ng-click="mdSwipeItem.triggered.left || mdSwipeItem.triggered.right ? mdSwipeItem.close() : (canEdit($me.$id) ? mdSwipeItem.teaseLeft() : null); $event.stopPropagation();"  class="md-fab" ng-class="{'md-success': RSVP(event).getParticipantStatus($me.$id) === 1, 'md-primary': RSVP(event).getParticipantStatus($me.$id) === -1, 'md-warn': RSVP(event).getParticipantStatus($me.$id) === 0}" aria-label="RSVP" ng-switch="RSVP(event).getParticipantStatus($me.$id)" ng-disabled=" ! canEdit($me.$id) && RSVP(event).getParticipantStatus($me.$id) === -2">
 										<md-icon ng-switch-when="1">check</md-icon>
 										<md-icon ng-switch-when="-1">swap_calls</md-icon>
 										<md-icon ng-switch-when="0">close</md-icon>
