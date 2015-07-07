@@ -671,9 +671,11 @@ angular.module('roster-io', ['ui.router', 'ngMaterial', 'firebaseHelper', 'ngTou
 						$element.addClass('md-swipe-item-animating');
 						$timeout(function () {
 							$element.removeClass('md-swipe-item-animating');
-						
-							if ( ! triggered.left)  $element.removeClass('md-swiping-left md-swiping-left-triggered');
-							if ( ! triggered.right) $element.removeClass('md-swiping-right md-swiping-right-triggered');
+							
+							if (triggered.leftMost)  $element.removeClass('md-swiping-left-most-triggered');
+							if (triggered.rightMost) $element.removeClass('md-swiping-right-most-triggered');
+							if ( ! triggered.left)   $element.removeClass('md-swiping-left md-swiping-left-triggered');
+							if ( ! triggered.right)  $element.removeClass('md-swiping-right md-swiping-right-triggered');
 						}, 100);
 					},
 					
@@ -736,6 +738,14 @@ angular.module('roster-io', ['ui.router', 'ngMaterial', 'firebaseHelper', 'ngTou
 										webkitTransform: transform,
 									});
 								});
+								
+								if (x < -$actions[0].offsetWidth * 0.66) {
+									$element.addClass('md-swiping-left-most-triggered');
+									triggered.leftMost = true;
+								} else {
+									$element.removeClass('md-swiping-left-most-triggered');
+									triggered.leftMost = false;
+								}
 							} else {
 								// swiping right
 								$element.addClass('md-swiping-right');
@@ -765,6 +775,14 @@ angular.module('roster-io', ['ui.router', 'ngMaterial', 'firebaseHelper', 'ngTou
 										webkitTransform: transform,
 									});
 								});
+								
+								if (x > $actions[0].offsetWidth * 0.66) {
+									$element.addClass('md-swiping-right-most-triggered');
+									triggered.rightMost = true;
+								} else {
+									$element.removeClass('md-swiping-right-most-triggered');
+									triggered.rightMost = false;
+								}
 							}
 						}
 					},
@@ -784,9 +802,13 @@ angular.module('roster-io', ['ui.router', 'ngMaterial', 'firebaseHelper', 'ngTou
 							});
 							
 							// fire events
-							if (triggered.left) {
+							if (triggered.leftMost) {
+								$parse($attrs.mdSwipeLeftMostTriggered)($scope);
+							} else if (triggered.left) {
 								$parse($attrs.mdSwipeLeftTriggered)($scope);
 								move(-width.right);
+							} else if (triggered.rightMost) {
+								$parse($attrs.mdSwipeRightMostTriggered)($scope);
 							} else if (triggered.right) {
 								$parse($attrs.mdSwipeRightTriggered)($scope);
 							} else {

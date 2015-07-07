@@ -38,7 +38,7 @@
 			</md-subheader>
 			<md-card>
 				<md-list>
-					<md-list-item ng-repeat="participant in status.$participants = (participants | filterByRsvp:event.rsvps:status.$id | orderBy:'name')" md-swipe-item="canEdit(participant.$id, roster.admins)" md-swipe-right-triggered="RSVP(event).setParticipantStatus(participant.$id, 1); mdSwipeItem.close();">
+					<md-list-item ng-repeat="participant in status.$participants = (participants | filterByRsvp:event.rsvps:status.$id | orderBy:'name')" md-swipe-item="canEdit(participant.$id, roster.admins)" md-swipe-right-triggered="RSVP(event).setParticipantStatus(participant.$id, 1); mdSwipeItem.close();" md-swipe-right-most-triggered="RSVP(event).setParticipantStatus(participant.$id, -1); mdSwipeItem.close();" md-swipe-left-most-triggered="RSVP(event).setParticipantStatus(participant.$id, 0); mdSwipeItem.close();">
 						<div md-ink-ripple class="md-list-item-inner md-swipe-item-inner" style="padding-right: 8px;">
 							<img ng-src="{{ avatar(participant.facebook.id) }}" width="40" height="40" class="md-avatar" alt="{{ participant.name }}" />
 							<p>{{ participant.name }}</p>
@@ -52,9 +52,10 @@
 							</md-button>
 						</div>
 						<md-swipe-actions hide-gt-sm layout="row">
-							<div class="md-swipe-action-left md-success" layout="row" layout-align="start center">
+							<div class="md-swipe-action-left" layout="row" layout-align="start center">
 								<md-button class="md-icon-button">
 									<md-icon>check</md-icon>
+									<md-icon class="ng-hide">swap_calls</md-icon>
 								</md-button>
 							</div>
 							<div class="md-swipe-action-right" layout="row" layout-align="end center">

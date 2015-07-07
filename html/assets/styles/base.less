@@ -305,6 +305,8 @@ a.passthru {
 }
 .md-swipe-item {
 	position: relative;
+	background-color: @darker;
+	transition: background-color 100ms ease-in-out;
 	overflow: hidden;
 	padding: 0 !important;
 	
@@ -320,8 +322,6 @@ a.passthru {
 		left: 0;
 		right: 0;
 		bottom: 0;
-		background-color: @darker;
-		transition: background-color 100ms ease-in-out;
 		z-index: 0;
 		
 		&,
@@ -330,15 +330,6 @@ a.passthru {
 		}
 		> * {
 			flex: 1;
-		}
-		.md-success {
-			background-color: @success;
-		}
-		&.md-primary {
-			background-color: @primary;
-		}
-		&.md-warn {
-			background-color: @warn;
 		}
 	}
 	&.md-swiping-left,
@@ -378,4 +369,38 @@ a.passthru {
 		}
 	}
 	
+	// custom
+	&.md-swiping-right-triggered {
+		background-color: @success;
+	}
+	&.md-swiping-right-most-triggered {
+		background-color: @primary;
+		
+		md-icon {
+			&:not(.ng-hide) {
+				display: none;
+			}
+			&.ng-hide {
+				display: inline-block !important;
+			}
+			
+		}
+	}
+	&.md-swiping-left-triggered {
+		.md-success,
+		.md-primary {
+			transition: opacity 100ms ease-in-out;
+		}
+	}
+	&.md-swiping-left-most-triggered {
+		background-color: @warn;
+		
+		.md-success,
+		.md-primary {
+			opacity: 0;
+		}
+		.md-warn {
+			box-shadow: none;
+		}
+	}
 }
