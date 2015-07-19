@@ -293,18 +293,26 @@ angular.module('roster-io', ['ui.router', 'ngMaterial', 'firebaseHelper', 'ngTou
 					$firebaseHelper.array('data/invites').$add($scope.invite).then(function (inviteSnap) {
 						var inviteId = inviteSnap.key();
 						
-						Api.post('email/invite', undefined, {params: {invite: inviteId}}).then(function () {
-							$firebaseHelper.object($scope.roster, 'invites').$loaded().then(function (invites) {
-								invites[inviteId] = inviteId;
-								invites.$save().then(function () {
-									deferred.resolve();
-									
-									$mdToast.showSimple({
-										content: 'Invitation email sent to "' + (scope.invite.name ? scope.invite.name + ' ' : '') + '<' + scope.invite.email + '>".',
+						Api.post('email/invite', undefined, {params: {invite: inviteId}})
+							.then(function () {
+								$firebaseHelper.object($scope.roster, 'invites').$loaded().then(function (invites) {
+									invites[inviteId] = inviteId;
+									invites.$save().then(function () {
+										deferred.resolve();
+										
+										$mdToast.showSimple({
+											content: 'Invitation email sent to "' + (scope.invite.name ? scope.invite.name + ' ' : '') + '<' + scope.invite.email + '>".',
+										});
 									});
 								});
+							})
+							.catch(function (err) {
+								deferred.reject(err);
+								
+								$mdToast.showSimple({
+									content: 'Error ' + err.code + ': ' + err.message + '.',
+								});
 							});
-						});
 					});
 					
 					return deferred.promise;
@@ -624,8 +632,8 @@ angular.module('roster-io', ['ui.router', 'ngMaterial', 'firebaseHelper', 'ngTou
 							deferred.reject(res);
 						}
 					})
-					.error(function (res) {
-						deferred.reject(res);
+					.error(function (msg, code) {
+						deferred.reject({code: code, message: msg});
 					});
 				
 				return deferred.promise;
