@@ -104,6 +104,11 @@ angular.module('roster-io', ['ui.router', 'ngMaterial', 'firebaseHelper', 'ngTou
 		
 		// helpers
 		$rootScope.canEdit = function (uid, adminUids) {
+			// returns false if not logged in
+			// returns true if any of the following:
+			// - adminUids specified and currently logged in user is in it
+			// - uid is specified and is the currently logged in user
+			// - nothing is specified but the currently logged in user is an admin
 			if (angular.isArray(adminUids) && adminUids.indexOf($rootScope.$me.$id) >= 0) return true;
 			if (angular.isObject(adminUids) && adminUids[$rootScope.$me.$id]) return true;
 			return uid ? uid === $rootScope.$me.$id : $rootScope.$me.admin;
