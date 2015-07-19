@@ -417,20 +417,24 @@ a.passthru {
 		}
 	}
 	&.md-swiping-left-triggered {
-		.md-success,
-		.md-primary {
-			transition: opacity 100ms ease-in-out;
+		md-swipe-actions {
+			.md-success,
+			.md-primary {
+				transition: opacity 100ms ease-in-out;
+			}
 		}
 	}
 	&.md-swiping-left-most-triggered {
 		background-color: @warn;
 		
-		.md-success,
-		.md-primary {
-			opacity: 0;
-		}
-		.md-warn {
-			box-shadow: none;
+		md-swipe-actions {
+			.md-success,
+			.md-primary {
+				opacity: 0;
+			}
+			.md-warn {
+				box-shadow: none;
+			}
 		}
 	}
 }
