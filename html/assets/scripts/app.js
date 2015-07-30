@@ -112,15 +112,15 @@ angular.module('roster-io', ['ui.router', 'ngMaterial', 'firebaseHelper', 'ngTou
 		$rootScope.canEdit = function () {
 			// returns false if not logged in
 			// returns true if any of the following:
-			// - object(s) specified and currently logged in user id is in it(them)
+			// - object/array(s) specified and currently logged in user id is in it(them)
 			// - string(s) specified and it(they) match the currently logged in user id
 			// - nothing is specified but the currently logged in user is an admin
 			var args = Array.prototype.slice.call(arguments);
 			return !! args.filter(function (test) {
 				if (angular.isArray(test) && test.indexOf($rootScope.$me.$id) >= 0) return true;
 				else if (angular.isObject(test) && test[$rootScope.$me.$id]) return true;
-				else return test ? test === $rootScope.$me.$id : $rootScope.$me.admin;
-			}).length;
+				else return test ? test === $rootScope.$me.$id : false;
+			}).length || $rootScope.$me.admin;
 		};
 		$rootScope.avatar = function (userId) {
 			return '//graph.facebook.com/' + (userId ? userId + '/' : '') + 'picture?type=square';
@@ -205,6 +205,7 @@ angular.module('roster-io', ['ui.router', 'ngMaterial', 'firebaseHelper', 'ngTou
 		
 		$rootScope.roster   = $firebaseHelper.object('data/rosters', $state.params.roster);
 		$rootScope.event    = null;
+		
 		$scope.invites      = $firebaseHelper.join([$scope.roster, 'invites'], 'data/invites');
 		$scope.participants = $firebaseHelper.join([$scope.roster, 'participants'], 'data/users');
 		$scope.events       = $firebaseHelper.array($scope.roster, 'events');
@@ -256,25 +257,6 @@ angular.module('roster-io', ['ui.router', 'ngMaterial', 'firebaseHelper', 'ngTou
 			});
 		};
 		
-/*
-		$scope.addUser = function () {
-			$scope.users = $firebaseHelper.array('data/users');
-			
-			$mdDialogForm.show({
-				scope:         $scope,
-				title:         'Add user',
-				contentUrl:    'views/template/user.html',
-				ok:            'Add',
-				onSubmit: function (scope) {
-					return $scope.participants.$ref().child(scope.selectedUser.$id).set(scope.selectedUser.$id, function () {
-						$mdToast.showSimple({
-							content: '"' + $scope.user.name + '" added.',
-						});
-					});
-				},
-			});
-		};
-*/
 		$scope.removeUser = function (skipConfirm, participant, participants) {
 			participants = participants || $scope.participants;
 			
@@ -289,7 +271,7 @@ angular.module('roster-io', ['ui.router', 'ngMaterial', 'firebaseHelper', 'ngTou
 		};
 		
 		
-		$scope.inviteUser = function (name) {
+		$scope.inviteUser = function () {
 			$scope.invite = {
 				by: $scope.$me.$id,
 				to: {
@@ -297,12 +279,9 @@ angular.module('roster-io', ['ui.router', 'ngMaterial', 'firebaseHelper', 'ngTou
 					params: $state.params,
 				},
 			};
-			if (name){
-				// Title Case in case of illiterate users
-				$scope.invite.name = name.replace(/\b\w+/g, function (text) {
-					return text.charAt(0).toUpperCase() + text.substr(1);
-				});
-			}
+			$scope.loadExistingUser = function (user) {
+				$scope.invite.email = user.email;
+			};
 			
 			$mdDialogForm.show({
 				scope:         $scope,
@@ -311,6 +290,19 @@ angular.module('roster-io', ['ui.router', 'ngMaterial', 'firebaseHelper', 'ngTou
 				ok:            'Invite',
 				onSubmit: function (scope) {
 					var deferred = $q.defer();
+					
+					// @TODO: add existing user, if found, and skip invitation process
+					angular.forEach($scope.users, function (user) {
+						if (user.email === $scope.invite.email) {
+							console.log(user);
+						}
+					});
+					return;
+					
+					// Title Case in case of illiterate users
+					$scope.invite.name = $scope.invite.name.replace(/\b\w+/g, function (text) {
+						return text.charAt(0).toUpperCase() + text.substr(1);
+					});
 					
 					$firebaseHelper.array('data/invites').$add($scope.invite).then(function (inviteSnap) {
 						var inviteId = inviteSnap.key();
@@ -425,6 +417,7 @@ angular.module('roster-io', ['ui.router', 'ngMaterial', 'firebaseHelper', 'ngTou
 	
 	.controller('InviteCtrl', function ($rootScope, $scope, $firebaseHelper, $state, $q, Auth, $mdToast, $mdDialog) {
 		$rootScope.roster = $rootScope.event = null;
+		
 		$scope.invite = $firebaseHelper.object('data/invites', $state.params.invite);
 		$scope.invite.$loaded().then(function (invite) {
 			if (invite.$value !== null) {
@@ -505,6 +498,7 @@ angular.module('roster-io', ['ui.router', 'ngMaterial', 'firebaseHelper', 'ngTou
 	
 	.controller('UserCtrl', function ($rootScope, $scope, $firebaseHelper, $state, $mdToast, $mdDialogForm) {
 		$rootScope.roster = $rootScope.event = null;
+		
 		$scope.user    = $firebaseHelper.object('data/users', $state.params.user);
 		$scope.rosters = $firebaseHelper.join([$scope.user, 'rosters'], 'data/rosters');
 		
