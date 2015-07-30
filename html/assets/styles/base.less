@@ -49,6 +49,16 @@ md-dialog {
 		}
 	}
 }
+md-input-container {
+	&.required {
+		label {
+			&:after {
+				content: " *";
+				opacity: .5;
+			}
+		}
+	}
+}
 md-list-item {
 	> .md-avatar {
 		margin-left: @u*2;
