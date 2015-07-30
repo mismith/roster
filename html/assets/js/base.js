@@ -332,7 +332,7 @@ angular.module('roster-io', ['ui.router', 'ngMaterial', 'firebaseHelper', 'ngTou
 				var name = participant.name || participant.email;
 				invites.$remove(participant).then(function () {
 					$mdToast.showSimple({
-						content: '"' + name + '" rescinded.',
+						content: 'Invite for "' + name + '" rescinded.',
 					});
 				});
 			}
@@ -390,6 +390,19 @@ angular.module('roster-io', ['ui.router', 'ngMaterial', 'firebaseHelper', 'ngTou
 						});
 					});
 				},
+			});
+		};
+		$scope.cloneEvent = function () {
+			var event = {};
+			angular.forEach($scope.event, function (v, k) {
+				event[k] = v;
+			});
+			return $firebaseHelper.array($scope.roster, 'events').$add(event).then(function (eventSnap) {
+				$state.go('event', {roster: $scope.roster.$id, event: eventSnap.key()});
+				
+				$mdToast.showSimple({
+					content: 'Event cloned.',
+				});
 			});
 		};
 	}])
