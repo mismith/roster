@@ -129,7 +129,7 @@ angular.module('roster-io', ['ui.router', 'ngMaterial', 'firebaseHelper', 'ngTou
 	
 	
 	
-	.controller('RostersCtrl', ["$scope", "$rootScope", "$firebaseHelper", "Auth", "$mdDialogForm", "$mdToast", function ($scope, $rootScope, $firebaseHelper, Auth, $mdDialogForm, $mdToast) {
+	.controller('RostersCtrl', ["$scope", "$rootScope", "$firebaseHelper", "$q", "Auth", "$mdDialogForm", "$mdToast", function ($scope, $rootScope, $firebaseHelper, $q, Auth, $mdDialogForm, $mdToast) {
 		Auth.$onAuth(function (authData) {
 			if (authData) {
 				$scope.rosters = $firebaseHelper.join([$scope.$me, 'rosters'], 'data/rosters');
@@ -180,12 +180,15 @@ angular.module('roster-io', ['ui.router', 'ngMaterial', 'firebaseHelper', 'ngTou
 				contentUrl:    'views/template/roster.html',
 				ok:            'Create',
 				onSubmit: function (scope) {
-					scope.roster.admins[$scope.$me.uid]       = $scope.$me.uid;
-					scope.roster.participants[$scope.$me.uid] = $scope.$me.uid;
-					
-					return $scope.rosters.$add(scope.roster).then(function () {
-						$mdToast.showSimple({
-							content: 'Roster created.',
+					return $scope.rosters.$add(scope.roster).then(function (rosterRef) {
+						$q.all([
+							$firebaseHelper.join([rosterRef, 'admins'], 'data/users').$link($scope.$me.$id),
+							$firebaseHelper.join([rosterRef, 'participants'], 'data/users').$link($scope.$me.$id),
+							$firebaseHelper.join([$scope.$me, 'rosters'], 'data/rosters').$link(rosterRef.key()),
+						]).then(function () {
+							$mdToast.showSimple({
+								content: 'Roster created.',
+							});
 						});
 					});
 				},
@@ -214,6 +217,9 @@ angular.module('roster-io', ['ui.router', 'ngMaterial', 'firebaseHelper', 'ngTou
 		
 		$scope.deleteRoster = function (skipConfirm) {
 			if (skipConfirm || confirm('Are you sure you want to permanently delete this roster?')) {
+				// @TODO: remove roster from all participants and admins rosters
+				var key = $scope.roster.$id;
+				
 				$scope.roster.$remove().then(function () {
 					$state.go('rosters');
 					
