@@ -17,7 +17,7 @@
 				<h2 layout-margin ng-show="event.location">
 					<a ng-href="{{ event.locationUrl }}" target="_blank" class="passthru">
 						<span ng-bind="event.location" style="white-space: pre-wrap;"></span>
-						<md-icon ng-if="event.locationUrl" md-font-set="fa" class="fa-map-marker" style="font-size: 24px; line-height: 16px;"></md-icon>
+						<md-icon ng-if="event.locationUrl" style="line-height: 16px;">place</md-icon>
 					</a>
 				</h2>
 				<md-card ng-show="event.locationPin" layout-padding>
@@ -44,7 +44,7 @@
 			<md-card>
 				<md-list>
 					<md-list-item ng-repeat="participant in status.$participants = (participants | filterByRsvp:event.rsvps:status.$id | orderBy:'name')" md-swipe-item="canEdit(participant.$id, roster.admins)" md-swipe-right-triggered="RSVP(event).setParticipantStatus(participant.$id, 1); mdSwipeItem.close();" md-swipe-right-most-triggered="RSVP(event).setParticipantStatus(participant.$id, -1); mdSwipeItem.close();" md-swipe-left-most-triggered="RSVP(event).setParticipantStatus(participant.$id, 0); mdSwipeItem.close();">
-						<div md-ink-ripple class="md-list-item-inner md-swipe-item-inner" style="padding-right: 8px;">
+						<div class="md-list-item-inner md-swipe-item-inner" style="padding-right: 8px;">
 							<img ng-src="{{ avatar(participant.facebook.id) }}" width="40" height="40" class="md-avatar" alt="{{ participant.name }}" />
 							<p>{{ participant.name }}</p>
 							

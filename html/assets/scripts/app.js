@@ -182,6 +182,13 @@ angular.module('roster-io', ['ui.router', 'ngMaterial', 'firebaseHelper', 'ngTou
 				},
 			});
 		};
+		
+		
+		$scope.initials = function (str) {
+			return (str || '').split(' ').map(function (word) {
+				return word ? word[0].toUpperCase() : '';
+			}).join('');
+		};
 	})
 	
 	.controller('RosterCtrl', function ($scope, $rootScope, $firebaseHelper, $mdDialogForm, $state, $mdToast, $q, Api, RSVP) {
