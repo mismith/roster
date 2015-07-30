@@ -32,6 +32,11 @@ angular.module('roster-io', ['ui.router', 'ngMaterial', 'firebaseHelper', 'ngTou
 				url: '/invite/:invite',
 				templateUrl: 'views/page/invite.html',
 				controller: 'InviteCtrl',
+			})
+			.state('user', {
+				url: '/user/:user',
+				templateUrl: 'views/page/user.html',
+				controller: 'UserCtrl',
 			});
 		
 		// data
@@ -49,6 +54,7 @@ angular.module('roster-io', ['ui.router', 'ngMaterial', 'firebaseHelper', 'ngTou
 			if (authData) {
 				// logging in
 				$rootScope.$me = $firebaseHelper.object('data/users/' + authData.uid); // fetch existing user profile
+				authData.lastActive = moment().format();
 				$rootScope.$me.$ref().update(authData); // update it w/ any changes since last login
 			} else {
 				// page loaded or refreshed while not logged in, or logging out
@@ -414,7 +420,8 @@ angular.module('roster-io', ['ui.router', 'ngMaterial', 'firebaseHelper', 'ngTou
 		};
 	}])
 	
-	.controller('InviteCtrl', ["$scope", "$firebaseHelper", "$state", "$q", "Auth", "$mdToast", "$mdDialog", function ($scope, $firebaseHelper, $state, $q, Auth, $mdToast, $mdDialog) {
+	.controller('InviteCtrl', ["$rootScope", "$scope", "$firebaseHelper", "$state", "$q", "Auth", "$mdToast", "$mdDialog", function ($rootScope, $scope, $firebaseHelper, $state, $q, Auth, $mdToast, $mdDialog) {
+		$rootScope.roster = $rootScope.event = null;
 		$scope.invite = $firebaseHelper.object('data/invites', $state.params.invite);
 		$scope.invite.$loaded().then(function (invite) {
 			if (invite.$value !== null) {
@@ -493,6 +500,28 @@ angular.module('roster-io', ['ui.router', 'ngMaterial', 'firebaseHelper', 'ngTou
 		});
 	}])
 	
+	.controller('UserCtrl', ["$rootScope", "$scope", "$firebaseHelper", "$state", "$mdToast", "$mdDialogForm", function ($rootScope, $scope, $firebaseHelper, $state, $mdToast, $mdDialogForm) {
+		$rootScope.roster = $rootScope.event = null;
+		$scope.user    = $firebaseHelper.object('data/users', $state.params.user);
+		$scope.rosters = $firebaseHelper.join([$scope.user, 'rosters'], 'data/rosters');
+		
+		
+		$scope.editUser = function () {
+			$mdDialogForm.show({
+				scope:         $scope,
+				title:         'Edit user',
+				contentUrl:    'views/template/user.html',
+				ok:            'Save',
+				onSubmit: function () {
+					return $scope.user.$save().then(function () {
+						$mdToast.showSimple({
+							content: 'User saved.',
+						});
+					});
+				},
+			});
+		};
+	}])
 	
 	
 	.factory('RSVP', ["$firebaseHelper", "$q", "$mdToast", function ($firebaseHelper, $q, $mdToast) {

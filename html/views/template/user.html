@@ -1,8 +1,8 @@
-<md-autocomplete md-selected-item="selectedUser" md-search-text="searchText" md-items="user in users | filter:{name: searchText}" md-item-text="user.name" placeholder="User search">
-	<md-item-template>
-		<span md-highlight-text="searchText">{{ user.name }}</span>
-	</md-item-template>
-	<md-not-found>
-		<span ng-click="inviteUser(searchText)">Invite user?</span><!-- @TODO -->
-	</md-not-found>
-</md-autocomplete>
+<md-input-container class="required">
+	<label>Name</label>
+	<input type="text" ng-model="user.name" required />
+</md-input-container>
+<md-input-container class="required">
+	<label>Email</label>
+	<input type="email" ng-model="user.email" required />
+</md-input-container>

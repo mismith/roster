@@ -1,0 +1,66 @@
+<div layout="column" flex>
+	<md-content>
+		<header layout="column" layout-gt-md="row" class="content-wrap">
+			<section flex layout-padding>
+				<div layout="row" layout-align="start center">
+					<figure class="md-avatar" style="margin-right: 16px;">
+						<img ng-src="{{ avatar(user.facebook.id) }}" width="96" height="96" />
+					</figure>
+					<div layout-padding>
+						<div>
+							<h1 ng-bind="user.name" style="display: inline-block;"></h1>
+							<md-icon md-font-set="fa" ng-class="{'fa-mars': user.gender === 'male', 'fa-venus': user.gender === 'female'}"></md-icon>
+						</div>
+						<small ng-if="user.lastActive">Last Active: <span ng-bind="user.lastActive | date:'medium'"></span></small>
+					</div>
+				</div>
+			</section>
+		</header>
+		
+		<section class="content-wrap">
+			<md-subheader class="md-no-sticky">Rosters</md-subheader>
+			<md-card>
+				<md-card-content style="padding: 0;">
+					<md-list>
+						<md-list-item ng-repeat="roster in rosters | orderBy:'name'" ng-click="$state.go('roster', {roster: roster.$id})" ng-class="{previous: $state.$previous.params.roster === roster.$id}">
+							<figure class="md-avatar initials" layout="row" layout-align="center center">
+								<img ng-if="roster.avatar" ng-src="{{ roster.avatar }}" alt="{{ roster.name }} Avatar" width="40" height="40" />
+								<span ng-if=" ! roster.avatar" ng-bind="initials(roster.name)"></span>
+							</figure>
+							<p flex>{{ roster.name }}</p>
+							<span class="counter">
+								<md-icon>event</md-icon> {{ roster.events | length }}
+							</span>
+							<span class="counter">
+								<md-icon>people</md-icon> {{ roster.participants | length }}
+							</span>
+						</md-list-item>
+						<md-list-item ng-if=" ! (rosters | length)" class="no-results">
+							No rosters found.
+						</md-list-item>
+					</md-list>
+				</md-card-content>
+			</md-card>
+		</section>
+	</md-content>
+	<md-fab-speed-dial ng-if="canEdit(user.$id)" md-direction="up" class="md-scale md-fab-speed-dial-bottom-right">
+		<md-fab-trigger>
+			<div layout="row">
+				<label><div>Edit user</div></label>
+				<md-button ng-click="editUser()" class="md-fab md-primary" aria-label="Edit user">
+					<md-icon>create</md-icon>
+				</md-button>
+			</div>
+		</md-fab-trigger>
+<!--
+		<md-fab-actions>
+			<div layout="row">
+				<label><div>Delete user</div></label>
+				<md-button ng-click="deleteUser($event.shiftKey)" class="md-fab md-mini md-raised md-warn" aria-label="Delete user">
+					<md-icon>delete</md-icon>
+				</md-button>
+			</div>
+		</md-fab-actions>
+-->
+	</md-fab-speed-dial>
+</div>
