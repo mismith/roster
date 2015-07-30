@@ -14,7 +14,12 @@
 			</section>
 			<section ng-show="event.location || event.locationPin">
 				<md-subheader class="md-no-sticky">Location</md-subheader>
-				<h2 layout-margin ng-show="event.location"><a ng-href="{{ event.locationUrl }}" target="_blank" class="passthru" ng-bind="event.location" style="white-space: pre-wrap;"></a></h2>
+				<h2 layout-margin ng-show="event.location">
+					<a ng-href="{{ event.locationUrl }}" target="_blank" class="passthru">
+						<span ng-bind="event.location" style="white-space: pre-wrap;"></span>
+						<md-icon ng-if="event.locationUrl" md-font-set="fa" class="fa-map-marker" style="font-size: 24px; line-height: 16px;"></md-icon>
+					</a>
+				</h2>
 				<md-card ng-show="event.locationPin" layout-padding>
 					<a ng-href="{{ event.locationUrl }}" target="_blank"><img ng-src="{{ 'http://maps.googleapis.com/maps/api/staticmap?markers=' + event.locationPin + '&zoom=15&size=300x200&maptype=hybrid' }}" width="300" height="200" /></a>
 				</md-card>
