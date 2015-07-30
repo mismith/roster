@@ -161,13 +161,19 @@ angular.module('roster-io', ['ui.router', 'ngMaterial', 'firebaseHelper', 'ngTou
 */
 		
 		$scope.newRoster = function () {
-			$scope.roster = {};
+			$scope.roster = {
+				admins: {},
+				participants: {},
+			};
 			$mdDialogForm.show({
 				scope:         $scope,
 				title:         'Add new roster',
 				contentUrl:    'views/template/roster.html',
 				ok:            'Create',
 				onSubmit: function (scope) {
+					scope.roster.admins[$scope.$me.uid]       = $scope.$me.uid;
+					scope.roster.participants[$scope.$me.uid] = $scope.$me.uid;
+					
 					return $scope.rosters.$add(scope.roster).then(function () {
 						$mdToast.showSimple({
 							content: 'Roster created.',
@@ -528,7 +534,8 @@ angular.module('roster-io', ['ui.router', 'ngMaterial', 'firebaseHelper', 'ngTou
 	
 	.filter('filterByRsvp', function () {
 		return function (array, rsvps, rsvp) {
-			if ( ! angular.isArray(array) || ! angular.isObject(rsvps)) return array;
+			if ( ! angular.isArray(array)) return array;
+			if ( ! angular.isObject(rsvps)) rsvps = {};
 			rsvp = parseInt(rsvp);
 			
 			return array.filter(function (item) {
