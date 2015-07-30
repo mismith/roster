@@ -109,15 +109,18 @@ angular.module('roster-io', ['ui.router', 'ngMaterial', 'firebaseHelper', 'ngTou
 		};
 		
 		// helpers
-		$rootScope.canEdit = function (uid, adminUids) {
+		$rootScope.canEdit = function () {
 			// returns false if not logged in
 			// returns true if any of the following:
-			// - adminUids specified and currently logged in user is in it
-			// - uid is specified and is the currently logged in user
+			// - object(s) specified and currently logged in user id is in it(them)
+			// - string(s) specified and it(they) match the currently logged in user id
 			// - nothing is specified but the currently logged in user is an admin
-			if (angular.isArray(adminUids) && adminUids.indexOf($rootScope.$me.$id) >= 0) return true;
-			if (angular.isObject(adminUids) && adminUids[$rootScope.$me.$id]) return true;
-			return uid ? uid === $rootScope.$me.$id : $rootScope.$me.admin;
+			var args = Array.prototype.slice.call(arguments);
+			return !! args.filter(function (test) {
+				if (angular.isArray(test) && test.indexOf($rootScope.$me.$id) >= 0) return true;
+				else if (angular.isObject(test) && test[$rootScope.$me.$id]) return true;
+				else return test ? test === $rootScope.$me.$id : $rootScope.$me.admin;
+			}).length;
 		};
 		$rootScope.avatar = function (userId) {
 			return '//graph.facebook.com/' + (userId ? userId + '/' : '') + 'picture?type=square';
@@ -788,7 +791,7 @@ angular.module('roster-io', ['ui.router', 'ngMaterial', 'firebaseHelper', 'ngTou
 									firstChild = children[0];
 								width.right = $actions[0].offsetWidth - firstChild.offsetLeft + parseInt(getStyle(firstChild, 'margin-left'));
 								
-								if (x < -48) {
+								if (x < -72) {
 									$element.addClass('md-swiping-left-triggered');
 									triggered.left = true;
 								} else {
@@ -825,7 +828,7 @@ angular.module('roster-io', ['ui.router', 'ngMaterial', 'firebaseHelper', 'ngTou
 									lastChild = children[children.length - 1];
 								width.left = lastChild.offsetLeft + lastChild.offsetWidth + parseInt(getStyle(lastChild, 'margin-right'));
 								
-								if (x > 48) {
+								if (x > 72) {
 									$element.addClass('md-swiping-right-triggered');
 									triggered.right = true;
 								} else {

@@ -48,14 +48,8 @@
 							<img ng-src="{{ avatar(participant.facebook.id) }}" width="40" height="40" class="md-avatar" alt="{{ participant.name }}" />
 							<p>{{ participant.name }}</p>
 							
-							<rsvp hide-sm ng-if="canEdit(participant.$id, roster.admins)" event="event" participant="participant"></rsvp>
-							<md-button hide-gt-sm ng-if="canEdit(participant.$id, roster.admins)" ng-click="mdSwipeItem.triggered.left || mdSwipeItem.triggered.right ? mdSwipeItem.close() : mdSwipeItem.teaseLeft()" class="md-fab" ng-class="{'md-success': RSVP(event).getParticipantStatus(participant.$id) === 1, 'md-primary': RSVP(event).getParticipantStatus(participant.$id) === -1, 'md-warn': RSVP(event).getParticipantStatus(participant.$id) === 0}" aria-label="RSVP" ng-switch="RSVP(event).getParticipantStatus(participant.$id)">
-								<md-icon ng-switch-when="1">check</md-icon>
-								<md-icon ng-switch-when="-1">swap_calls</md-icon>
-								<md-icon ng-switch-when="0">close</md-icon>
-								<md-icon ng-switch-default>more_horiz</md-icon>
-							</md-button>
-							<md-button ng-if=" ! canEdit(participant.$id, roster.admins)" class="md-fab" ng-class="{'md-success': RSVP(event).getParticipantStatus(participant.$id) === 1, 'md-primary': RSVP(event).getParticipantStatus(participant.$id) === -1, 'md-warn': RSVP(event).getParticipantStatus(participant.$id) === 0}" aria-label="RSVP" ng-switch="RSVP(event).getParticipantStatus(participant.$id)">
+							<rsvp hide-sm ng-if="canEdit(participant.$id, roster.admins) || RSVP(event).getParticipantStatus(participant.$id) !== -2" event="event" participant="participant" readonly=" ! canEdit(participant.$id, roster.admins)"></rsvp>
+							<md-button hide-gt-sm ng-if="canEdit(participant.$id, roster.admins) || RSVP(event).getParticipantStatus(participant.$id) !== -2" ng-click="mdSwipeItem.triggered.left || mdSwipeItem.triggered.right ? mdSwipeItem.close() : mdSwipeItem.teaseLeft(); $event.stopPropagation()" class="md-fab" ng-class="{'md-success': RSVP(event).getParticipantStatus(participant.$id) === 1, 'md-primary': RSVP(event).getParticipantStatus(participant.$id) === -1, 'md-warn': RSVP(event).getParticipantStatus(participant.$id) === 0}" aria-label="RSVP" ng-switch="RSVP(event).getParticipantStatus(participant.$id)">
 								<md-icon ng-switch-when="1">check</md-icon>
 								<md-icon ng-switch-when="-1">swap_calls</md-icon>
 								<md-icon ng-switch-when="0">close</md-icon>
@@ -86,7 +80,7 @@
 			</md-card>
 		</section>
 	</md-content>
-	<md-fab-speed-dial ng-if="canEdit(undefined, roster.admins)" md-direction="up" class="md-scale md-fab-speed-dial-bottom-right">
+	<md-fab-speed-dial ng-if="canEdit(roster.admins)" md-direction="up" class="md-scale md-fab-speed-dial-bottom-right">
 		<md-fab-trigger>
 			<div layout="row">
 				<label><div>Edit event</div></label>

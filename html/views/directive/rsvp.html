@@ -1,6 +1,6 @@
 <md-fab-speed-dial md-direction="left" class="md-scale">
 	<md-fab-trigger>
-		<md-button ng-click="$event.stopPropagation()" class="md-fab" ng-class="{'md-success': RSVP(event).getParticipantStatus(participant.$id) === 1, 'md-primary': RSVP(event).getParticipantStatus(participant.$id) === -1, 'md-warn': RSVP(event).getParticipantStatus(participant.$id) === 0}" aria-label="RSVP" ng-switch="RSVP(event).getParticipantStatus(participant.$id)" ng-disabled="readonly">
+		<md-button ng-click="$event.stopPropagation()" class="md-fab" ng-class="{'md-success': RSVP(event).getParticipantStatus(participant.$id) === 1, 'md-primary': RSVP(event).getParticipantStatus(participant.$id) === -1, 'md-warn': RSVP(event).getParticipantStatus(participant.$id) === 0}" aria-label="RSVP" ng-switch="RSVP(event).getParticipantStatus(participant.$id)" ng-disabled="readonly && RSVP(event).getParticipantStatus(participant.$id) === -2">
 			<md-icon ng-switch-when="1">check</md-icon>
 			<md-icon ng-switch-when="-1">swap_calls</md-icon>
 			<md-icon ng-switch-when="0">close</md-icon>

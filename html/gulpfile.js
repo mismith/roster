@@ -158,7 +158,7 @@ gulp
 		browserSync.init(merge.recursive(config.browsersync || {}, {
 			files: config.globs.files.concat(config.globs.excludes),
 			ghostMode: argv.g || gutil.env.ghost, // call `gulp -g` or `gulp --ghost` to start in ghostMode
-			open: ! argv.s && ! gutil.env.silent, // call `gulp -s` or `gulp --silent` to start gulp without opening a new browser window
+			open: ! (argv.s || gutil.env.silent), // call `gulp -s` or `gulp --silent` to start gulp without opening a new browser window
 		}));
 	})
 	
