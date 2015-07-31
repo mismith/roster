@@ -574,11 +574,12 @@ angular.module('roster-io', ['ui.router', 'ngMaterial', 'firebaseHelper', 'ngTou
 				},
 				setParticipantStatus: function (participantId, status) {
 					status = parseInt(status);
+					status = $rsvps && $rsvps[participantId] && $rsvps[participantId].status === status ? -2 : status;
 					
 					var deferred = $q.defer();
 					
 					return $firebaseHelper.ref($rsvps, participantId).update({
-						status: $rsvps && $rsvps[participantId] && $rsvps[participantId].status === status ? -2 : status,
+						status: status,
 						updated: moment().format(),
 					}, function () {
 						deferred.resolve();
