@@ -1,12 +1,9 @@
-<md-autocomplete md-items="user in users | filter:{name: searchText}" md-search-text="searchText" md-search-text-change="null" md-selected-item="existingUser" md-selected-item-change="loadExistingUser(existingUser)" md-item-text="user.name" md-floating-label="Name">
+<md-autocomplete md-items="user in filteredUsers = (users | filter:{name: searchText})" md-search-text="searchText" md-search-text-change="checkExistingUser(filteredUsers)" md-selected-item="existingUser" md-selected-item-change="loadExistingUser(existingUser)" md-item-text="user.name" md-floating-label="Name">
 	<md-item-template>
 		<img ng-src="{{ avatar(user.facebook.id) }}" width="24" height="24" alt="{{ user.name }}" class="md-avatar" />
 		&nbsp;&nbsp;
 		<span md-highlight-text="searchText" md-highlight-flags="i">{{ user.name }}</span>
 	</md-item-template>
-	<md-not-found>
-		No existing users match.
-	</md-not-found>
 </md-autocomplete>
 <md-input-container class="required">
 	<label>Email</label>

@@ -278,7 +278,10 @@ angular.module('roster-io', ['ui.router', 'ngMaterial', 'firebaseHelper', 'ngTou
 			
 			if (skipConfirm || confirm('Are you sure you want to remove this user from this roster?')) {
 				var name = participant.name;
-				participants.$unlink(participant).then(function () {
+				$q.all([
+					participants.$unlink(participant), // remove roster's particpants link
+					$firebaseHelper.object('data/users', participant.$id, 'rosters', $scope.roster.$id).$remove(), // remove user's rosters link
+				]).then(function () {
 					$mdToast.showSimple({
 						content: '"' + name + '" removed.',
 					});
@@ -296,54 +299,71 @@ angular.module('roster-io', ['ui.router', 'ngMaterial', 'firebaseHelper', 'ngTou
 				},
 			};
 			$scope.loadExistingUser = function (user) {
+				$scope.invite.name  = user.name;
 				$scope.invite.email = user.email;
 			};
 			
 			$mdDialogForm.show({
 				scope:         $scope,
-				title:         'Invite new user',
+				title:         'Invite user',
 				contentUrl:    'views/template/invite.html',
 				ok:            'Invite',
 				onSubmit: function (scope) {
-					var deferred = $q.defer();
+					var deferred      = $q.defer(),
+						alreadyExists = false;
 					
-					// @TODO: add existing user, if found, and skip invitation process
+					// add existing user, if found, and skip invitation process
 					angular.forEach($scope.users, function (user) {
 						if (user.email === $scope.invite.email) {
-							console.log(user);
-						}
-					});
-					return;
-					
-					// Title Case in case of illiterate users
-					$scope.invite.name = $scope.invite.name.replace(/\b\w+/g, function (text) {
-						return text.charAt(0).toUpperCase() + text.substr(1);
-					});
-					
-					$firebaseHelper.array('data/invites').$add($scope.invite).then(function (inviteSnap) {
-						var inviteId = inviteSnap.key();
-						
-						Api.post('email/invite', undefined, {params: {invite: inviteId}})
-							.then(function () {
-								$firebaseHelper.object($scope.roster, 'invites').$loaded().then(function (invites) {
-									invites[inviteId] = inviteId;
-									invites.$save().then(function () {
-										deferred.resolve();
-										
-										$mdToast.showSimple({
-											content: 'Invitation email sent to "' + (scope.invite.name ? scope.invite.name + ' ' : '') + '<' + scope.invite.email + '>".',
-										});
-									});
-								});
-							})
-							.catch(function (err) {
-								deferred.reject(err);
+							alreadyExists = true;
+							$q.all([
+								$firebaseHelper.join(['data/users', user.$id, 'rosters'], 'data/rosters').$link($scope.roster.$id),
+								$firebaseHelper.join(['data/rosters', $scope.roster.$id, 'participants'], 'data/users').$link(user.$id),
+							]).then(function () {
+								deferred.resolve();
 								
 								$mdToast.showSimple({
-									content: 'Error ' + err.code + ': ' + err.message + '.',
+									content: '"' + user.name + '" added.',
 								});
 							});
+						}
 					});
+					
+					if ( ! alreadyExists) {
+						// Title Case in case of illiterate users
+						$scope.invite.name = $scope.invite.name.replace(/\b\w+/g, function (text) {
+							return text.charAt(0).toUpperCase() + text.substr(1);
+						});
+						
+						// create invite
+						$firebaseHelper.array('data/invites').$add($scope.invite).then(function (inviteSnap) {
+							var inviteId = inviteSnap.key();
+							
+							// send email
+							Api.post('email/invite', undefined, {params: {invite: inviteId}})
+								.then(function () {
+									// add to roster's invites list
+									$firebaseHelper.object($scope.roster, 'invites').$loaded().then(function (invites) {
+										invites[inviteId] = inviteId;
+										invites.$save().then(function () {
+											deferred.resolve();
+											
+											// alert user
+											$mdToast.showSimple({
+												content: 'Invitation email sent to "' + (scope.invite.name ? scope.invite.name + ' ' : '') + '<' + scope.invite.email + '>".',
+											});
+										});
+									});
+								})
+								.catch(function (err) {
+									deferred.reject(err);
+									
+									$mdToast.showSimple({
+										content: 'Error ' + err.code + ': ' + err.message + '.',
+									});
+								});
+						});
+					}
 					
 					return deferred.promise;
 				},
