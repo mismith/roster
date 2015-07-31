@@ -217,10 +217,20 @@ angular.module('roster-io', ['ui.router', 'ngMaterial', 'firebaseHelper', 'ngTou
 		
 		$scope.deleteRoster = function (skipConfirm) {
 			if (skipConfirm || confirm('Are you sure you want to permanently delete this roster?')) {
-				// @TODO: remove roster from all participants and admins rosters
-				var key = $scope.roster.$id;
+				// remove roster from all participants and admins rosters
+				var deferreds  = [],
+					rosterId   = $scope.roster.$id,
+					removeLink = function (uid) {
+						deferreds.push($firebaseHelper.object('data/users', uid, 'rosters', rosterId).$remove());
+					};
+				angular.forEach($scope.roster.admins,       removeLink);
+				angular.forEach($scope.roster.participants, removeLink);
 				
-				$scope.roster.$remove().then(function () {
+				// delete the roster itself
+				deferreds.push($scope.roster.$remove());
+				
+				// wait for all promises to complete the redirect and notify user
+				$q.all(deferreds).then(function () {
 					$state.go('rosters');
 					
 					$mdToast.showSimple({
