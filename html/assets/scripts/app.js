@@ -577,19 +577,17 @@ angular.module('roster-io', ['ui.router', 'ngMaterial', 'firebaseHelper', 'ngTou
 					
 					var deferred = $q.defer();
 					
-					return $firebaseHelper.object($rsvps, participantId).$loaded().then(function ($rsvp) {
-						$rsvp.status = status; // clear it if trying to set to same value, or set it otherwise
-						$rsvp.updated = moment().format();
+					return $firebaseHelper.ref($rsvps, participantId).update({
+						status: $rsvps && $rsvps[participantId] && $rsvps[participantId].status === status ? -2 : status,
+						updated: moment().format(),
+					}, function () {
+						deferred.resolve();
 						
-						return $rsvp.$save().then(function () {
-							deferred.resolve();
-							
-							if(options.showToast) {
-								$statuses.$loaded().then(function () {
-									$mdToast.showSimple({content: 'Your RSVP saved as: "' + $statuses[$rsvp.status].name + '"'});
-								});
-							}
-						});
+						if(options.showToast) {
+							$statuses.$loaded().then(function () {
+								$mdToast.showSimple({content: 'Your RSVP saved as: "' + $statuses[status].name + '"'});
+							});
+						}
 					});
 					
 					return deferred.promise;
