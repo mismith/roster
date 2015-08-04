@@ -229,4 +229,20 @@ server.post('/api/v1/email/invite', function (req, res) {
 	});
 });
 
+
+server.get('/api/v1/url/shorten', function (req, res) {
+	var id = 1;
+	var CHARS = '2346789abcdefghjklmnpqrstuvwxyzABCDEFGHJKMNPQRTUVWXYZ';
+	
+	function hash(n) {
+		if(n > CHARS.length) {
+			return hash(Math.floor(n / CHARS.length)) + CHARS[n % CHARS.length];
+		} else {
+			return CHARS[n];
+		}
+	}
+	
+	res.send(hash(id));
+});
+
 server.listen(process.env.OPENSHIFT_NODEJS_PORT || 3030, process.env.OPENSHIFT_NODEJS_IP || '127.0.0.1');
