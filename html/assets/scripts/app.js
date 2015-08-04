@@ -331,17 +331,20 @@ angular.module('roster-io', ['ui.router', 'ngMaterial', 'firebaseHelper', 'ngTou
 					
 					if ( ! alreadyExists) {
 						// Title Case in case of illiterate users
-						$scope.invite.name = $scope.invite.name.replace(/\b\w+/g, function (text) {
+						$scope.invite.name = ($scope.invite.name || '').replace(/\b\w+/g, function (text) {
 							return text.charAt(0).toUpperCase() + text.substr(1);
 						});
 						
 						// create invite
-						$firebaseHelper.array('data/invites').$add($scope.invite).then(function (inviteSnap) {
-							var inviteId = inviteSnap.key();
+						$firebaseHelper.array('data/invites').$add($scope.invite).then(function (inviteRef) {
+							var inviteId = inviteRef.key();
 							
 							// send email
 							Api.post('email/invite', undefined, {params: {invite: inviteId}})
 								.then(function () {
+									// log as sent
+									inviteRef.update({sent: moment().format()});
+									
 									// add to roster's invites list
 									$firebaseHelper.object($scope.roster, 'invites').$loaded().then(function (invites) {
 										invites[inviteId] = inviteId;
@@ -441,8 +444,8 @@ angular.module('roster-io', ['ui.router', 'ngMaterial', 'firebaseHelper', 'ngTou
 			angular.forEach($scope.event, function (v, k) {
 				event[k] = v;
 			});
-			return $firebaseHelper.array($scope.roster, 'events').$add(event).then(function (eventSnap) {
-				$state.go('event', {roster: $scope.roster.$id, event: eventSnap.key()});
+			return $firebaseHelper.array($scope.roster, 'events').$add(event).then(function (eventRef) {
+				$state.go('event', {roster: $scope.roster.$id, event: eventRef.key()});
 				
 				$mdToast.showSimple({
 					content: 'Event cloned.',
