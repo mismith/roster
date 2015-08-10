@@ -77,7 +77,7 @@
 					</md-subheader>
 					<md-card>
 						<md-list>
-							<md-list-item ng-repeat="participant in participants | orderBy:'name'" ng-click="$state.go('user', {user: participant.$id})" ng-class="{previous: $state.$previous.params.user === participant.$id}">
+							<md-list-item ng-repeat="participant in participants | orderBy:'name'" ng-click="$state.go('user', {user: participant.$id})" ng-class="{previous: $state.$previous.params.user === participant.$id}" class="participant">
 								<img ng-src="{{ avatar(participant.facebook.id) }}" width="32" height="32" class="md-avatar" alt="{{ participant.name }}" />
 								
 								<p>{{ participant.name }}</p>
@@ -97,7 +97,7 @@
 					<md-subheader class="md-no-sticky">Invitees</md-subheader>
 					<md-card>
 						<md-list>
-							<md-list-item ng-repeat="participant in invites | orderBy:'name'">
+							<md-list-item ng-repeat="participant in invites | orderBy:'name'" class="invitee">
 								<img ng-src="{{ avatar(participant.facebook.id) }}" width="32" height="32" class="md-avatar" alt="{{ participant.name }}" />
 								
 								<p>{{ participant.name || participant.email }}</p>
