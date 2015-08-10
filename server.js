@@ -229,16 +229,16 @@ server.post('/api/v1/email/invite', function (req, res) {
 	});
 });
 
-
 server.get('/api/v1/url/shorten', function (req, res) {
-	var id = 1;
-	var CHARS = '2346789abcdefghjklmnpqrstuvwxyzABCDEFGHJKMNPQRTUVWXYZ';
+	var id = 1000;
+	var alphabet = 'UteQA9bjVXygpBE2vchDdnKrk7xMFHGa3RmCf6uZws4Tl8zqNWYPJ',
+		count    = alphabet.length;
 	
 	function hash(n) {
-		if(n > CHARS.length) {
-			return hash(Math.floor(n / CHARS.length)) + CHARS[n % CHARS.length];
+		if(n > count) {
+			return hash(Math.floor(n / count)) + alphabet[n % count];
 		} else {
-			return CHARS[n];
+			return alphabet[n];
 		}
 	}
 	
