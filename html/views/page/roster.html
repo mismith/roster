@@ -100,7 +100,10 @@
 							<md-list-item ng-repeat="participant in invites | orderBy:'name'" class="invitee">
 								<img ng-src="{{ avatar(participant.facebook.id) }}" width="32" height="32" class="md-avatar" alt="{{ participant.name }}" />
 								
-								<p>{{ participant.name || participant.email }}</p>
+								<p>
+									<span>{{ participant.name || participant.email }}</span>
+									<small>Invited {{ participant.sent | date }}</small>
+								</p>
 								<div ng-if="canEdit(roster.admins)">
 									<md-button ng-click="rescindInvite($event.shiftKey, participant)" class="md-icon-button md-warn" aria-label="Rescind invite">
 										<md-icon>close</md-icon>
