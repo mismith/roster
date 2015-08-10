@@ -242,7 +242,7 @@ server.get('/api/v1/url/shorten', function (req, res) {
 		}
 	}
 	
-	res.send(hash(id));
+	res.send(hash(req.query.url));
 });
 
 server.listen(process.env.OPENSHIFT_NODEJS_PORT || 3030, process.env.OPENSHIFT_NODEJS_IP || '127.0.0.1');
