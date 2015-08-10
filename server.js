@@ -12,7 +12,10 @@ var fs       = require('fs'),
 	moment   = require('moment'),
 	Firebase = require('firebase'),
 	extend   = require('node.extend'),
-	Q        = require('q');
+	Q        = require('q')
+	_        = require('lodash'),
+	rest     = require('restler'),
+	schedule = require('node-schedule');
 
 // web app
 server.use(express.static('html'));
@@ -67,8 +70,19 @@ function getJuicedEmail(template, data, callback) {
 function getEventInfo(rosterId, eventId, callback) {
 	// fetch data
 	new Firebase(FB_BASE_URL + '/data/rosters/' + rosterId).once('value', function (snapshot) {
-		var roster  = snapshot.val(),         // @TODO: make sure this roster exists
-			event   = roster.events[eventId]; // @TODO: make sure this event exists
+		var roster  = snapshot.val();
+		if ( ! roster) {
+			// make sure roster exists
+			console.error('Roster "' + rosterId + '" not found.');
+			return; // @TODO
+		}
+		
+		var event   = roster.events[eventId];
+		if ( ! event) {
+			// make sure event exists
+			console.error('Event "' + eventId + '" not found.');
+			return; // @TODO
+		}
 		
 		roster.$id = rosterId;
 		roster.url = '#/roster/' + roster.$id;
@@ -105,7 +119,7 @@ server.get('/api/v1/email/reminder', function (req, res) {
 });
 server.post('/api/v1/email/reminder', function (req, res) {
 	getReminderEmailTemplate(req.query.roster, req.query.event, function (template, data) {
-		var response = {success: true, sent: [], failed: []};
+		var response = {success: true, sent: [], skipped: [], failed: []};
 		
 		var deferreds = [];
 		Object.keys(data.roster.participants).forEach(function (userId) {
@@ -139,6 +153,7 @@ server.post('/api/v1/email/reminder', function (req, res) {
 							});
 						});
 					} else {
+						response.skipped.push({userId: userId});
 						deferred.resolve();
 					}
 				});
@@ -148,6 +163,35 @@ server.post('/api/v1/email/reminder', function (req, res) {
 			res.json(response);
 		});
 	});
+});
+
+
+function sendReminders() {
+	new Firebase(FB_BASE_URL + '/data/rosters').once('value', function (rostersSnap) {
+		_.each(rostersSnap.val(), function (roster, rosterId) {
+			_.each(roster.events, function (event, eventId) {
+				// check if date matches a range that needs sending reminders for
+				var now  = moment(),
+					date = moment(event.date);
+				if (now.isBefore(date), now.isSame(date, 'week')) {
+					// send individual emails (to specific users based on logic within reminder api endpoint)
+					rest.post('http://localhost:3030/api/v1/email/reminder', {query: {roster: rosterId, event: eventId}}).on('complete', function (result, response) {
+						if (result instanceof Error) {
+							console.error(result); // @TODO
+							return;
+						}
+						console.log(result); // @TODO
+						
+						// @TODO: parse and aggregate results, then return them
+					});
+				}
+			});
+		});
+	});
+}
+schedule.scheduleJob('0 0 17 * * 1' /* every Monday at 5pm */, sendReminders);
+server.get('/api/v1/schedule/reminders', function (req, res) {
+	sendReminders();
 });
 
 
