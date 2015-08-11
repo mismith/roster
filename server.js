@@ -189,7 +189,7 @@ function dispatchReminders() {
 	});
 }
 scheduler.scheduleJob('0 0 17 * * 1' /* every Monday at 5pm */, dispatchReminders);
-server.get('/api/v1/dispatch/reminders', function (req, res) {
+server.post('/api/v1/dispatch/reminders', function (req, res) {
 	dispatchReminders();
 });
 
