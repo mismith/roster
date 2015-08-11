@@ -2,20 +2,20 @@
 
 var FB_BASE_URL = 'https://roster-io.firebaseio.com';
 
-var fs       = require('fs'),
-	express  = require('express'),
-	server   = express(),
-	Postmark = require('postmark'),
-	postmark = new Postmark.Client('75cdd97a-2c40-4319-a6a9-4576d0948d57'),
-	ejs      = require('ejs'),
-	juice    = require('juice'),
-	moment   = require('moment'),
-	Firebase = require('firebase'),
-	extend   = require('node.extend'),
-	Q        = require('q')
-	_        = require('lodash'),
-	rest     = require('restler'),
-	schedule = require('node-schedule');
+var fs        = require('fs'),
+	express   = require('express'),
+	server    = express(),
+	Postmark  = require('postmark'),
+	postmark  = new Postmark.Client('75cdd97a-2c40-4319-a6a9-4576d0948d57'),
+	ejs       = require('ejs'),
+	juice     = require('juice'),
+	moment    = require('moment'),
+	Firebase  = require('firebase'),
+	extend    = require('node.extend'),
+	Q         = require('q')
+	_         = require('lodash'),
+	rest      = require('restler'),
+	scheduler = require('node-schedule');
 
 // web app
 server.use(express.static('html'));
@@ -92,7 +92,7 @@ function getEventInfo(rosterId, eventId, callback) {
 		callback(roster, event);
 	});
 }
-function getReminderEmailTemplate(rosterId, eventId, callback) {
+function getEventReminderEmailTemplate(rosterId, eventId, callback) {
 	getCompiledTemplate('reminder', function (template) {
 		getEventInfo(rosterId, eventId, function (roster, event) {
 			var subject = 'Reminder: RSVP Required - ' + roster.name + ' - ' + event.name,
@@ -110,15 +110,15 @@ function getReminderEmailTemplate(rosterId, eventId, callback) {
 	});
 }
 server.get('/api/v1/email/reminder', function (req, res) {
-	getReminderEmailTemplate(req.query.roster, req.query.event, function (template, data) {
+	getEventReminderEmailTemplate(req.query.roster, req.query.event, function (template, data) {
 		getJuicedEmail(template, data, function (html) {
 			// display email
 			res.send(html);
 		});
 	});
 });
-server.post('/api/v1/email/reminder', function (req, res) {
-	getReminderEmailTemplate(req.query.roster, req.query.event, function (template, data) {
+function sendEventReminderEmails(rosterId, eventId, callback) {
+	getEventReminderEmailTemplate(rosterId, eventId, function (template, data) {
 		var response = {success: true, sent: [], skipped: [], failed: []};
 		
 		var deferreds = [];
@@ -160,13 +160,18 @@ server.post('/api/v1/email/reminder', function (req, res) {
 			})(deferred);
 		});
 		Q.all(deferreds).then(function () {
-			res.json(response);
+			callback(response);
 		});
+	});
+}
+server.post('/api/v1/email/reminder', function (req, res) {
+	sendEventReminderEmails(req.query.roster, req.query.event, function (response) {
+		res.json(response);
 	});
 });
 
 
-function sendReminders() {
+function dispatchReminders() {
 	new Firebase(FB_BASE_URL + '/data/rosters').once('value', function (rostersSnap) {
 		_.each(rostersSnap.val(), function (roster, rosterId) {
 			_.each(roster.events, function (event, eventId) {
@@ -174,24 +179,18 @@ function sendReminders() {
 				var now  = moment(),
 					date = moment(event.date);
 				if (now.isBefore(date), now.isSame(date, 'week')) {
-					// send individual emails (to specific users based on logic within reminder api endpoint)
-					rest.post('http://localhost:3030/api/v1/email/reminder', {query: {roster: rosterId, event: eventId}}).on('complete', function (result, response) {
-						if (result instanceof Error) {
-							console.error(result); // @TODO
-							return;
-						}
-						console.log(result); // @TODO
-						
-						// @TODO: parse and aggregate results, then return them
+					// send individual emails (to specific users based on logic within sentReminderEmails)
+					sendEventReminderEmails(rosterId, eventId, function (response) {
+						console.log(response); // @TODO: handle errors
 					});
 				}
 			});
 		});
 	});
 }
-schedule.scheduleJob('0 0 17 * * 1' /* every Monday at 5pm */, sendReminders);
-server.get('/api/v1/schedule/reminders', function (req, res) {
-	sendReminders();
+scheduler.scheduleJob('0 0 17 * * 1' /* every Monday at 5pm */, dispatchReminders);
+server.get('/api/v1/dispatch/reminders', function (req, res) {
+	dispatchReminders();
 });
 
 

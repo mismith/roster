@@ -11,7 +11,7 @@ Quickly poll your team roster's availability.
 - add local notifications for reminders (including push notifications for home screen apps?)
 - send email to existing user when added to new roster
 - send email to roster members on event day to notify them
-- setup reminder emails (crons)
+- get reminder emails (crons) working
 - enable custom reminder email times
 - in dialogs, clone edited object so cancellable changes aren't visible locally
 - fix dialog loading icon issues and error handling
