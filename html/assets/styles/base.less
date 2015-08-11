@@ -212,6 +212,9 @@ md-icon {
 			}
 		}
 	}
+	md-toolbar & {
+		min-width: 0;
+	}
 }
 .md-subheader {
 	&.md-no-sticky {
@@ -479,6 +482,19 @@ a.passthru {
 			.md-warn {
 				box-shadow: none;
 			}
+		}
+	}
+}
+
+
+#header {
+	.md-button {
+		padding: 0;
+		margin: 0;
+		border-radius: 24px;
+		
+		span {
+			margin-left: @u;
 		}
 	}
 }
