@@ -10,7 +10,7 @@
 					</md-subheader>
 					<md-card>
 						<md-list>
-							<md-list-item ng-repeat="eventObj in timegroup.$events = (events | filterByTimegroup:timegroup.$id | orderBy:timegroup.orderBy)" ng-init="event = $firebaseHelper.object(events, eventObj.$id)" ng-class="{previous: $state.$previous.params.roster === roster.$id && $state.$previous.params.event === event.$id}" md-swipe-item="canEdit(roster.participants, roster.admins)" md-swipe-right-triggered="RSVP(event).setParticipantStatus($me.$id, 1); mdSwipeItem.close();" md-swipe-right-most-triggered="RSVP(event).setParticipantStatus($me.$id, -1); mdSwipeItem.close();" md-swipe-left-most-triggered="RSVP(event).setParticipantStatus($me.$id, 0); mdSwipeItem.close();">
+							<md-list-item ng-repeat="event in timegroup.$events = (events | filterByTimegroup:timegroup.$id | orderBy:timegroup.orderBy)" ng-init="eventObj = $firebaseHelper.object(events, event.$id)" ng-class="{previous: $state.$previous.params.roster === roster.$id && $state.$previous.params.event === event.$id}" md-swipe-item="canEdit(roster.participants, roster.admins)" md-swipe-right-triggered="RSVP(eventObj).setParticipantStatus($me.$id, 1); mdSwipeItem.close();" md-swipe-right-most-triggered="RSVP(eventObj).setParticipantStatus($me.$id, -1); mdSwipeItem.close();" md-swipe-left-most-triggered="RSVP(eventObj).setParticipantStatus($me.$id, 0); mdSwipeItem.close();">
 								<div md-ink-ripple ng-click="$state.go('event', {roster: roster.$id, event: event.$id})" class="md-list-item-inner md-swipe-item-inner" style="padding-right: 8px;">
 									<figure class="md-avatar calendar-day md-primary">
 										<div class="month" ng-bind="event.date | date:'MMM'"></div>
@@ -23,7 +23,7 @@
 									
 									<p>{{ event.name }}</p>
 									
-									<rsvp ng-if="canEdit(roster.participants, roster.admins)" event="event" participant="$me"></rsvp>
+									<rsvp ng-if="canEdit(roster.participants, roster.admins)" event="eventObj" participant="$me"></rsvp>
 								</div>
 								<md-swipe-actions hide-gt-sm layout="row">
 									<div class="md-swipe-action-left" layout="row" layout-align="start center">
@@ -33,13 +33,13 @@
 										</md-button>
 									</div>
 									<div class="md-swipe-action-right" layout="row" layout-align="end center">
-										<md-button ng-click="RSVP(event).setParticipantStatus($me.$id, 1); mdSwipeItem.close();" class="md-fab md-mini md-success">
+										<md-button ng-click="RSVP(eventObj).setParticipantStatus($me.$id, 1); mdSwipeItem.close();" class="md-fab md-mini md-success">
 											<md-icon>check</md-icon>
 										</md-button>
-										<md-button ng-click="RSVP(event).setParticipantStatus($me.$id, -1); mdSwipeItem.close();" class="md-fab md-mini md-primary">
+										<md-button ng-click="RSVP(eventObj).setParticipantStatus($me.$id, -1); mdSwipeItem.close();" class="md-fab md-mini md-primary">
 											<md-icon>swap_calls</md-icon>
 										</md-button>
-										<md-button ng-click="RSVP(event).setParticipantStatus($me.$id, 0); mdSwipeItem.close();" class="md-fab md-mini md-warn">
+										<md-button ng-click="RSVP(eventObj).setParticipantStatus($me.$id, 0); mdSwipeItem.close();" class="md-fab md-mini md-warn">
 											<md-icon>close</md-icon>
 										</md-button>
 									</div>
