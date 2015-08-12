@@ -2,13 +2,12 @@
 	<md-content>
 		<div layout="column" layout-gt-md="row" class="content-wrap">
 			<section flex>
-				<div ng-repeat="timegroup in timegroups" ng-show="timegroup.$id === 'upcoming' || (timegroup.$events | length)">
-					<md-subheader class="md-no-sticky">
-						<div layout="row">
-							<span flex ng-bind="timegroup.name"></span>
-						</div>
+				<div ng-repeat="timegroup in timegroups" ng-show="timegroup.$id === 'upcoming' || (timegroup.$events | length)" ng-init="timegroup.$id === 'past' ? past = timegroup.$collapsed = true : null;">
+					<md-subheader class="md-no-sticky" ng-click="past ? timegroup.$collapsed = ! timegroup.$collapsed : null">
+						<span ng-bind="timegroup.name"></span>
+						<md-icon ng-if="past" md-font-set="fa" ng-class="{'fa-plus-circle': timegroup.$collapsed, 'fa-minus-circle': ! timegroup.$collapsed}" style="font-size: 14px; line-height: 22px;"></md-icon>
 					</md-subheader>
-					<md-card>
+					<md-card ng-hide="timegroup.$collapsed">
 						<md-list>
 							<md-list-item ng-repeat="event in timegroup.$events = (events | filterByTimegroup:timegroup.$id | orderBy:timegroup.orderBy)" ng-init="eventObj = $firebaseHelper.object(events, event.$id)" ng-class="{previous: $state.$previous.params.roster === roster.$id && $state.$previous.params.event === event.$id}" md-swipe-item="canEdit(roster.participants, roster.admins)" md-swipe-right-triggered="RSVP(eventObj).setParticipantStatus($me.$id, 1); mdSwipeItem.close();" md-swipe-right-most-triggered="RSVP(eventObj).setParticipantStatus($me.$id, -1); mdSwipeItem.close();" md-swipe-left-most-triggered="RSVP(eventObj).setParticipantStatus($me.$id, 0); mdSwipeItem.close();">
 								<div md-ink-ripple ng-click="$state.go('event', {roster: roster.$id, event: event.$id})" class="md-list-item-inner md-swipe-item-inner" style="padding-right: 8px;">
@@ -71,14 +70,16 @@
 					</md-subheader>
 					<md-card>
 						<md-list>
-							<md-list-item ng-repeat="participant in participants | orderBy:'name'" ng-click="$state.go('user', {user: participant.$id})" ng-class="{previous: $state.$previous.params.user === participant.$id}" class="participant">
-								<img ng-src="{{ avatar(participant.facebook.id) }}" width="32" height="32" class="md-avatar" alt="{{ participant.name }}" />
-								
-								<p>{{ participant.name }}</p>
-								<div ng-if="canEdit(roster.admins)">
-									<md-button ng-click="removeUser($event.shiftKey, participant); $event.stopPropagation();" class="md-icon-button md-warn" aria-label="Remove participant">
-										<md-icon>close</md-icon>
-									</md-button>
+							<md-list-item ng-repeat="participant in participants | orderBy:'name'" ng-class="{previous: $state.$previous.params.user === participant.$id}" class="participant">
+								<div md-ink-ripple ng-click="$state.go('user', {user: participant.$id})" class="md-list-item-inner">
+									<img ng-src="{{ avatar(participant.facebook.id) }}" width="32" height="32" class="md-avatar" alt="{{ participant.name }}" />
+									
+									<p>{{ participant.name }}</p>
+									<div ng-if="canEdit(roster.admins)">
+										<md-button ng-click="removeUser($event.shiftKey, participant); $event.stopPropagation();" class="md-icon-button md-warn" aria-label="Remove participant">
+											<md-icon>close</md-icon>
+										</md-button>
+									</div>
 								</div>
 							</md-list-item>
 							<md-list-item ng-if=" ! (participants | length)" class="no-results">

@@ -60,6 +60,17 @@ md-input-container {
 	}
 }
 md-list-item {
+	position: relative;
+	
+	[md-ink-ripple].md-list-item-inner {
+		flex: 1;
+		padding: 0 0 0 @u*2;
+		outline: none;
+		
+		p {
+			padding-right: @u*2;
+		}
+	}
 	.md-avatar {
 		margin-left: 0 !important;
 	}
@@ -220,6 +231,7 @@ md-icon {
 	&.md-no-sticky {
 		background-color: transparent;
 		line-height: 24px;
+		outline: none;
 		
 		.md-subheader-inner {
 			padding-bottom: 0;
