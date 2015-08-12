@@ -19,3 +19,6 @@ Quickly poll your team roster's availability.
 - fix page loading flicker (by caching results ($firebaseJoin) and/or resolving?)
 - fix toast position on android
 - auto-accept invites if invited user's email logs in (and not necessarily to accept that invite)
+- google contacts integration?
+- async email sending via queue in firebase
+- add online tracking to users

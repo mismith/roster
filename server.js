@@ -148,7 +148,7 @@ function sendEventReminderEmails(rosterId, eventId, callback) {
 						getJuicedEmail(template, userData, function (html) {
 							// send email
 							postmark.sendEmail({
-								From:       'rsvp@rstr.io',
+								From:       'support@roster-io.com',
 								To:         user.name + ' <' + user.email + '>',
 								Subject:    data.subject,
 								HtmlBody:   html,
@@ -208,79 +208,93 @@ server.post('/api/v1/dispatch/reminders', function (req, res) {
 
 
 
-function getInviteInfo(inviteId, callback) {
-	// fetch data
-	new Firebase(FB_BASE_URL + '/data/invites/' + inviteId).once('value', function (inviteSnap) {
-		var invite = inviteSnap.val();
-		if (invite) {
-			invite.$id = inviteId;
-			invite.url = '#/invite/' + invite.$id;
-			
-			new Firebase(FB_BASE_URL + '/data/users/' + invite.by).once('value', function (userSnap) {
-				var user = userSnap.val();
-				
-				user.$id = userSnap.key();
+function getInviteInfo(inviteId) {
+	var deferred = Q.defer();
 	
-				new Firebase(FB_BASE_URL + '/data/rosters/' + invite.to.params.roster).once('value', function (rosterSnap) {
-					var roster = rosterSnap.val();
+	// fetch data
+	if (inviteId) {
+		new Firebase(FB_BASE_URL + '/data/invites/' + inviteId).once('value', function (inviteSnap) {
+			var invite = inviteSnap.val();
+			if (invite) {
+				invite.$id = inviteId;
+				invite.url = '#/invite/' + invite.$id;
 				
-					roster.$id = rosterSnap.key();
-					roster.url = '#/roster/' + roster.$id;
-					
-					callback(invite, user, roster);
+				new Firebase(FB_BASE_URL + '/data/users/' + invite.by).once('value', function (inviterSnap) {
+					var inviter = inviterSnap.val();
+					inviter.$id = inviterSnap.key();
+		
+					new Firebase(FB_BASE_URL + '/data/rosters/' + invite.to.params.roster).once('value', function (rosterSnap) {
+						var roster = rosterSnap.val();
+						roster.$id = rosterSnap.key();
+						roster.url = '#/roster/' + roster.$id;
+						
+						deferred.resolve({
+							invite:  invite,
+							inviter: inviter,
+							roster:  roster,
+						});
+					});
+				});
+			} else {
+				deferred.reject(new Error('Invite not found'));
+			}
+		});
+	} else {
+		deferred.reject(new Error('Invite not specified'));
+	}
+	
+	return deferred.promise;
+}
+function getInviteEmail(inviteId) {
+	var deferred = Q.defer();
+	
+	getCompiledTemplate('invite', function (template) {
+		getInviteInfo(inviteId).then(function (info) {
+			info.inviter.avatar = 'http://graph.facebook.com/' + (info.inviter.facebook && info.inviter.facebook.id ? info.inviter.facebook.id + '/' : '') + 'picture?type=square';
+			info.subject = 'Invitation: Join ' + info.inviter.name + ' on the "' + info.roster.name + '" roster';
+				
+			getJuicedEmail(template, info, function (html) {
+				deferred.resolve({
+					html: html,
+					info: info,
 				});
 			});
-		} else {
-			// @TODO
-			console.error('Invite not found');
-		}
-	});
-}
-function getInviteEmail(inviteId, callback) {
-	getCompiledTemplate('invite', function (template) {
-		getInviteInfo(inviteId, function (invite, inviter, roster) {
-			inviter.avatar = 'http://graph.facebook.com/' + (inviter.facebook && inviter.facebook.id ? inviter.facebook.id + '/' : '') + 'picture?type=square';
-			
-			var subject = 'Invitation: Join ' + inviter.name + ' on the "' + roster.name + '" roster',
-				data = {
-					subject: subject,
-					invite:  invite,
-					inviter: inviter,
-					roster:  roster,
-				};
-				
-			getJuicedEmail(template, data, function (html) {
-				callback(html, data);
-			});
+		}).catch(function (err) {
+			deferred.reject(err);
 		});
 	});
+	
+	return deferred.promise;
 }
 server.get('/api/v1/email/invite', function (req, res) {
-	getInviteEmail(req.query.invite, function (html, data) {
+	getInviteEmail(req.query.invite).then(function (email) {
 		// return email as html
-		res.send(html);
+		res.send(email.html);
+	}).catch(function (err) {
+		res.json({
+			success: false,
+			error: err,
+		});
 	});
 });
 server.post('/api/v1/email/invite', function (req, res) {
-	getInviteEmail(req.query.invite, function (html, data) {
+	getInviteEmail(req.query.invite).then(function (email) {
 		// send email
 		postmark.sendEmail({
-			From:       'invite@rstr.io',
-			To:         data.invite.name ? data.invite.name + ' <' + data.invite.email + '>' : data.invite.email,
-			Subject:    data.subject,
-			HtmlBody:   html,
+			From:       'support@roster-io.com',
+			To:         email.info.invite.name ? email.info.invite.name + ' <' + email.info.invite.email + '>' : email.info.invite.email,
+			Subject:    email.info.subject,
+			HtmlBody:   email.html,
 			TrackOpens: true,
 		}, function (err) {
-			if (err) {
-				console.error(err);
-				
-				res.json({
-					success: false,
-					error:   err,
-				});
-				return;
-			}
+			if (err) throw err; // @TODO
+			
 			res.json({success: true});
+		});
+	}).catch(function (err) {
+		res.json({
+			success: false,
+			error:   err,
 		});
 	});
 });
@@ -395,6 +409,7 @@ server.post('/api/v1/email/added', function (req, res) {
 
 
 
+/*
 server.get('/api/v1/url/shorten', function (req, res) {
 	var id = 1000;
 	var alphabet = 'UteQA9bjVXygpBE2vchDdnKrk7xMFHGa3RmCf6uZws4Tl8zqNWYPJ',
@@ -410,5 +425,6 @@ server.get('/api/v1/url/shorten', function (req, res) {
 	
 	res.send(hash(req.query.url));
 });
+*/
 
 server.listen(process.env.OPENSHIFT_NODEJS_PORT || 3030, process.env.OPENSHIFT_NODEJS_IP || '127.0.0.1');
