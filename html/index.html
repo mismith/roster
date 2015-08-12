@@ -37,7 +37,7 @@
 						Login
 					</md-button>
 					<md-menu ng-if="$me.$id">
-						<md-button ng-click="$mdOpenMenu()" layout="row" layout-align="center center" layout-fill aria-label="Open user menu">
+						<md-button ng-click="$mdOpenMenu()" layout="row" layout-align="center center" layout-fill aria-label="Open user menu" class="md-button-user">
 							<span hide-sm ng-bind="$me.name" style="padding: 0 8px;"></span>
 							<figure class="md-avatar md-icon-button md-raised" aria-label="Open user menu">
 								<img ng-src="{{ avatar($me.facebook.id) }}" width="48" height="48" class="md-avatar" />
