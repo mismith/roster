@@ -83,6 +83,7 @@ angular.module('roster-io', ['ui.router', 'ngMaterial', 'firebaseHelper', 'ngTou
 		return Auth;
 	})
 	.controller('AppCtrl', function ($rootScope, $state, $firebaseHelper, Auth) {
+		$rootScope.loaded          = true;
 		$rootScope.$state          = $state;
 		$rootScope.$firebaseHelper = $firebaseHelper;
 		$rootScope.console         = console;
