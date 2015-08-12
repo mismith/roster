@@ -24,13 +24,13 @@
     "npm": ">= 1.0.0"
   },
   "dependencies": {
+    "cron": "^1.0.9",
     "ejs": "^2.3.1",
     "express": "^3.4.8",
     "firebase": "^2.2.7",
     "juice": "^1.2.0",
     "lodash": "^3.10.1",
     "moment": "^2.10.3",
-    "node-schedule": "^0.2.9",
     "node.extend": "^1.1.5",
     "postmark": "^1.0.0",
     "q": "^1.4.1",

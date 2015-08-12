@@ -16,7 +16,7 @@ var fs        = require('fs'),
 	Q         = require('q')
 	_         = require('lodash'),
 	rest      = require('restler'),
-	scheduler = require('node-schedule');
+	CronJob   = require('cron').CronJob;
 
 // make Error object's JSON-ifiable more easily
 Object.defineProperty(Error.prototype, 'toJSON', {
@@ -234,29 +234,64 @@ server.post('/api/v1/email/reminder', function (req, res) {
 });
 
 
-function dispatchEventReminders() {
-	new Firebase(FB_BASE_URL + '/data/rosters').once('value', function (rostersSnap) {
-		_.each(rostersSnap.val(), function (roster, rosterId) {
-			_.each(roster.events, function (event, eventId) {
-				// check if date matches a range that needs sending reminders for
-				var now  = moment(),
-					date = moment(event.date);
-				if (now.isBefore(date), now.isSame(date, 'week')) {
-					// send individual emails (to specific users based on logic within sentReminderEmails)
-					sendEventReminderEmails(rosterId, eventId).then(function (response) {
-						console.log(response); // @TODO: handle errors
-					}).catch(function (err) {
-						console.error(err); // @TODO
-					});
-				}
-			});
+
+
+function dispatchEventReminders(rosterId) {
+	new Firebase(FB_BASE_URL + '/data/rosters/' + rosterId + '/events').once('value', function (eventsSnap) {
+		var events = eventsSnap.val();
+		
+		_.each(events, function (event, eventId) {
+			// check if date matches a range that needs sending reminders for
+			var now  = moment(),
+				date = moment(event.date),
+				diff = date.diff(now, 'day');
+			if (0 <= diff && diff < 7) {
+				// send individual emails (to specific users based on logic within sentReminderEmails)
+				sendEventReminderEmails(rosterId, eventId).then(function (response) {
+					console.log('Event ' + eventId + ':\n', response); // @TODO: handle errors
+				}).catch(function (err) {
+					console.error(err); // @TODO
+				});
+			}
 		});
 	});
 }
-scheduler.scheduleJob('0 0 17 * * 1' /* every Monday at 5pm */, dispatchEventReminders);
-server.post('/api/v1/dispatch/reminders', function (req, res) {
-	dispatchEventReminders();
+var runningJobs = {};
+var rostersRef = new Firebase(FB_BASE_URL + '/data/rosters');
+rostersRef.on('child_added', function (rosterSnap) {
+	var rosterId  = rosterSnap.key(),
+		rosterRef = rosterSnap.ref();
+	
+	rosterRef.child('cron').on('value', function (cronSnap) {
+		// stop any running job since we've changed how often it should run anyway
+		if (runningJobs[rosterId]){
+			runningJobs[rosterId].stop();
+			delete runningJobs[rosterId];
+		}
+		
+		var cron = cronSnap.val();
+		if (cron) {
+			try {
+				runningJobs[rosterId] = new CronJob(cron, function () {
+					console.log('Running cron for roster ' + rosterId + '.');
+					dispatchEventReminders(rosterId);
+				}, undefined, true);
+			} catch (err) {
+				console.error(err);
+			}
+		}
+	});	
 });
+rostersRef.on('child_removed', function (rosterSnap) {
+	var rosterId = rosterSnap.key();
+	
+	// stop any jobs for this roster
+	if (runningJobs[rosterId]){
+		runningJobs[rosterId].stop();
+		delete runningJobs[rosterId];
+	}
+});
+
 
 
 
