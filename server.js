@@ -81,6 +81,19 @@ function getJuicedEmail(template, data, callback) {
 		callback(juiced);
 	});
 }
+function sendEmail(options) {
+	var deferred = Q.defer();
+	
+	postmark.sendEmail(options, function (err) {
+		if (err){
+			deferred.reject(err);
+		} else {
+			deferred.resolve();
+		}
+	});
+	
+	return deferred.promise;
+}
 
 
 
@@ -161,21 +174,20 @@ function sendEventReminderEmails(rosterId, eventId, callback) {
 						
 						getJuicedEmail(template.html, userInfo, function (html) {
 							// send email
-							postmark.sendEmail({
+							sendEmail({
 								From:       EMAIL,
 								To:         user.name + ' <' + user.email + '>',
 								Subject:    template.info.subject,
 								HtmlBody:   html,
 								TrackOpens: true,
-							}, function (err) {
-								if (err) {
-									response.failed.push({userId: userId, error: err});
-									response.success = false;
-									
-									d.resolve();
-									return;
-								}
+							}).then(function () {
 								response.sent.push({userId: userId});
+								
+								d.resolve();
+							}).catch(function (err) {
+								response.failed.push({userId: userId, error: err});
+								response.success = false;
+									
 								d.resolve();
 							});
 						});
@@ -320,15 +332,13 @@ server.get('/api/v1/email/invite', function (req, res) {
 server.post('/api/v1/email/invite', function (req, res) {
 	getInviteEmail(req.query.invite).then(function (email) {
 		// send email
-		postmark.sendEmail({
+		return sendEmail({
 			From:       EMAIL,
 			To:         email.info.invite.name ? email.info.invite.name + ' <' + email.info.invite.email + '>' : email.info.invite.email,
 			Subject:    email.info.subject,
 			HtmlBody:   email.html,
 			TrackOpens: true,
-		}, function (err) {
-			if (err) throw err; // @TODO
-			
+		}).then(function () {
 			res.json({success: true});
 		});
 	}).catch(function (err) {
@@ -428,15 +438,13 @@ server.get('/api/v1/email/added', function (req, res) {
 server.post('/api/v1/email/added', function (req, res) {
 	getAddedEmail(req.query.roster, req.query.invitee, req.query.inviter).then(function (email) {
 		// send email
-		postmark.sendEmail({
+		return sendEmail({
 			From:       EMAIL,
 			To:         email.info.invitee.name ? email.info.invitee.name + ' <' + email.info.invitee.email + '>' : email.info.invitee.email,
 			Subject:    email.info.subject,
 			HtmlBody:   email.html,
 			TrackOpens: true,
-		}, function (err) {
-			if (err) throw err; // @TODO
-			
+		}).then(function () {
 			res.json({success: true});
 		});
 	}).catch(function (err) {
