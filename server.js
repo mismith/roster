@@ -17,6 +17,19 @@ var fs        = require('fs'),
 	rest      = require('restler'),
 	scheduler = require('node-schedule');
 
+Object.defineProperty(Error.prototype, 'toJSON', {
+    value: function () {
+        var alt = {};
+
+        Object.getOwnPropertyNames(this).forEach(function (key) {
+            alt[key] = this[key];
+        }, this);
+
+        return alt;
+    },
+    configurable: true
+});
+
 // web app
 server.use(express.static('html'));
 server.get('/', express.static('html/index.html'));
@@ -271,6 +284,116 @@ server.post('/api/v1/email/invite', function (req, res) {
 		});
 	});
 });
+
+
+
+function getAddedInfo(rosterId, inviteeId, inviterId) {
+	var deferred = Q.defer();
+	
+	// fetch data
+	if (rosterId) {
+		new Firebase(FB_BASE_URL + '/data/rosters/' + rosterId).once('value', function (rosterSnap) {
+			var roster = rosterSnap.val();
+			if (roster) {
+				roster.$id = rosterId;
+				roster.url = '#/roster/' + roster.$id;
+				
+				if (inviteeId) {
+					new Firebase(FB_BASE_URL + '/data/users/' + inviteeId).once('value', function (inviteeSnap) {
+						var invitee = inviteeSnap.val();
+						if (invitee) {
+							invitee.$id = inviteeSnap.key();
+				
+							if (inviterId) {
+								new Firebase(FB_BASE_URL + '/data/users/' + inviterId).once('value', function (inviterSnap) {
+									var inviter = inviterSnap.val();
+									if (inviter) {
+										inviter.$id = inviterSnap.key();
+										inviter.avatar = 'http://graph.facebook.com/' + (inviter.facebook && inviter.facebook.id ? inviter.facebook.id + '/' : '') + 'picture?type=square';
+										
+										deferred.resolve({
+											roster:  roster,
+											invitee: invitee,
+											inviter: inviter,
+										});
+									} else {
+										deferred.reject(new Error('Inviter not found'));
+									}
+								});
+							} else {
+								deferred.reject(new Error('Inviter not specified'));
+							}
+						} else {
+							deferred.reject(new Error('Invitee not found'));
+						}
+					});
+				} else {
+					deferred.reject(new Error('Invitee not specified'));
+				}
+			} else {
+				deferred.reject(new Error('Roster not found'));
+			}
+		});
+	} else {
+		deferred.reject(new Error('Roster not specified'));
+	}
+	
+	return deferred.promise;
+}
+function getAddedEmail(rosterId, inviteeId, inviterId) {
+	var deferred = Q.defer();
+	
+	getCompiledTemplate('added', function (template) {
+		getAddedInfo(rosterId, inviteeId, inviterId).then(function (info) {
+			info.subject = info.inviter.name + ' added you to the "' + info.roster.name + '" roster';
+				
+			getJuicedEmail(template, info, function (html) {
+				deferred.resolve({
+					html: html,
+					info: info,
+				});
+			});
+		}).catch(function (err) {
+			deferred.reject(err);
+		});
+	});
+	
+	return deferred.promise;
+}
+server.get('/api/v1/email/added', function (req, res) {
+	getAddedEmail(req.query.roster, req.query.invitee, req.query.inviter).then(function (email) {
+		// return email as html
+		res.send(email.html);
+	}).catch(function (err) {
+		res.json({
+			success: false,
+			error: err,
+		});
+	});
+});
+server.post('/api/v1/email/added', function (req, res) {
+	getAddedEmail(req.query.roster, req.query.invitee, req.query.inviter).then(function (email) {
+		// send email
+		postmark.sendEmail({
+			From:       'support@roster-io.com',
+			To:         email.info.invitee.name ? email.info.invitee.name + ' <' + email.info.invitee.email + '>' : email.info.invitee.email,
+			Subject:    email.info.subject,
+			HtmlBody:   email.html,
+			TrackOpens: true,
+		}, function (err) {
+			if (err) throw err; // @TODO
+			
+			res.json({success: true});
+		});
+	}).catch(function (err) {
+		res.json({
+			success: false,
+			error:   err,
+		});
+	});
+});
+
+
 
 server.get('/api/v1/url/shorten', function (req, res) {
 	var id = 1000;
