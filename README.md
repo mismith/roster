@@ -7,8 +7,7 @@ Quickly poll your team roster's availability.
 ## TODO
 
 - enable custom reminder email times
-- improve loading screen
-- send email (+ notif) to existing user when added to new roster
+- improve loading screen messaging if angular fails, connectivity issues, etc
 - send email to roster members on event day to notify them
 - add local notifications for reminders (including push notifications for home screen apps?)
 - shareable urls on event pages
@@ -20,5 +19,5 @@ Quickly poll your team roster's availability.
 - fix toast position on android
 - auto-accept invites if invited user's email logs in (and not necessarily to accept that invite)
 - google contacts integration?
-- async email sending via queue in firebase
-- add online tracking to users
+- async email sending via debounced queue in firebase
+- add 'online' status tracking to users

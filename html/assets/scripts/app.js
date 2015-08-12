@@ -289,12 +289,15 @@ angular.module('roster-io', ['ui.router', 'ngMaterial', 'firebaseHelper', 'ngTou
 							$q.all([
 								$firebaseHelper.join(['data/users', user.$id, 'rosters'], 'data/rosters').$link($scope.roster.$id),
 								$firebaseHelper.join(['data/rosters', $scope.roster.$id, 'participants'], 'data/users').$link(user.$id),
+								Api.post('email/added', {params: {roster: $scope.roster.$id, invitee: user.$id, inviter: $scope.$me.$id}}),
 							]).then(function () {
 								deferred.resolve();
 								
 								$mdToast.showSimple({
 									content: '"' + user.name + '" added.',
 								});
+							}).catch(function (err) {
+								deferred.reject(err);
 							});
 						}
 					});
@@ -310,7 +313,7 @@ angular.module('roster-io', ['ui.router', 'ngMaterial', 'firebaseHelper', 'ngTou
 							var inviteId = inviteRef.key();
 							
 							// send email
-							Api.post('email/invite', undefined, {params: {invite: inviteId}})
+							Api.post('email/invite', {params: {invite: inviteId}})
 								.then(function () {
 									// log as sent
 									inviteRef.update({sent: moment().format()});
@@ -683,10 +686,10 @@ angular.module('roster-io', ['ui.router', 'ngMaterial', 'firebaseHelper', 'ngTou
 	.factory('Api', function ($http, $q) {
 		var BASE_URL = '/api/v1/';
 		return {
-			post: function (method, data, config) {
+			post: function (method, config) {
 				var deferred = $q.defer();
 				
-				$http.post(BASE_URL + method.replace(/^\/+/, ''), data, config)
+				$http.post(BASE_URL + method.replace(/^\/+/, ''), config.data, config)
 					.success(function (res) {
 						if (res && res.success) {
 							deferred.resolve(res);
