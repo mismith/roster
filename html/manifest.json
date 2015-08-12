@@ -8,5 +8,6 @@
       "density": "4.0"
     }
   ],
-  "display": "standalone"
+  "display": "standalone",
+  "start_url": "/index.html"
 }
