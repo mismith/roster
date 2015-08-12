@@ -16,6 +16,6 @@ Quickly poll your team roster's availability.
 - in dialogs, clone edited object so cancellable changes aren't visible locally
 - fix dialog loading icon issues and error handling
 - fix buggy fast scrolling on mobile
-- fix page loading flicker (by caching results and/or resolving?)
+- fix page loading flicker (by caching results ($firebaseJoin) and/or resolving?)
 - fix toast position on android
 - auto-accept invites if invited user's email logs in (and not necessarily to accept that invite)
