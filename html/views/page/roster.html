@@ -89,8 +89,11 @@
 					</md-card>
 				</div>
 				<div ng-if="invites.length">
-					<md-subheader class="md-no-sticky">Invitees</md-subheader>
-					<md-card>
+					<md-subheader ng-click="invites.$expanded = ! invites.$expanded" class="md-no-sticky">
+						Invitees
+						<md-icon md-font-set="fa" ng-class="{'fa-plus-circle': ! invites.$expanded, 'fa-minus-circle': invites.$expanded}" style="font-size: 14px; line-height: 22px;"></md-icon>
+					</md-subheader>
+					<md-card ng-show="invites.$expanded">
 						<md-list>
 							<md-list-item ng-repeat="participant in invites | orderBy:'name'" class="invitee">
 								<img ng-src="{{ avatar(participant.facebook.id) }}" width="40" height="40" class="md-avatar" alt="{{ participant.name }}" />
