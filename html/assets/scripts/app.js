@@ -610,6 +610,7 @@ angular.module('roster-io', ['ui.router', 'ngMaterial', 'firebaseHelper', 'ngTou
 			templateUrl: 'views/directive/rsvp.html',
 			controller: function ($scope, RSVP) {
 				$scope.RSVP = RSVP;
+				$scope.mdSwipeItem = $scope.$parent.mdSwipeItem;
 			}
 		};
 	})

@@ -23,13 +23,7 @@
 									
 									<p>{{ event.name }}</p>
 									
-									<rsvp hide-sm ng-if="canEdit(roster.participants, roster.admins)" event="event" participant="$me"></rsvp>
-									<md-button hide-gt-sm ng-if="canEdit(roster.participants, roster.admins)" ng-click="mdSwipeItem.triggered.left || mdSwipeItem.triggered.right ? mdSwipeItem.close() : mdSwipeItem.teaseLeft(); $event.stopPropagation();"  class="md-fab" ng-class="{'md-success': RSVP(event).getParticipantStatus($me.$id) === 1, 'md-primary': RSVP(event).getParticipantStatus($me.$id) === -1, 'md-warn': RSVP(event).getParticipantStatus($me.$id) === 0}" aria-label="RSVP" ng-switch="RSVP(event).getParticipantStatus($me.$id)">
-										<md-icon ng-switch-when="1">check</md-icon>
-										<md-icon ng-switch-when="-1">swap_calls</md-icon>
-										<md-icon ng-switch-when="0">close</md-icon>
-										<md-icon ng-switch-default>more_horiz</md-icon>
-									</md-button>
+									<rsvp ng-if="canEdit(roster.participants, roster.admins)" event="event" participant="$me"></rsvp>
 								</div>
 								<md-swipe-actions hide-gt-sm layout="row">
 									<div class="md-swipe-action-left" layout="row" layout-align="start center">
