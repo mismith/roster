@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Generator: Adobe Illustrator 19.1.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg version="1.1" id="icon" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+	 viewBox="-378 -56.7 214 214" style="enable-background:new -378 -56.7 214 214;" xml:space="preserve">
+<style type="text/css">
+	.st0{fill:#3F51B5;}
+	.st1{display:none;}
+	.st2{fill:#F44336;}
+	.st3{fill:#008000;}
+	.st4{fill:#FF4081;}
+	.st5{fill:#333333;}
+</style>
+<path class="st0" d="M-228.3-56.3V-35h-85.3v-21.3H-335V-35h-10.7c-11.8,0-21.2,9.6-21.2,21.3l-0.1,149.3c0,11.7,9.5,21.3,21.3,21.3
+	h149.3c11.7,0,21.3-9.6,21.3-21.3V-13.7c0-11.7-9.6-21.3-21.3-21.3H-207v-21.3H-228.3z M-196.3,135.7h-149.3V18.3h149.3V135.7z"/>
+<path id="touchicon_1_" class="st1" d="M-271,65.8c10.4,0,18.6-8.4,18.6-18.7s-8.3-18.7-18.6-18.7s-18.7,8.4-18.7,18.7
+	S-281.4,65.8-271,65.8z M-271,78.2c-14.5,0-43.6,7.3-43.6,21.8v15.6h87.3v-15.6C-227.4,85.5-256.5,78.2-271,78.2z"/>
+<path id="touchicon_5_" class="st2" d="M-246.8,127.9c14.4,0,25.8-11.6,25.8-25.9s-11.5-25.9-25.8-25.9c-14.4,0-25.9,11.6-25.9,25.9
+	S-261.2,127.9-246.8,127.9z"/>
+<path id="touchicon_3_" class="st0" d="M-269.7,127.9c14.4,0,25.8-11.6,25.8-25.9s-11.5-25.9-25.8-25.9c-14.4,0-25.9,11.6-25.9,25.9
+	S-284,127.9-269.7,127.9z"/>
+<path id="touchicon_4_" class="st3" d="M-294.7,127.9c14.4,0,25.8-11.6,25.8-25.9s-11.5-25.9-25.8-25.9c-14.4,0-25.9,11.6-25.9,25.9
+	S-309.1,127.9-294.7,127.9z"/>
+<path id="touchicon_2_" class="st4" d="M-269.7,78.7c14.4,0,25.8-11.6,25.8-25.9s-11.5-25.9-25.8-25.9c-14.4,0-25.9,11.6-25.9,25.9
+	S-284,78.7-269.7,78.7z"/>
+<rect x="-227.4" y="-56.3" class="st5" width="20.4" height="49.8"/>
+<rect x="-335" y="-56.3" class="st5" width="20.4" height="49.8"/>
+</svg>
