@@ -467,7 +467,7 @@ angular.module('roster-io', ['ui.router', 'ngMaterial', 'firebaseHelper', 'ngTou
 									$scope.$me.$ref().update({
 										email:   invite.email || me.facebook.email,
 										name:    invite.name || me.facebook.displayName,
-										gender:  me.facebook.gender || 'male',
+										gender:  me.facebook.cachedUserProfile.gender || 'male',
 										rosters: rosters,
 									});
 									
