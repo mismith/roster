@@ -21,7 +21,7 @@ angular.module('roster-io', ['ui.router', 'ngMaterial', 'firebaseHelper', 'ngTou
 			.state('roster', {
 				url: '/roster/:roster',
 				templateUrl: 'views/page/roster.html',
-				controller: 'RosterCtrl', 
+				controller: 'RosterCtrl',
 			})
 			.state('event', {
 				url: '/roster/:roster/:event?v',
@@ -136,38 +136,6 @@ angular.module('roster-io', ['ui.router', 'ngMaterial', 'firebaseHelper', 'ngTou
 			}
 		});
 		$rootScope.roster = $rootScope.event = null;
-/*
-		$scope.threads = [];
-		$scope.loadThreads = function () {
-			$scope.$authThen(function (authData) {
-				FB.api('/me/threads', 'get', {access_token: authData.facebook.accessToken}, function (res) {
-					if (res.error) return console.error(res);
-					
-					$scope.$apply(function () {
-						$scope.threads = res.data;
-					});
-				});
-			});
-		};
-		
-		$scope.importParticipants = function (thread) {
-			var participants = {};
-			angular.forEach(thread.participants.data, function (participant) {
-				participants['facebook:' + participant.id] = {
-					id:   participant.id,
-					name: participant.name
-				};
-			});
-			
-			var admins = {};
-			admins[$scope.$me.$id] = $scope.$me.$id;
-			$firebaseHelper.array('data/rosters').$add({
-				admins:       admins,
-				thread:       thread.id,
-				participants: participants
-			});
-		};
-*/
 		
 		$scope.newRoster = function () {
 			$scope.roster = {
