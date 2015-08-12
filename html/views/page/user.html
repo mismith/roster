@@ -3,15 +3,15 @@
 		<header layout="column" layout-gt-md="row" class="content-wrap">
 			<section flex layout-padding>
 				<div layout="row" layout-align="start center">
-					<figure class="md-avatar" style="margin-right: 16px;">
+					<figure class="md-avatar" ng-class="{online: user.online === true}" style="margin-right: 16px;">
 						<img ng-src="{{ avatar(user.facebook.id, 'width=192&height=192') }}" width="96" height="96" />
 					</figure>
 					<div layout-padding>
 						<div>
-							<h1 ng-bind="user.name" style="display: inline-block;"></h1>
+							<h1 ng-bind="user.name" style="display: inline-block; margin: 0;"></h1>
 							<md-icon md-font-set="fa" ng-class="{'fa-mars': user.gender === 'male', 'fa-venus': user.gender === 'female'}"></md-icon>
 						</div>
-						<small ng-if="user.lastActive">Last Active: <span ng-bind="user.lastActive | date:'medium'"></span></small>
+						<small ng-if="user.online">Last Online: <span ng-bind="user.online === true ? 'Now' : (user.online | date:'medium')"></span></small>
 					</div>
 				</div>
 			</section>

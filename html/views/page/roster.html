@@ -72,7 +72,7 @@
 						<md-list>
 							<md-list-item ng-repeat="participant in participants | orderBy:'name'" ng-class="{previous: $state.$previous.params.user === participant.$id}" class="participant">
 								<div md-ink-ripple ng-click="$state.go('user', {user: participant.$id})" class="md-list-item-inner">
-									<img ng-src="{{ avatar(participant.facebook.id) }}" width="32" height="32" class="md-avatar" alt="{{ participant.name }}" />
+									<img ng-src="{{ avatar(participant.facebook.id) }}" width="40" height="40" class="md-avatar" ng-class="{online: participant.online === true}" alt="{{ participant.name }}" />
 									
 									<p>{{ participant.name }}</p>
 									<div ng-if="canEdit(roster.admins)">
@@ -93,7 +93,7 @@
 					<md-card>
 						<md-list>
 							<md-list-item ng-repeat="participant in invites | orderBy:'name'" class="invitee">
-								<img ng-src="{{ avatar(participant.facebook.id) }}" width="32" height="32" class="md-avatar" alt="{{ participant.name }}" />
+								<img ng-src="{{ avatar(participant.facebook.id) }}" width="40" height="40" class="md-avatar" alt="{{ participant.name }}" />
 								
 								<p>
 									<span>{{ participant.name || participant.email }}</span>

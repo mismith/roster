@@ -103,8 +103,8 @@ md-list-item {
 	&.previous {
 		border-left: solid 3px @primary;
 		
-		.md-no-style {
-			padding-left: @u*2 - 3px;
+		> * {
+			padding-left: @u*2 - 3px !important;
 		}
 	}
 	&:not(:first-child) {
@@ -250,6 +250,9 @@ md-icon {
 	}
 	img {
 		vertical-align: middle;
+	}
+	&.online {
+		box-shadow: 0 0 0 2px @accent;
 	}
 }
 .tooltip {

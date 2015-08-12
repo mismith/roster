@@ -53,9 +53,19 @@ angular.module('roster-io', ['ui.router', 'ngMaterial', 'firebaseHelper', 'ngTou
 		Auth.$onAuth(function (authData) {
 			if (authData) {
 				// logging in
-				$rootScope.$me = $firebaseHelper.object('data/users/' + authData.uid); // fetch existing user profile
-				authData.lastActive = moment().format();
-				$rootScope.$me.$ref().update(authData); // update it w/ any changes since last login
+				var meRef      = $firebaseHelper.ref('data/users/' + authData.uid);
+				$rootScope.$me = $firebaseHelper.object(meRef);
+				
+				// presence
+				$firebaseHelper.ref('.info/connected').on('value', function (snap) {
+					if (snap.val()) {
+						meRef.child('online').onDisconnect().set(moment().format());
+						meRef.child('online').set(true);
+					}
+				});
+				
+				// info
+				meRef.update(authData); // update it w/ any changes since last login
 			} else {
 				// page loaded or refreshed while not logged in, or logging out
 				$rootScope.$me = {};

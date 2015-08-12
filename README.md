@@ -12,12 +12,11 @@ Quickly poll your team roster's availability.
 - add local notifications for reminders (including push notifications for home screen apps?)
 - shareable urls on event pages
 - in dialogs, clone edited object so cancellable changes aren't visible locally
-- fix dialog loading icon issues and error handling
+- fix dialog error handling and loading icon issues
 - fix buggy fast scrolling on mobile
-- fix minor page loading flicker (by resolving)
+- fix minor page loading flicker (using resolve?)
 - fix toast position on android
 - auto-accept invites if invited user's email logs in (and not necessarily to accept that invite)
 - google contacts integration?
 - async email sending via debounced queue in firebase
-- add 'online' status tracking to users
 - add offline app cache for homescreen app (or native app wrapper?)
