@@ -122,8 +122,9 @@ angular.module('roster-io', ['ui.router', 'ngMaterial', 'firebaseHelper', 'ngTou
 				else return test ? test === $rootScope.$me.$id : false;
 			}).length || $rootScope.$me.admin;
 		};
-		$rootScope.avatar = function (userId) {
-			return '//graph.facebook.com/' + (userId ? userId + '/' : '') + 'picture?type=square';
+		$rootScope.avatar = function (userId, query) {
+			query = query || 'type=square';
+			return '//graph.facebook.com/' + (userId ? userId + '/' : '') + 'picture?' + query;
 		};
 	}])
 	
