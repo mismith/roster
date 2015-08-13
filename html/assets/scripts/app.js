@@ -270,6 +270,43 @@ angular.module('roster-io', ['ui.router', 'ngMaterial', 'firebaseHelper', 'ngTou
 		};
 		
 		
+		var sendInviteEmail = function (inviteId) {
+			var deferred  = $q.defer(),
+				inviteRef = $firebaseHelper.ref('data/invites', inviteId);
+				
+			inviteRef.once('value', function (inviteSnap) {
+				var invite = inviteSnap.val();
+				
+				Api.post('email/invite', {params: {invite: inviteId}}).then(function () {
+					// log as sent
+					inviteRef.update({sent: moment().format()});
+					
+					// add to roster's invites list
+					$firebaseHelper.object($scope.roster, 'invites').$loaded().then(function ($invites) {
+						$invites[inviteId] = inviteId;
+						$invites.$save().then(function () {
+							deferred.resolve();
+							
+							// alert user
+							$mdToast.showSimple({
+								content: 'Invitation email sent to "' + (invite.name ? invite.name + ' ' : '') + '<' + invite.email + '>".',
+							});
+						}).catch(function (err) {
+							deferred.reject(err);
+						});
+					}).catch(function (err) {
+						deferred.reject(err);
+					});
+				}).catch(function (err) {
+					deferred.reject(err);
+					
+					$mdToast.showSimple({
+						content: 'Error ' + err.code + ': ' + err.message + '.',
+					});
+				});
+			});
+			return deferred.promise;
+		};
 		$scope.inviteUser = function () {
 			$scope.invite = {
 				by: $scope.$me.$id,
@@ -320,34 +357,14 @@ angular.module('roster-io', ['ui.router', 'ngMaterial', 'firebaseHelper', 'ngTou
 						
 						// create invite
 						$firebaseHelper.array('data/invites').$add($scope.invite).then(function (inviteRef) {
-							var inviteId = inviteRef.key();
-							
 							// send email
-							Api.post('email/invite', {params: {invite: inviteId}})
-								.then(function () {
-									// log as sent
-									inviteRef.update({sent: moment().format()});
-									
-									// add to roster's invites list
-									$firebaseHelper.object($scope.roster, 'invites').$loaded().then(function (invites) {
-										invites[inviteId] = inviteId;
-										invites.$save().then(function () {
-											deferred.resolve();
-											
-											// alert user
-											$mdToast.showSimple({
-												content: 'Invitation email sent to "' + (scope.invite.name ? scope.invite.name + ' ' : '') + '<' + scope.invite.email + '>".',
-											});
-										});
-									});
-								})
-								.catch(function (err) {
-									deferred.reject(err);
-									
-									$mdToast.showSimple({
-										content: 'Error ' + err.code + ': ' + err.message + '.',
-									});
-								});
+							sendInviteEmail(inviteRef.key()).then(function () {
+								deferred.resolve();
+							}).catch(function (err) {
+								deferred.reject(err);
+							});
+						}).catch(function (err) {
+							deferred.reject(err);
 						});
 					}
 					
@@ -365,6 +382,11 @@ angular.module('roster-io', ['ui.router', 'ngMaterial', 'firebaseHelper', 'ngTou
 						content: 'Invite for "' + name + '" rescinded.',
 					});
 				});
+			}
+		};
+		$scope.resendInvite = function (skipConfirm, inviteId) {
+			if (skipConfirm || confirm('Are you sure you want to resend this user\'s invite?')) {
+				sendInviteEmail(inviteId);
 			}
 		};
 	})
