@@ -275,7 +275,7 @@ rostersRef.on('child_added', function (rosterSnap) {
 				runningJobs[rosterId] = new CronJob(cron, function () {
 					console.log('Running cron for roster ' + rosterId + '.');
 					dispatchEventReminders(rosterId);
-				}, undefined, true);
+				}, undefined, true, 'America/Edmonton');
 			} catch (err) {
 				console.error(err);
 			}
