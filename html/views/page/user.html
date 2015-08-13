@@ -27,12 +27,12 @@
 								<img ng-if="roster.avatar" ng-src="{{ roster.avatar }}" alt="{{ roster.name }} Avatar" width="40" height="40" />
 								<span ng-if=" ! roster.avatar" ng-bind="initials(roster.name)"></span>
 							</figure>
-							<p flex>{{ roster.name }}</p>
+							<p flex ng-bind="roster.name"></p>
 							<span class="counter">
-								<md-icon>event</md-icon> {{ roster.events | length }}
+								<md-icon>event</md-icon> <span ng-bind="roster.events | length"></span>
 							</span>
 							<span class="counter">
-								<md-icon>people</md-icon> {{ roster.participants | length }}
+								<md-icon>people</md-icon> <span ng-bind="roster.participants | length"></span>
 							</span>
 						</md-list-item>
 						<md-list-item ng-if=" ! (rosters | length)" class="no-results">

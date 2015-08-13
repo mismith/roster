@@ -9,7 +9,7 @@
 				
 				<div ng-show="event.notes">
 					<md-subheader class="md-no-sticky">Notes</md-subheader>
-					<div layout-padding style="white-space: pre-wrap;">{{ event.notes }}</div>
+					<div layout-padding ng-bind="event.notes" style="white-space: pre-wrap;"></div>
 				</div>
 			</section>
 			<section ng-show="event.location || event.locationPin">
@@ -31,13 +31,13 @@
 					<span flex ng-bind="status.name"></span>
 					
 					<span class="counter">
-						<md-icon class="fa fa-venus"></md-icon> {{ status.$participants | gender:'female' | length }}
+						<md-icon class="fa fa-venus"></md-icon> <span ng-bind="status.$participants | gender:'female' | length"></span>
 					</span>
 					<span class="counter">
-						<md-icon md-font-set="fa" class="fa-mars"></md-icon> {{ status.$participants | gender:'male' | length }}
+						<md-icon md-font-set="fa" class="fa-mars"></md-icon> <span ng-bind="status.$participants | gender:'male' | length"></span>
 					</span>
 					<span class="counter">
-						<md-icon>people</md-icon> {{ status.$participants | length }}
+						<md-icon>people</md-icon> <span ng-bind="status.$participants | length"></span>
 					</span>
 				</div>
 			</md-subheader>
@@ -46,7 +46,7 @@
 					<md-list-item ng-repeat="participant in status.$participants = (participants | filterByRsvp:event.rsvps:status.$id | orderBy:'name')" ng-class="{previous: $state.$previous.params.user === participant.$id}" md-swipe-item="canEdit(participant.$id, roster.admins)" md-swipe-right-triggered="RSVP(event).setParticipantStatus(participant.$id, 1); mdSwipeItem.close();" md-swipe-right-most-triggered="RSVP(event).setParticipantStatus(participant.$id, -1); mdSwipeItem.close();" md-swipe-left-most-triggered="RSVP(event).setParticipantStatus(participant.$id, 0); mdSwipeItem.close();">
 						<div md-ink-ripple ng-click="$state.go('user', {user: participant.$id})" class="md-list-item-inner md-swipe-item-inner" style="padding-right: 8px;">
 							<img ng-src="{{ avatar(participant.facebook.id) }}" width="40" height="40" class="md-avatar" ng-class="{online: participant.online === true}" alt="{{ participant.name }}" />
-							<p>{{ participant.name }}</p>
+							<p ng-bind="participant.name"></p>
 							
 							<rsvp ng-if="canEdit(participant.$id, roster.admins) || RSVP(event).getParticipantStatus(participant.$id) !== -2" event="event" participant="participant" readonly=" ! canEdit(participant.$id, roster.admins)"></rsvp>
 						</div>
