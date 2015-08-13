@@ -6,7 +6,6 @@ Quickly poll your team roster's availability.
 
 ## TODO
 
-- fix cron timezone issues
 - improve loading screen messaging if angular fails, connectivity issues, etc
 - send email to roster members on event day to notify them
 - async email sending via debounced queue in firebase
