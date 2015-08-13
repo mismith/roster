@@ -10,7 +10,6 @@ Quickly poll your team roster's availability.
 - improve loading screen messaging if angular fails, connectivity issues, etc
 - send email to roster members on event day to notify them
 - async email sending via debounced queue in firebase
-- fix toast position on android
 - fix dialog error handling and loading icon issues
 - in dialogs, clone edited object so cancellable changes aren't visible locally
 - auto-accept invites if invited user's email logs in (and not necessarily to accept that invite)
