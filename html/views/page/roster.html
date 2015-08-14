@@ -58,7 +58,7 @@
 							<span flex>Participants</span>
 							
 							<span class="counter">
-								<md-icon md-font-set="fa" class="fa-venus"></md-icon> <span ng-bind="participants | gender:'female' | length"></span>}
+								<md-icon md-font-set="fa" class="fa-venus"></md-icon> <span ng-bind="participants | gender:'female' | length"></span>
 							</span>
 							<span class="counter">
 								<md-icon md-font-set="fa" class="fa-mars"></md-icon> <span ng-bind="participants | gender:'male' | length"></span>
@@ -101,7 +101,7 @@
 								<p>
 									<span ng-bind="invite.name || invite.email"></span>
 									<small>
-										Invited <span ng-bind="invite.sent | date" title="{{ invite.sent }}"></span>
+										<span ng-if="invite.sent">Invited <span ng-bind="invite.sent | date" title="{{ invite.sent }}"></span></span>
 										<span ng-if="canEdit(roster.admins)">&bull; <a ng-click="resendInvite($event.shiftKey, invite.$id)">Resend</a></span>
 									</small>
 								</p>
