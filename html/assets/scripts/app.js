@@ -183,7 +183,7 @@ angular.module('roster-io', ['ui.router', 'ngMaterial', 'firebaseHelper', 'ngTou
 		};
 	})
 	
-	.controller('RosterCtrl', function ($scope, $rootScope, $firebaseHelper, $mdDialogForm, $state, $mdToast, $q, RSVP) {
+	.controller('RosterCtrl', function ($scope, $rootScope, $firebaseHelper, $mdDialogForm, $state, $mdToast, $q, RSVP, $http) {
 		$scope.timegroups   = $firebaseHelper.array('constants/timegroups'); // constant
 		
 		$rootScope.roster   = $firebaseHelper.object('data/rosters', $state.params.roster);
@@ -315,6 +315,30 @@ angular.module('roster-io', ['ui.router', 'ngMaterial', 'firebaseHelper', 'ngTou
 			$scope.loadExistingUser = function (user) {
 				$scope.invite.name  = user.name;
 				$scope.invite.email = user.email;
+			};
+			$scope.importGoogleContacts = function () {
+				$scope.contacts = [];
+				gapi.auth.authorize({
+					client_id: '413081268225-vj2fi4to1uhlv6h7acdsn0l6kifjep21.apps.googleusercontent.com',
+					scope: 'https://www.googleapis.com/auth/contacts.readonly',
+					immediate: true,
+				}, function (authResponse) {
+					$http.get('https://www.google.com/m8/feeds/contacts/default/full?alt=json&max-results=9999999', {params: gapi.auth.getToken()}).then(function (response) {
+						if (response && response.data && response.data.feed && response.data.feed.entry) {
+							angular.forEach(response.data.feed.entry, function (contact) {
+								console.log(contact);
+								angular.forEach(contact.gd$email, function (email) {
+									if (contact.title.$t) {
+										$scope.contacts.push({
+											name: contact.title.$t,
+											email: email.address,
+										});
+									}
+								});
+							});
+						}
+					});
+				});
 			};
 			
 			$mdDialogForm.show({
@@ -666,6 +690,11 @@ angular.module('roster-io', ['ui.router', 'ngMaterial', 'firebaseHelper', 'ngTou
 			if (angular.isArray(array)) return array.length;
 			if (angular.isObject(array)) return Object.keys(array).length;
 			return 0;
+		};
+	})
+	.filter('concat', function () {
+		return function (array, append) {
+			return array.concat(append);
 		};
 	})
 	

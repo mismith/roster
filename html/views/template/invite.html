@@ -1,11 +1,17 @@
-<md-autocomplete md-items="user in filteredUsers = (users | filter:{name: invite.name})" md-search-text="invite.name" md-search-text-change="checkExistingUser(filteredUsers)" md-selected-item="existingUser" md-selected-item-change="loadExistingUser(existingUser)" md-item-text="user.name" md-floating-label="Name">
+<md-autocomplete md-items="user in filteredUsers = (users | concat:contacts | filter:{name: invite.name})" md-search-text="invite.name" md-selected-item="existingUser" md-selected-item-change="loadExistingUser(existingUser)" md-item-text="user.name" md-floating-label="Name">
 	<md-item-template>
 		<img ng-src="{{ avatar(user.facebook.id) }}" width="24" height="24" alt="{{ user.name }}" class="md-avatar" ng-class="{online: user.online === true}" />
 		&nbsp;&nbsp;
 		<span md-highlight-text="invite.name" md-highlight-flags="i">{{ user.name }}</span>
+		&nbsp;&nbsp;
+		<small md-highlight-text="invite.email" md-highlight-flags="i">({{ user.email }})</small>
 	</md-item-template>
 </md-autocomplete>
 <md-input-container class="required">
 	<label>Email</label>
 	<input type="email" ng-model="invite.email" required />
 </md-input-container>
+<div>
+	<md-button ng-if=" ! contacts.length" ng-click="importGoogleContacts()" class="md-google" style="margin: 0;"><md-icon md-font-set="fa" class="fa-google-plus"></md-icon> Import Google Contacts</md-button>
+	<small ng-if="contacts.length"><md-icon md-font-set="fa" class="fa-google-plus"></md-icon>&nbsp;&nbsp; {{ contacts | length }} contacts imported</small>
+</div>
