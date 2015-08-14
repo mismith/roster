@@ -183,7 +183,7 @@ angular.module('roster-io', ['ui.router', 'ngMaterial', 'firebaseHelper', 'ngTou
 		};
 	}])
 	
-	.controller('RosterCtrl', ["$scope", "$rootScope", "$firebaseHelper", "$mdDialogForm", "$state", "$mdToast", "$q", "Api", "RSVP", function ($scope, $rootScope, $firebaseHelper, $mdDialogForm, $state, $mdToast, $q, Api, RSVP) {
+	.controller('RosterCtrl', ["$scope", "$rootScope", "$firebaseHelper", "$mdDialogForm", "$state", "$mdToast", "$q", "RSVP", function ($scope, $rootScope, $firebaseHelper, $mdDialogForm, $state, $mdToast, $q, RSVP) {
 		$scope.timegroups   = $firebaseHelper.array('constants/timegroups'); // constant
 		
 		$rootScope.roster   = $firebaseHelper.object('data/rosters', $state.params.roster);
@@ -277,10 +277,7 @@ angular.module('roster-io', ['ui.router', 'ngMaterial', 'firebaseHelper', 'ngTou
 			inviteRef.once('value', function (inviteSnap) {
 				var invite = inviteSnap.val();
 				
-				Api.post('email/invite', {params: {invite: inviteId}}).then(function () {
-					// log as sent
-					inviteRef.update({sent: moment().format()});
-					
+				$firebaseHelper.array('email/queue').$add({template: 'invite', data: {inviteId: inviteId}}).then(function () {
 					// add to roster's invites list
 					$firebaseHelper.object($scope.roster, 'invites').$loaded().then(function ($invites) {
 						$invites[inviteId] = inviteId;
@@ -336,7 +333,7 @@ angular.module('roster-io', ['ui.router', 'ngMaterial', 'firebaseHelper', 'ngTou
 							$q.all([
 								$firebaseHelper.join(['data/users', user.$id, 'rosters'], 'data/rosters').$link($scope.roster.$id),
 								$firebaseHelper.join(['data/rosters', $scope.roster.$id, 'participants'], 'data/users').$link(user.$id),
-								Api.post('email/added', {params: {roster: $scope.roster.$id, invitee: user.$id, inviter: $scope.$me.$id}}),
+								$firebaseHelper.array('email/queue').$add({template: 'added', data: {rosterId: $scope.roster.$id, inviteeId: user.$id, inviterId: $scope.$me.$id}}),
 							]).then(function () {
 								deferred.resolve();
 								
@@ -715,7 +712,8 @@ angular.module('roster-io', ['ui.router', 'ngMaterial', 'firebaseHelper', 'ngTou
 			},
 		};
 	}])
-	.factory('Api', ["$http", "$q", function ($http, $q) {
+/*
+	.factory('Api', function ($http, $q) {
 		var BASE_URL = '/api/v1/';
 		return {
 			post: function (method, config) {
@@ -736,7 +734,8 @@ angular.module('roster-io', ['ui.router', 'ngMaterial', 'firebaseHelper', 'ngTou
 				return deferred.promise;
 			},
 		};
-	}])
+	})
+*/
 	
 	
 	.directive('loading', function () {

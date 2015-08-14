@@ -1,7 +1,8 @@
 #!/bin/env node
 
-var FB_BASE_URL = 'https://roster-io.firebaseio.com',
-	EMAIL       = 'support@roster-io.com';
+var FB_BASE_URL   = 'https://roster-io.firebaseio.com',
+	FB_AUTH_TOKEN = 'xwYj28J4UELF5WgifokLbqjN71mFE9Y4cBwykmyI',
+	EMAIL         = 'support@roster-io.com';
 
 var fs        = require('fs'),
 	express   = require('express'),
@@ -97,7 +98,7 @@ function sendEmail(options) {
 
 
 
-function getEventReminderInfo(rosterId, eventId) {
+function getReminderInfo(rosterId, eventId) {
 	var deferred = Q.defer();
 	
 	// fetch data
@@ -135,11 +136,11 @@ function getEventReminderInfo(rosterId, eventId) {
 	
 	return deferred.promise;
 }
-function getEventReminderEmailTemplate(rosterId, eventId) {
+function getReminderEmailTemplate(rosterId, eventId) {
 	var deferred = Q.defer();
 	
 	getCompiledTemplate('reminder', function (template) {
-		getEventReminderInfo(rosterId, eventId).then(function (info) {
+		getReminderInfo(rosterId, eventId).then(function (info) {
 			info.subject = 'Reminder: RSVP Required - ' + info.roster.name + ' - ' + info.event.name;
 			info.moment  = moment;
 			
@@ -154,11 +155,11 @@ function getEventReminderEmailTemplate(rosterId, eventId) {
 	
 	return deferred.promise;
 }
-function sendEventReminderEmails(rosterId, eventId, callback) {
+function sendReminderEmails(rosterId, eventId, callback) {
 	// @TODO double check all the error handling in here
 	var deferred = Q.defer();
 	
-	getEventReminderEmailTemplate(rosterId, eventId).then(function (template) {
+	getReminderEmailTemplate(rosterId, eventId).then(function (template) {
 		var response = {success: true, sent: [], skipped: [], failed: []};
 		
 		var deferreds = [];
@@ -210,7 +211,7 @@ function sendEventReminderEmails(rosterId, eventId, callback) {
 	return deferred.promise;
 }
 server.get('/api/v1/email/reminder', function (req, res) {
-	getEventReminderEmailTemplate(req.query.roster, req.query.event).then(function (template) {
+	getReminderEmailTemplate(req.query.rosterId, req.query.eventId).then(function (template) {
 		getJuicedEmail(template.html, template.info, function (html) {
 			// display email
 			res.send(html);
@@ -223,7 +224,7 @@ server.get('/api/v1/email/reminder', function (req, res) {
 	});
 });
 server.post('/api/v1/email/reminder', function (req, res) {
-	sendEventReminderEmails(req.query.roster, req.query.event).then(function (response) {
+	sendReminderEmails(req.query.rosterId, req.query.eventId).then(function (response) {
 		res.json(response);
 	}).catch(function (err) {
 		res.json({
@@ -236,7 +237,7 @@ server.post('/api/v1/email/reminder', function (req, res) {
 
 
 
-function dispatchEventReminders(rosterId) {
+function dispatchReminders(rosterId) {
 	new Firebase(FB_BASE_URL + '/data/rosters/' + rosterId + '/events').once('value', function (eventsSnap) {
 		var events = eventsSnap.val();
 		
@@ -247,7 +248,7 @@ function dispatchEventReminders(rosterId) {
 				diff = date.diff(now, 'day');
 			if (0 <= diff && diff < 7) {
 				// send individual emails (to specific users based on logic within sentReminderEmails)
-				sendEventReminderEmails(rosterId, eventId).then(function (response) {
+				sendReminderEmails(rosterId, eventId).then(function (response) {
 					console.log('Event ' + eventId + ':\n', response); // @TODO: handle errors
 				}).catch(function (err) {
 					console.error(err); // @TODO
@@ -274,7 +275,7 @@ rostersRef.on('child_added', function (rosterSnap) {
 			try {
 				runningJobs[rosterId] = new CronJob(cron, function () {
 					console.log('Running cron for roster ' + rosterId + '.');
-					dispatchEventReminders(rosterId);
+					dispatchReminders(rosterId);
 				}, undefined, true, 'America/Edmonton');
 			} catch (err) {
 				console.error(err);
@@ -353,8 +354,28 @@ function getInviteEmail(inviteId) {
 	
 	return deferred.promise;
 }
+function sendInviteEmail(inviteId) {
+	var deferred = Q.defer();
+	
+	getInviteEmail(inviteId).then(function (email) {
+		// send email
+		return sendEmail({
+			From:       EMAIL,
+			To:         email.info.invite.name ? email.info.invite.name + ' <' + email.info.invite.email + '>' : email.info.invite.email,
+			Subject:    email.info.subject,
+			HtmlBody:   email.html,
+			TrackOpens: true,
+		}).then(function () {
+			deferred.resolve();
+		});
+	}).catch(function (err) {
+		deferred.reject(err);
+	});
+	
+	return deferred.promise;
+}
 server.get('/api/v1/email/invite', function (req, res) {
-	getInviteEmail(req.query.invite).then(function (email) {
+	getInviteEmail(req.query.inviteId).then(function (email) {
 		// return email as html
 		res.send(email.html);
 	}).catch(function (err) {
@@ -365,16 +386,9 @@ server.get('/api/v1/email/invite', function (req, res) {
 	});
 });
 server.post('/api/v1/email/invite', function (req, res) {
-	getInviteEmail(req.query.invite).then(function (email) {
-		// send email
-		return sendEmail({
-			From:       EMAIL,
-			To:         email.info.invite.name ? email.info.invite.name + ' <' + email.info.invite.email + '>' : email.info.invite.email,
-			Subject:    email.info.subject,
-			HtmlBody:   email.html,
-			TrackOpens: true,
-		}).then(function () {
-			res.json({success: true});
+	sendInviteEmail(req.query.inviteId).then(function () {
+		res.json({
+			success: true,
 		});
 	}).catch(function (err) {
 		res.json({
@@ -459,8 +473,28 @@ function getAddedEmail(rosterId, inviteeId, inviterId) {
 	
 	return deferred.promise;
 }
+function sendAddedEmail(rosterId, inviteeId, inviterId) {
+	var deferred = Q.defer();
+	
+	getAddedEmail(rosterId, inviteeId, inviterId).then(function (email) {
+		// send email
+		return sendEmail({
+			From:       EMAIL,
+			To:         email.info.invitee.name ? email.info.invitee.name + ' <' + email.info.invitee.email + '>' : email.info.invitee.email,
+			Subject:    email.info.subject,
+			HtmlBody:   email.html,
+			TrackOpens: true,
+		}).then(function () {
+			deferred.resolve();
+		});
+	}).catch(function (err) {
+		deferred.reject(err);
+	});
+	
+	return deferred.promise;
+}
 server.get('/api/v1/email/added', function (req, res) {
-	getAddedEmail(req.query.roster, req.query.invitee, req.query.inviter).then(function (email) {
+	getAddedEmail(req.query.rosterId, req.query.inviteeId, req.query.inviterId).then(function (email) {
 		// return email as html
 		res.send(email.html);
 	}).catch(function (err) {
@@ -471,16 +505,9 @@ server.get('/api/v1/email/added', function (req, res) {
 	});
 });
 server.post('/api/v1/email/added', function (req, res) {
-	getAddedEmail(req.query.roster, req.query.invitee, req.query.inviter).then(function (email) {
-		// send email
-		return sendEmail({
-			From:       EMAIL,
-			To:         email.info.invitee.name ? email.info.invitee.name + ' <' + email.info.invitee.email + '>' : email.info.invitee.email,
-			Subject:    email.info.subject,
-			HtmlBody:   email.html,
-			TrackOpens: true,
-		}).then(function () {
-			res.json({success: true});
+	sendAddedEmail(req.query.rosterId, req.query.inviteeId, req.query.inviterId).then(function () {
+		res.json({
+			success: true,
 		});
 	}).catch(function (err) {
 		res.json({
@@ -490,6 +517,39 @@ server.post('/api/v1/email/added', function (req, res) {
 	});
 });
 
+
+var emailQueueRef = new Firebase(FB_BASE_URL + '/email/queue');
+emailQueueRef.authWithCustomToken(FB_AUTH_TOKEN, function(err, authData) {
+	if (err) return console.error(err);
+	
+	emailQueueRef.on('child_added', function (emailSnap) {
+		var email = emailSnap.val();
+		if (email) {
+			var promise;
+			
+			switch (email.template) {
+				case 'added':
+					promise = sendAddedEmail(email.data.rosterId, email.data.inviteeId, email.data.inviterId);
+					break;
+				case 'invite':
+					promise = sendInviteEmail(email.data.inviteId).then(function () {
+						new Firebase(FB_BASE_URL + '/data/invites/' + email.data.inviteId).update({sent: moment().format()});
+					});
+					break;
+			}
+			
+			if (promise) {
+				promise.then(function () {
+					emailSnap.ref().remove();
+				}).catch(function (err) {
+					email.error   = err;
+					email.errorAt = moment().format();
+					emailSnap.ref().update(email);
+				});
+			}
+		}
+	});
+});
 
 
 /*
