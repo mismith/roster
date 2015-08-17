@@ -584,7 +584,7 @@ function getUrl(hash) {
 	
 	return deferred.promise;
 }
-server.get('/api/v1/url/short', function (req, res) {
+server.get('/api/v1/url/unshorten', function (req, res) {
 	var hash = req.query.hash;
 	getUrl(hash).then(function (url) {
 		res.send({
@@ -599,20 +599,38 @@ server.get('/api/v1/url/short', function (req, res) {
 		});
 	});
 });
-server.post('/api/v1/url/short', function (req, res) {
+server.post('/api/v1/url/shorten', function (req, res) {
 	var urlsRef = new Firebase(FB_BASE_URL + '/data/urls');
 	urlsRef.once('value', function (urlsSnap) {
-		var id   = urlsSnap.numChildren() + 1000 + 1,
-			hash = generateHash(id),
+		var urls = urlsSnap.val(),
 			url  = req.query.url || BASE_URL + req.query.path;
 		
-		urlsRef.child(hash).set(url, function () {
-			res.json({
-				success: true,
-				hash:    hash,
-				url:     url,
+		if (url) {
+			// check if url has already been shortened
+			var hash;
+			_.each(urls, function(u, h) {
+				if (url === u) {
+					hash = h + '';
+					return false;
+				}
 			});
-		});
+			// otherwise, generate a new one
+			if ( ! hash) hash = generateHash(urlsSnap.numChildren() + 1000 + 1);
+			
+			// save it
+			urlsRef.child(hash).set(url, function () {
+				res.json({
+					success: true,
+					hash:    hash,
+					url:     url,
+				});
+			});
+		} else {
+			res.json({
+				success: false,
+				error:   new Error('URL or Path not specified'),
+			});
+		}
 	});
 });
 server.all('/api/v1/url/redirect', function (req, res) {

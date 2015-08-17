@@ -413,7 +413,7 @@ angular.module('roster-io', ['ui.router', 'ngMaterial', 'firebaseHelper', 'ngTou
 		};
 	})
 		
-	.controller('EventCtrl', function ($scope, $rootScope, $firebaseHelper, $mdDialogForm, $state, $mdToast, Auth, RSVP, $location) {
+	.controller('EventCtrl', function ($scope, $rootScope, $firebaseHelper, $mdDialogForm, $state, $mdToast, Auth, RSVP, $location, API, $stateParams) {
 		$rootScope.roster = $firebaseHelper.object('data/rosters', $state.params.roster);
 		$rootScope.event  = $firebaseHelper.object($scope.roster, 'events', $state.params.event);
 		
@@ -435,8 +435,20 @@ angular.module('roster-io', ['ui.router', 'ngMaterial', 'firebaseHelper', 'ngTou
 		// helpers
 		$scope.urlencode = window.encodeURIComponent;
 		
-		$scope.shareEvent = function () {
+		var sharePrompt = function () {
 			prompt('Copy and paste this URL:', $rootScope.BASE_SHORT_URL + $scope.event.hash);
+		};
+		$scope.shareEvent = function () {
+			if ($scope.event.hash) {
+				sharePrompt();
+			} else {
+				API.post('/url/shorten', {params: {path: '/' + $state.href('event', $stateParams)}}).then(function (data) {
+					if (data && data.hash) {
+						$scope.event.hash = data.hash;
+						$scope.event.$save().then(sharePrompt);
+					}
+				});
+			}
 		};
 		
 		// CRUD
@@ -746,8 +758,7 @@ angular.module('roster-io', ['ui.router', 'ngMaterial', 'firebaseHelper', 'ngTou
 			},
 		};
 	})
-/*
-	.factory('Api', function ($http, $q) {
+	.factory('API', function ($http, $q) {
 		var BASE_URL = '/api/v1/';
 		return {
 			post: function (method, config) {
@@ -769,7 +780,6 @@ angular.module('roster-io', ['ui.router', 'ngMaterial', 'firebaseHelper', 'ngTou
 			},
 		};
 	})
-*/
 	
 	
 	.directive('loading', function () {
