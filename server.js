@@ -17,7 +17,6 @@ var fs        = require('fs'),
 	extend    = require('node.extend'),
 	Q         = require('q')
 	_         = require('lodash'),
-	rest      = require('restler'),
 	CronJob   = require('cron').CronJob;
 
 // make Error object's JSON-ifiable more easily
