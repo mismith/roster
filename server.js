@@ -36,7 +36,9 @@ Object.defineProperty(Error.prototype, 'toJSON', {
 
 // server
 server.use(express.static('html'));
-server.get('/*', express.static('html/index.html'));
+server.all('/*', function(req, res){
+  res.sendfile(__dirname + '/html/index.html');
+});
 server.listen(process.env.OPENSHIFT_NODEJS_PORT || 3030, process.env.OPENSHIFT_NODEJS_IP || '127.0.0.1');
 
 // api
