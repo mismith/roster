@@ -636,12 +636,16 @@ server.post('/api/v1/url/shorten', function (req, res) {
 server.all('/api/v1/url/redirect', function (req, res) {
 	var hash = req.query.hash || (req.query.from || '').replace(/^\/+|\/+$/g, '');
 	
-	getUrl(hash).then(function (url) {
-		res.redirect(url);
-	}).catch(function (err) {
-		res.json({
-			success: false,
-			error:   err,
+	if (hash) {
+		getUrl(hash).then(function (url) {
+			res.redirect(url);
+		}).catch(function (err) {
+			res.json({
+				success: false,
+				error:   err,
+			});
 		});
-	});
+	} else {
+		res.redirect(BASE_URL);
+	}
 });
