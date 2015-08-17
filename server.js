@@ -568,15 +568,19 @@ function generateHash(n) {
 function getUrl(hash) {
 	var deferred = Q.defer();
 	
-	new Firebase(FB_BASE_URL + '/data/urls/' + hash).once('value', function (urlSnap) {
-		var url = urlSnap.val();
-		
-		if (url) {
-			deferred.resolve(url);
-		} else {
-			deferred.reject(new Error('URL not found for hash "' + hash + '"'));
-		}
-	});
+	if (hash) {
+		new Firebase(FB_BASE_URL + '/data/urls/' + hash).once('value', function (urlSnap) {
+			var url = urlSnap.val();
+			
+			if (url) {
+				deferred.resolve(url);
+			} else {
+				deferred.reject(new Error('URL not found for hash "' + hash + '"'));
+			}
+		});
+	} else {
+		deferred.reject(new Error('Hash not specified'));
+	}
 	
 	return deferred.promise;
 }
@@ -600,7 +604,7 @@ server.post('/api/v1/url/short', function (req, res) {
 	urlsRef.once('value', function (urlsSnap) {
 		var id   = urlsSnap.numChildren() + 1000 + 1,
 			hash = generateHash(id),
-			url  = BASE_URL + req.query.url;
+			url  = req.query.url || BASE_URL + req.query.path;
 		
 		urlsRef.child(hash).set(url, function () {
 			res.json({
@@ -612,7 +616,7 @@ server.post('/api/v1/url/short', function (req, res) {
 	});
 });
 server.all('/api/v1/url/redirect', function (req, res) {
-	var hash = req.query.from.replace(/^\/+|\/+$/g, '');
+	var hash = (req.query.from || '').replace(/^\/+|\/+$/g, '');
 	
 	getUrl(hash).then(function (url) {
 		res.redirect(url);
