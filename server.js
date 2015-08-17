@@ -1,6 +1,7 @@
 #!/bin/env node
 
-var FB_BASE_URL   = 'https://roster-io.firebaseio.com',
+var BASE_URL      = 'http://www.roster-io.com',
+	FB_BASE_URL   = 'https://roster-io.firebaseio.com',
 	FB_AUTH_TOKEN = 'xwYj28J4UELF5WgifokLbqjN71mFE9Y4cBwykmyI',
 	EMAIL         = 'support@roster-io.com';
 
@@ -33,9 +34,10 @@ Object.defineProperty(Error.prototype, 'toJSON', {
     configurable: true
 });
 
-// web app
+// server
 server.use(express.static('html'));
 server.get('/', express.static('html/index.html'));
+server.listen(process.env.OPENSHIFT_NODEJS_PORT || 3030, process.env.OPENSHIFT_NODEJS_IP || '127.0.0.1');
 
 // api
 /*
@@ -552,22 +554,72 @@ emailQueueRef.authWithCustomToken(FB_AUTH_TOKEN, function(err, authData) {
 });
 
 
-/*
-server.get('/api/v1/url/shorten', function (req, res) {
-	var id = 1000;
+// url shortening
+function generateHash(n) {
 	var alphabet = 'UteQA9bjVXygpBE2vchDdnKrk7xMFHGa3RmCf6uZws4Tl8zqNWYPJ',
-		count    = alphabet.length;
+		length   = alphabet.length;
 	
-	function hash(n) {
-		if(n > count) {
-			return hash(Math.floor(n / count)) + alphabet[n % count];
-		} else {
-			return alphabet[n];
-		}
+	if(n > length) {
+		return generateHash(Math.floor(n / length)) + alphabet[n % length];
+	} else {
+		return alphabet[n];
 	}
+}
+function getUrl(hash) {
+	var deferred = Q.defer();
 	
-	res.send(hash(req.query.url));
+	new Firebase(FB_BASE_URL + '/data/urls/' + hash).once('value', function (urlSnap) {
+		var url = urlSnap.val();
+		
+		if (url) {
+			deferred.resolve(url);
+		} else {
+			deferred.reject(new Error('URL not found for hash "' + hash + '"'));
+		}
+	});
+	
+	return deferred.promise;
+}
+server.get('/api/v1/url/short', function (req, res) {
+	var hash = req.query.hash;
+	getUrl(hash).then(function (url) {
+		res.send({
+			success: true,
+			hash:    hash,
+			url:     url,
+		});
+	}).catch(function (err) {
+		res.json({
+			success: false,
+			error:   err,
+		});
+	});
 });
-*/
-
-server.listen(process.env.OPENSHIFT_NODEJS_PORT || 3030, process.env.OPENSHIFT_NODEJS_IP || '127.0.0.1');
+server.post('/api/v1/url/short', function (req, res) {
+	var urlsRef = new Firebase(FB_BASE_URL + '/data/urls');
+	urlsRef.once('value', function (urlsSnap) {
+		var id   = urlsSnap.numChildren() + 1000 + 1,
+			hash = generateHash(id),
+			url  = BASE_URL + req.query.url;
+		
+		urlsRef.child(hash).set(url, function () {
+			res.json({
+				success: true,
+				hash:    hash,
+				url:     url,
+			});
+		});
+	});
+});
+server.all('/api/v1/url/redirect', function (req, res) {
+	var hash = req.query.from.replace(/^\/+|\/+$/g, '');
+	
+	getUrl(hash).then(function (url) {
+		res.redirect(url);
+	}).catch(function (err) {
+		res.json({
+			success: false,
+			error:   err,
+		});
+	});
+});
