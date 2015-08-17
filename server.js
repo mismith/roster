@@ -22,21 +22,21 @@ var fs        = require('fs'),
 
 // make Error object's JSON-ifiable more easily
 Object.defineProperty(Error.prototype, 'toJSON', {
-    value: function () {
-        var alt = {};
+	value: function () {
+		var alt = {};
 
-        Object.getOwnPropertyNames(this).forEach(function (key) {
-            alt[key] = this[key];
-        }, this);
+		Object.getOwnPropertyNames(this).forEach(function (key) {
+			alt[key] = this[key];
+		}, this);
 
-        return alt;
-    },
-    configurable: true
+		return alt;
+	},
+	configurable: true
 });
 
 // server
 server.use(express.static('html'));
-server.get('/', express.static('html/index.html'));
+server.get('/*', express.static('html/index.html'));
 server.listen(process.env.OPENSHIFT_NODEJS_PORT || 3030, process.env.OPENSHIFT_NODEJS_IP || '127.0.0.1');
 
 // api

@@ -7,6 +7,7 @@ Quickly poll your team roster's availability.
 ## @TODO
 
 - improve loading screen messaging if angular fails, connectivity issues, etc
+- improve user profiles by adding recent activity + upcoming rsvps
 - improve notifications with user-selectable preferences
 	- send email to roster members on event day to notify them
 	- add local notifications for reminders (including push notifications for home screen apps?)

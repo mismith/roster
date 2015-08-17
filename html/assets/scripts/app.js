@@ -2,14 +2,15 @@ window.STRICT_INVITE_CHECK = false;
 
 angular.module('roster-io', ['ui.router', 'ngMaterial', 'firebaseHelper', 'ngTouch'])
 	
-	.config(function ($urlRouterProvider, $stateProvider, $firebaseHelperProvider, $sceProvider) {
+	.config(function ($locationProvider, $urlRouterProvider, $stateProvider, $firebaseHelperProvider, $sceProvider) {
 		// routing
-		$urlRouterProvider.when('',  '/');
-		$urlRouterProvider.when('/',  '/rosters'); // @TEMP?
+		$locationProvider.html5Mode(true);
+		$urlRouterProvider.when('', '/');
+		$urlRouterProvider.when('/rosters', '/');
 		$stateProvider
 			// pages
 			.state('rosters', {
-				url: '/rosters',
+				url: '/',
 				templateUrl: 'views/page/rosters.html',
 				resolve: {
 					currentAuth:  function (Auth) {
