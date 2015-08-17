@@ -616,7 +616,7 @@ server.post('/api/v1/url/short', function (req, res) {
 	});
 });
 server.all('/api/v1/url/redirect', function (req, res) {
-	var hash = (req.query.from || '').replace(/^\/+|\/+$/g, '');
+	var hash = req.query.hash || (req.query.from || '').replace(/^\/+|\/+$/g, '');
 	
 	getUrl(hash).then(function (url) {
 		res.redirect(url);
