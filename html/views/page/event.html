@@ -11,17 +11,19 @@
 				<div layout-padding ng-bind="event.notes" style="white-space: pre-wrap;"></div>
 			</div>
 		</section>
-		<section ng-show="event.location || event.locationPin">
-			<md-subheader class="md-no-sticky">Location</md-subheader>
-			<h2 layout-margin ng-show="event.location">
-				<a ng-href="{{ event.locationUrl }}" target="_blank" class="passthru">
-					<span ng-bind="event.location" style="white-space: pre-wrap;"></span>
-					<md-icon ng-if="event.locationUrl" style="line-height: 16px;">place</md-icon>
-				</a>
-			</h2>
-			<md-card ng-show="event.locationPin" layout-padding>
-				<a ng-href="{{ event.locationUrl }}" target="_blank"><img ng-src="{{ 'http://maps.googleapis.com/maps/api/staticmap?markers=' + event.locationPin + '&zoom=15&size=300x200&maptype=hybrid' }}" width="300" height="200" /></a>
-			</md-card>
+		<section>
+			<div ng-show="event.location || event.locationPin">
+				<md-subheader class="md-no-sticky">Location</md-subheader>
+				<h2 layout-margin ng-show="event.location">
+					<a ng-href="{{ event.locationUrl }}" target="_blank" class="passthru">
+						<span ng-bind="event.location" style="white-space: pre-wrap;"></span>
+						<md-icon ng-if="event.locationUrl" style="line-height: 16px;">place</md-icon>
+					</a>
+				</h2>
+				<md-card ng-show="event.locationPin" layout-padding>
+					<a ng-href="{{ event.locationUrl }}" target="_blank"><img ng-src="{{ 'http://maps.googleapis.com/maps/api/staticmap?markers=' + event.locationPin + '&zoom=15&size=300x200&maptype=hybrid' }}" width="300" height="200" /></a>
+				</md-card>
+			</div>
 		</section>
 	</header>
 	<section ng-repeat="status in statuses" ng-show="status.$participants | length" class="content-wrap">
@@ -72,17 +74,23 @@
 			</md-list>
 		</md-card>
 	</section>
-	
-	<md-fab-speed-dial ng-if="canEdit(roster.admins)" md-direction="up" class="md-scale md-fab-speed-dial-bottom-right">
+
+	<md-fab-speed-dial md-direction="up" class="md-scale md-fab-speed-dial-bottom-right">
 		<md-fab-trigger>
 			<div layout="row">
-				<label><div>Edit event</div></label>
-				<md-button ng-click="editEvent()" class="md-fab md-primary" aria-label="Edit event">
-					<md-icon>create</md-icon>
+				<label><div>Share event</div></label>
+				<md-button ng-click="shareEvent()" class="md-fab md-success" aria-label="Share event">
+					<md-icon>share</md-icon>
 				</md-button>
 			</div>
 		</md-fab-trigger>
-		<md-fab-actions>
+		<md-fab-actions ng-if="canEdit(roster.admins)">
+			<div layout="row">
+				<label><div>Edit event</div></label>
+				<md-button ng-click="editEvent()" class="md-fab md-mini md-raised md-primary" aria-label="Edit event">
+					<md-icon>create</md-icon>
+				</md-button>
+			</div>
 			<div layout="row">
 				<label><div>Delete event</div></label>
 				<md-button ng-click="deleteEvent($event.shiftKey)" class="md-fab md-mini md-raised md-warn" aria-label="Delete event">

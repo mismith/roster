@@ -97,6 +97,7 @@ angular.module('roster-io', ['ui.router', 'ngMaterial', 'firebaseHelper', 'ngTou
 		$rootScope.$state          = $state;
 		$rootScope.$firebaseHelper = $firebaseHelper;
 		$rootScope.console         = console;
+		$rootScope.BASE_SHORT_URL  = 'http://rstr.io/';
 		
 		// state
 		$rootScope.$on('$stateChangeSuccess', function(e, toState, toParams, fromState, fromParams){
@@ -433,6 +434,10 @@ angular.module('roster-io', ['ui.router', 'ngMaterial', 'firebaseHelper', 'ngTou
 		
 		// helpers
 		$scope.urlencode = window.encodeURIComponent;
+		
+		$scope.shareEvent = function () {
+			prompt('Copy and paste this URL:', $rootScope.BASE_SHORT_URL + $scope.event.hash);
+		};
 		
 		// CRUD
 		$scope.deleteEvent = function (skipConfirm) {
