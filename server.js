@@ -1,9 +1,11 @@
 #!/bin/env node
 
-var BASE_URL      = 'http://www.roster-io.com',
+var NAME          = 'Roster IO',
+	DOMAIN        = 'roster-io.com',
+	BASE_URL      = 'http://www.' + DOMAIN,
 	FB_BASE_URL   = 'https://roster-io.firebaseio.com',
 	FB_AUTH_TOKEN = 'xwYj28J4UELF5WgifokLbqjN71mFE9Y4cBwykmyI',
-	EMAIL         = 'support@roster-io.com',
+	EMAIL         = 'support@' + DOMAIN,
 	TIMEZONE      = 'America/Edmonton';
 
 var fs        = require('fs'),
@@ -18,7 +20,8 @@ var fs        = require('fs'),
 	extend    = require('node.extend'),
 	Q         = require('q')
 	_         = require('lodash'),
-	CronJob   = require('cron').CronJob;
+	CronJob   = require('cron').CronJob,
+	ical      = require('ical-generator');
 
 // config
 moment.tz.setDefault(TIMEZONE);
@@ -650,6 +653,107 @@ server.all('/api/v1/url/redirect', function (req, res) {
 		res.redirect(BASE_URL);
 	}
 });
+
+
+
+// calendars
+function createCal(options) {
+	return ical(_.extend({
+		domain:   DOMAIN,
+		timezone: TIMEZONE,
+		name:     NAME,
+		prodId:   {
+			company: NAME,
+			product: DOMAIN,
+		},
+	}, options || {}));
+}
+function getEventParticipantstatus(event, participantId) {
+	var status = undefined;
+	if (event && event.rsvps && event.rsvps[participantId]) {
+		switch(event.rsvps[participantId].status) {
+			case 1:  status = 'accepted'; break;
+			case 0:  status = 'declined'; break;
+			case -1: status = 'tentative'; break;
+		}
+	}
+	return status;
+}
+function getRosterCalendar(rosterId) {
+	var deferred = Q.defer();
+	if (rosterId) {
+		new Firebase(FB_BASE_URL + '/data/rosters/' + rosterId).once('value', function (rosterSnap) {
+			var roster = rosterSnap.val(),
+				cal    = createCal({
+					name: roster.name,
+				});
+			
+			new Firebase(FB_BASE_URL + '/data/users').once('value', function (usersSnap) {
+				var users = usersSnap.val();
+				
+				new Firebase(FB_BASE_URL + '/data/invites').once('value', function (invitesSnap) {
+					var invites = invitesSnap.val();
+					
+					_.each(roster.events, function (event, eventId) {
+						// populate event info
+						var calEvent = cal.createEvent({
+							id:          eventId,
+							summary:     event.name,
+							description: event.notes,
+							start:       moment(event.date).toDate(),
+							end:         moment(event.date).add(1, 'hours').toDate(),
+							location:    event.location,
+							url:         BASE_URL + '/roster/' + rosterId + '/' + eventId,
+							//status:      event.status,
+						});
+						
+						// add attendees
+						if (users) {
+							_.each(roster.participants, function (participantId) {
+								var user = users[participantId];
+								if (user) {
+									calEvent.createAttendee({
+										name:   user.name,
+										email:  user.email,
+										status: getEventParticipantstatus(event, participantId),
+									});
+								}
+							});
+						}
+						if (invites) {
+							_.each(roster.invites, function (inviteId) {
+								var invite = invites[inviteId];
+								if (invite) {
+									calEvent.createAttendee({
+										name:   invite.name,
+										email:  invite.email,
+									});
+								}
+							});
+						}
+					});
+					
+					deferred.resolve(cal);
+				});
+			});
+		});
+	} else {
+		deferred.reject(new Error('Roster not specified'));
+	}
+	return deferred.promise;
+}
+server.get('/api/v1/calendar/roster', function (req, res) {
+	getRosterCalendar(req.query.rosterId).then(function (cal) {
+		res.type('text/plain');
+		res.send(cal.toString());
+	}).catch(function (err) {
+		res.json({
+			success: false,
+			error:   new Error('Roster not specified'),
+		});
+	});
+});
+
 
 
 // routes

@@ -28,6 +28,7 @@
     "ejs": "^2.3.1",
     "express": "^3.4.8",
     "firebase": "^2.2.7",
+    "ical-generator": "^0.2.2",
     "juice": "^1.2.0",
     "lodash": "^3.10.1",
     "moment": "^2.10.3",
