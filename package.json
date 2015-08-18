@@ -26,7 +26,7 @@
   "dependencies": {
     "cron": "^1.0.9",
     "ejs": "^2.3.1",
-    "express": "^3.4.8",
+    "express": "^4.13.3",
     "firebase": "^2.2.7",
     "ical-generator": "^0.2.2",
     "juice": "^1.2.0",

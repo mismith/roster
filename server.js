@@ -44,16 +44,19 @@ Object.defineProperty(Error.prototype, 'toJSON', {
 server.use(express.static('html'));
 
 // api
-/*
-function authed(req, res, next) {
-	if (req.headers.authorization) {
-		next();
-	} else {
-		res.send(403);
-	}
-}
-*/
+var api = express.Router();
+server.use('/api/v1', api);
 
+// routes
+server.all('/*', function(req, res){
+	res.sendFile(__dirname + '/html/index.html');
+});
+
+// server
+server.listen(process.env.OPENSHIFT_NODEJS_PORT || 3030, process.env.OPENSHIFT_NODEJS_IP || '127.0.0.1');
+
+
+// api methods
 function getCompiledTemplate(templateId, callback) {
 	// read template
 	fs.readFile('html/emails/' + templateId + '.html', function (err, file) {
@@ -216,7 +219,7 @@ function sendReminderEmails(rosterId, eventId, callback) {
 	
 	return deferred.promise;
 }
-server.get('/api/v1/email/reminder', function (req, res) {
+api.get('/email/reminder', function (req, res) {
 	getReminderEmailTemplate(req.query.rosterId, req.query.eventId).then(function (template) {
 		getJuicedEmail(template.html, template.info, function (html) {
 			// display email
@@ -229,7 +232,7 @@ server.get('/api/v1/email/reminder', function (req, res) {
 		});
 	});
 });
-server.post('/api/v1/email/reminder', function (req, res) {
+api.post('/email/reminder', function (req, res) {
 	sendReminderEmails(req.query.rosterId, req.query.eventId).then(function (response) {
 		res.json(response);
 	}).catch(function (err) {
@@ -380,7 +383,7 @@ function sendInviteEmail(inviteId) {
 	
 	return deferred.promise;
 }
-server.get('/api/v1/email/invite', function (req, res) {
+api.get('/email/invite', function (req, res) {
 	getInviteEmail(req.query.inviteId).then(function (email) {
 		// return email as html
 		res.send(email.html);
@@ -391,7 +394,7 @@ server.get('/api/v1/email/invite', function (req, res) {
 		});
 	});
 });
-server.post('/api/v1/email/invite', function (req, res) {
+api.post('/email/invite', function (req, res) {
 	sendInviteEmail(req.query.inviteId).then(function () {
 		res.json({
 			success: true,
@@ -499,7 +502,7 @@ function sendAddedEmail(rosterId, inviteeId, inviterId) {
 	
 	return deferred.promise;
 }
-server.get('/api/v1/email/added', function (req, res) {
+api.get('/email/added', function (req, res) {
 	getAddedEmail(req.query.rosterId, req.query.inviteeId, req.query.inviterId).then(function (email) {
 		// return email as html
 		res.send(email.html);
@@ -510,7 +513,7 @@ server.get('/api/v1/email/added', function (req, res) {
 		});
 	});
 });
-server.post('/api/v1/email/added', function (req, res) {
+api.post('/email/added', function (req, res) {
 	sendAddedEmail(req.query.rosterId, req.query.inviteeId, req.query.inviterId).then(function () {
 		res.json({
 			success: true,
@@ -588,7 +591,7 @@ function getUrl(hash) {
 	
 	return deferred.promise;
 }
-server.get('/api/v1/url/unshorten', function (req, res) {
+api.get('/url/unshorten', function (req, res) {
 	var hash = req.query.hash;
 	getUrl(hash).then(function (url) {
 		res.send({
@@ -603,7 +606,7 @@ server.get('/api/v1/url/unshorten', function (req, res) {
 		});
 	});
 });
-server.post('/api/v1/url/shorten', function (req, res) {
+api.post('/url/shorten', function (req, res) {
 	var urlsRef = new Firebase(FB_BASE_URL + '/data/urls');
 	urlsRef.once('value', function (urlsSnap) {
 		var urls = urlsSnap.val(),
@@ -637,7 +640,7 @@ server.post('/api/v1/url/shorten', function (req, res) {
 		}
 	});
 });
-server.all('/api/v1/url/redirect', function (req, res) {
+api.all('/url/redirect', function (req, res) {
 	var hash = req.query.hash || (req.query.from || '').replace(/^\/+|\/+$/g, '');
 	
 	if (hash) {
@@ -725,8 +728,8 @@ function getRosterCalendar(rosterId) {
 								var invite = invites[inviteId];
 								if (invite) {
 									calEvent.createAttendee({
-										name:   invite.name,
-										email:  invite.email,
+										name:  invite.name,
+										email: invite.email,
 									});
 								}
 							});
@@ -742,7 +745,7 @@ function getRosterCalendar(rosterId) {
 	}
 	return deferred.promise;
 }
-server.get('/api/v1/calendar/roster', function (req, res) {
+api.get('/calendar/roster', function (req, res) {
 	getRosterCalendar(req.query.rosterId).then(function (cal) {
 		cal.serve(res);
 	}).catch(function (err) {
@@ -752,13 +755,3 @@ server.get('/api/v1/calendar/roster', function (req, res) {
 		});
 	});
 });
-
-
-
-// routes
-server.all('/*', function(req, res){
-	res.sendfile('html/index.html');
-});
-
-// server
-server.listen(process.env.OPENSHIFT_NODEJS_PORT || 3030, process.env.OPENSHIFT_NODEJS_IP || '127.0.0.1');
