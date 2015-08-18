@@ -13,6 +13,7 @@ var gulp         = require('gulp'),
 	
 	// watching
 	browserSync  = require('browser-sync'),
+	historyApiFallback = require('connect-history-api-fallback'),
 	
 	// linting
 	htmlhint     = require('gulp-htmlhint'),
@@ -53,6 +54,7 @@ var defaults = {
 		notify: false,
 		server: { 
 			baseDir: './',
+			middleware: [ historyApiFallback() ],
 		},
 		//proxy: 'example.dev',
 	},

@@ -21,3 +21,4 @@ Quickly poll your team roster's availability.
 - add offline app cache for homescreen app (or native app wrapper?)
 - fix buggy fast scrolling on touch
 - fix minor page loading flicker (using resolve?)
+- fix .fa size on user page
