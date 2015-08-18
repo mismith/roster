@@ -1,6 +1,7 @@
 // vars
 @u:        8px;
 @t:        300ms;
+@hh:       80px;
 @sm:       600px;
 @md:       960px;
 @primary:  rgb(63,81,181);
@@ -17,6 +18,7 @@
 // modifications
 md-content {
 	background-color: transparent;
+	padding-bottom: @hh;
 }
 md-card {
 	md-list {
@@ -411,6 +413,16 @@ a {
 	background-color: @accent;
 	color: @lightest;
 	font-size: 12px;
+}
+.center-sm {
+	@media (max-width: @sm) {
+		text-align: center;
+	}
+}
+.center-md {
+	@media (max-width: @md) {
+		text-align: center;
+	}
 }
 
 
