@@ -744,8 +744,7 @@ function getRosterCalendar(rosterId) {
 }
 server.get('/api/v1/calendar/roster', function (req, res) {
 	getRosterCalendar(req.query.rosterId).then(function (cal) {
-		res.type('text/plain');
-		res.send(cal.toString());
+		cal.serve(res);
 	}).catch(function (err) {
 		res.json({
 			success: false,
