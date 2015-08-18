@@ -3,7 +3,8 @@
 var BASE_URL      = 'http://www.roster-io.com',
 	FB_BASE_URL   = 'https://roster-io.firebaseio.com',
 	FB_AUTH_TOKEN = 'xwYj28J4UELF5WgifokLbqjN71mFE9Y4cBwykmyI',
-	EMAIL         = 'support@roster-io.com';
+	EMAIL         = 'support@roster-io.com',
+	TIMEZONE      = 'America/Edmonton';
 
 var fs        = require('fs'),
 	express   = require('express'),
@@ -12,12 +13,15 @@ var fs        = require('fs'),
 	postmark  = new Postmark.Client('75cdd97a-2c40-4319-a6a9-4576d0948d57'),
 	ejs       = require('ejs'),
 	juice     = require('juice'),
-	moment    = require('moment'),
+	moment    = require('moment-timezone'),
 	Firebase  = require('firebase'),
 	extend    = require('node.extend'),
 	Q         = require('q')
 	_         = require('lodash'),
 	CronJob   = require('cron').CronJob;
+
+// config
+moment.tz.setDefault(TIMEZONE);
 
 // make Error object's JSON-ifiable more easily
 Object.defineProperty(Error.prototype, 'toJSON', {
@@ -275,7 +279,7 @@ rostersRef.on('child_added', function (rosterSnap) {
 				runningJobs[rosterId] = new CronJob(cron, function () {
 					console.log('Running cron for roster ' + rosterId + '.');
 					dispatchReminders(rosterId);
-				}, undefined, true, 'America/Edmonton');
+				}, undefined, true, TIMEZONE);
 			} catch (err) {
 				console.error(err);
 			}
