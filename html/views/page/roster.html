@@ -1,6 +1,18 @@
 <div layout="column" flex>
 	<div layout="column" layout-gt-md="row" class="content-wrap">
 		<section flex>
+			<header layout-padding>
+				<div layout="row" layout-sm="column" layout-align="start center">
+					<figure ng-if="roster.avatar" class="md-avatar">
+						<img ng-src="{{ roster.avatar }}" width="96" height="96" />
+					</figure>
+					<h1 flex ng-bind="roster.name" style="margin: 16px;"></h1>
+					<div ng-if="roster.name">
+						<a ng-href="{{ 'webcal://www.roster-io.com/api/v1/calendar/roster?rosterId=' + roster.$id }}" class="md-button"><md-icon style="margin-right: 8px;">event_available</md-icon> Add to Calendar</a>
+					</div>
+				</div>
+				
+			</header>
 			<div ng-repeat="timegroup in timegroups" ng-show="timegroup.$id === 'upcoming' || (timegroup.$events | length)" ng-init="timegroup.$id === 'past' ? past = timegroup.$collapsed = true : null;">
 				<md-subheader class="md-no-sticky" ng-click="past ? timegroup.$collapsed = ! timegroup.$collapsed : null">
 					<span ng-bind="timegroup.name"></span>

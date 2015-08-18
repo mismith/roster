@@ -2,7 +2,7 @@ window.STRICT_INVITE_CHECK = false;
 
 angular.module('roster-io', ['ui.router', 'ngMaterial', 'firebaseHelper', 'ngTouch'])
 	
-	.config(["$locationProvider", "$urlRouterProvider", "$stateProvider", "$firebaseHelperProvider", "$sceProvider", function ($locationProvider, $urlRouterProvider, $stateProvider, $firebaseHelperProvider, $sceProvider) {
+	.config(["$locationProvider", "$urlRouterProvider", "$stateProvider", "$firebaseHelperProvider", "$sceProvider", "$compileProvider", function ($locationProvider, $urlRouterProvider, $stateProvider, $firebaseHelperProvider, $sceProvider, $compileProvider) {
 		// routing
 		$locationProvider.html5Mode(true);
 		$urlRouterProvider.when('', '/');
@@ -45,6 +45,7 @@ angular.module('roster-io', ['ui.router', 'ngMaterial', 'firebaseHelper', 'ngTou
 		
 		// security
 		$sceProvider.enabled(false);
+		$compileProvider.aHrefSanitizationWhitelist(/^\s*(https?|ftp|mailto|tel|webcal):/);
 	}])
 	
 	.factory('Auth', ["$rootScope", "$firebaseHelper", "$q", function ($rootScope, $firebaseHelper, $q) {
