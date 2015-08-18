@@ -17,7 +17,7 @@
 		<md-card>
 			<md-card-content style="padding: 0;">
 				<md-list>
-					<md-list-item ng-repeat="roster in rosters | orderBy:'name'" ng-click="$state.go('roster', {roster: roster.$id})" ng-class="{previous: $state.$previous.params.roster === roster.$id}">
+					<md-list-item ng-repeat="roster in myRosters | orderBy:'name'" ng-click="$state.go('roster', {roster: roster.$id})" ng-class="{previous: $state.$previous.params.roster === roster.$id}">
 						<figure class="md-avatar initials" layout="row" layout-align="center center">
 							<img ng-if="roster.avatar" ng-src="{{ roster.avatar }}" alt="{{ roster.name }} Avatar" width="40" height="40" />
 							<span ng-if=" ! roster.avatar" ng-bind="initials(roster.name)"></span>
@@ -30,7 +30,7 @@
 							<md-icon>people</md-icon> {{ roster.participants | length }}
 						</span>
 					</md-list-item>
-					<md-list-item ng-if=" ! (rosters | length)" class="no-results">
+					<md-list-item ng-if=" ! (myRosters | length)" class="no-results">
 						No rosters found.
 					</md-list-item>
 				</md-list>

@@ -143,10 +143,45 @@ angular.module('roster-io', ['ui.router', 'ngMaterial', 'firebaseHelper', 'ngTou
 	
 	
 	
-	.controller('RostersCtrl', function ($scope, $rootScope, $firebaseHelper, $q, Auth, $mdDialogForm, $mdToast) {
+	.controller('RostersCtrl', function ($scope, $rootScope, $firebaseHelper, $q, Auth, $mdDialogForm, $mdToast, $filter) {
 		Auth.$onAuth(function (authData) {
 			if (authData) {
-				$scope.rosters = $firebaseHelper.join([$scope.$me, 'rosters'], 'data/rosters');
+				$scope.myRosters = $firebaseHelper.join([$scope.$me, 'rosters'], 'data/rosters');
+				
+/*
+				function concatChildren(parents, childrenKey) {
+					var children = [];
+					$firebaseHelper.ref(parents).on('child_added', function (parentSnap) {
+						parentSnap.child(childrenKey).forEach(function (childSnap) {
+							childSnap.ref().on('value', function (childSnap){
+								var child = childSnap.val();
+								child.$id = childSnap.key();
+								
+								var index = -1;
+								angular.forEach(children, function (c, i) {
+									if (c.$id === child.$id) {
+										index = i;
+										children[i] = child; // overwrite it
+									}
+								});
+								if (index < 0) {
+									// not found, so add it
+									children.push(child);
+								}
+							});
+						});
+					});
+					return children;
+				}
+				
+				$scope.allMyEvents = concatChildren('data/rosters', 'events');
+				$scope.$watch('allMyEvents', function (allMyEvents) {
+					console.log(allMyEvents);
+					if (allMyEvents !== undefined){
+						$scope.myEvents = $filter('orderBy')(allMyEvents, 'date');
+					}
+				});
+*/
 			}
 		});
 		$rootScope.roster = $rootScope.event = null;
@@ -162,7 +197,7 @@ angular.module('roster-io', ['ui.router', 'ngMaterial', 'firebaseHelper', 'ngTou
 				contentUrl:    'views/template/roster.html',
 				ok:            'Create',
 				onSubmit: function (scope) {
-					return $scope.rosters.$add(scope.roster).then(function (rosterRef) {
+					return $scope.myRosters.$add(scope.roster).then(function (rosterRef) {
 						$q.all([
 							$firebaseHelper.join([rosterRef, 'admins'], 'data/users').$link($scope.$me.$id),
 							$firebaseHelper.join([rosterRef, 'participants'], 'data/users').$link($scope.$me.$id),
@@ -582,8 +617,8 @@ angular.module('roster-io', ['ui.router', 'ngMaterial', 'firebaseHelper', 'ngTou
 	.controller('UserCtrl', function ($rootScope, $scope, $firebaseHelper, $state, $mdToast, $mdDialogForm) {
 		$rootScope.roster = $rootScope.event = null;
 		
-		$scope.user    = $firebaseHelper.object('data/users', $state.params.user);
-		$scope.rosters = $firebaseHelper.join([$scope.user, 'rosters'], 'data/rosters');
+		$scope.user        = $firebaseHelper.object('data/users', $state.params.user);
+		$scope.userRosters = $firebaseHelper.join([$scope.user, 'rosters'], 'data/rosters');
 		
 		
 		$scope.editUser = function () {
