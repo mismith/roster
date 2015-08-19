@@ -122,6 +122,10 @@ angular.module('roster-io', ['ui.router', 'ngMaterial', 'firebaseHelper', 'ngTou
 			}
 		};
 		
+		// hacky browser detection
+		$rootScope.isAndroid = /Android/i.test(navigator.userAgent);
+		$rootScope.isiOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
+		
 		// helpers
 		$rootScope.canEdit = function () {
 			// returns false if not logged in

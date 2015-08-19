@@ -25,4 +25,4 @@ Quickly poll your team roster's availability.
 - add way to edit admins
 - add (request) subs functionality
 - add one-touch access to next event
-- group/nest api urls
+- fix glitchy md-swipe-item bg's on mobile
