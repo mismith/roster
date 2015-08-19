@@ -450,11 +450,18 @@ a {
 	overflow: hidden;
 	padding: 0 !important;
 	
+	&,
+	.md-swipe-item-inner,
+	md-swipe-actions {
+		transform: translate3d(0, 0, 0);
+		-webkit-backface-visibility: hidden;
+	}
 	.md-swipe-item-inner {
+		position: relative;
 		flex: 1;
 		background-color: @lightest;
 		padding: 0 @u*2;
-		z-index: 1;
+		z-index: 2;
 	}
 	md-swipe-actions {
 		position: absolute;
@@ -462,7 +469,7 @@ a {
 		left: 0;
 		right: 0;
 		bottom: 0;
-		z-index: 0;
+		z-index: 1;
 		
 		&,
 		md-icon {
@@ -551,7 +558,7 @@ a {
 
 
 #header {
-	box-shadow: 0 0 4px rgba(0,0,0,.14),0 4px 8px rgba(0,0,0,.28);
+	box-shadow: 0 0 4px rgba(0,0,0,.14), 0 4px 8px rgba(0,0,0,.28);
 	
 	.md-button-user {
 		padding: 0;
