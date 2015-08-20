@@ -237,6 +237,7 @@ angular.module('roster-io', ['ui.router', 'ngMaterial', 'firebaseHelper', 'ngTou
 		$scope.users        = $firebaseHelper.array('data/users');
 		$scope.RSVP         = RSVP;		
 		
+		// roster
 		$scope.deleteRoster = function (skipConfirm) {
 			if (skipConfirm || confirm('Are you sure you want to permanently delete this roster?')) {
 				// remove roster from all participants and admins rosters
@@ -295,6 +296,7 @@ angular.module('roster-io', ['ui.router', 'ngMaterial', 'firebaseHelper', 'ngTou
 			});
 		};
 		
+		// participants
 		$scope.removeUser = function (skipConfirm, participant, participants) {
 			participants = participants || $scope.participants;
 			
@@ -311,7 +313,7 @@ angular.module('roster-io', ['ui.router', 'ngMaterial', 'firebaseHelper', 'ngTou
 			}
 		};
 		
-		
+		// invites
 		var sendInviteEmail = function (inviteId) {
 			var deferred  = $q.defer(),
 				inviteRef = $firebaseHelper.ref('data/invites', inviteId);
@@ -453,6 +455,7 @@ angular.module('roster-io', ['ui.router', 'ngMaterial', 'firebaseHelper', 'ngTou
 			}
 		};
 		
+		// admins
 		$scope.isAdmin = function (participantId) {
 			return $scope.roster && angular.isObject($scope.roster.admins) && $scope.roster.admins[participantId];
 		};
@@ -491,6 +494,7 @@ angular.module('roster-io', ['ui.router', 'ngMaterial', 'firebaseHelper', 'ngTou
 		// helpers
 		$scope.urlencode = window.encodeURIComponent;
 		
+		// sharing
 		var sharePrompt = function () {
 			prompt('Copy and paste this URL:', $rootScope.BASE_SHORT_URL + $scope.event.hash);
 		};
@@ -507,7 +511,7 @@ angular.module('roster-io', ['ui.router', 'ngMaterial', 'firebaseHelper', 'ngTou
 			}
 		};
 		
-		// CRUD
+		// event
 		$scope.deleteEvent = function (skipConfirm) {
 			if (skipConfirm || confirm('Are you sure you want to permanently delete this event?')) {
 				$scope.event.$remove().then(function () {
@@ -639,7 +643,6 @@ angular.module('roster-io', ['ui.router', 'ngMaterial', 'firebaseHelper', 'ngTou
 		
 		$scope.user        = $firebaseHelper.object('data/users', $state.params.user);
 		$scope.userRosters = $firebaseHelper.join([$scope.user, 'rosters'], 'data/rosters');
-		
 		
 		$scope.editUser = function () {
 			$mdDialogForm.show({
