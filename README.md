@@ -24,3 +24,7 @@ Quickly poll your team roster's availability.
 - add (request) subs functionality
 - add one-touch access to next event
 - fix floating fab scrolling/positioning on mobile
+- send email when new event is added to roster
+- send notification when new feature is added
+- send email when user is removed from roster, or promoted/demoted to/from admin
+- add prompt to add to homescreen

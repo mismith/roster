@@ -547,7 +547,15 @@ angular.module('roster-io', ['ui.router', 'ngMaterial', 'firebaseHelper', 'ngTou
 		$scope.cloneEvent = function () {
 			var event = {};
 			angular.forEach($scope.event, function (v, k) {
-				event[k] = v;
+				switch (k) {
+					case 'rsvps':
+					case 'hash':
+						// @IGNORE
+						break;
+					default:
+						event[k] = v;
+						break;
+				}
 			});
 			return $firebaseHelper.array($scope.roster, 'events').$add(event).then(function (eventRef) {
 				$state.go('event', {roster: $scope.roster.$id, event: eventRef.key()});
