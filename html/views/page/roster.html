@@ -85,12 +85,30 @@
 							<div md-ink-ripple ng-click="$state.go('user', {user: participant.$id})" class="md-list-item-inner">
 								<img ng-src="{{ avatar(participant.facebook.id) }}" width="40" height="40" class="md-avatar" ng-class="{online: participant.online === true}" alt="{{ participant.name }}" />
 								
-								<p ng-bind="participant.name"></p>
-								<div ng-if="canEdit(roster.admins)">
-									<md-button ng-click="removeUser($event.shiftKey, participant); $event.stopPropagation();" class="md-icon-button md-warn" aria-label="Remove participant">
-										<md-icon>close</md-icon>
+								<p>
+									<span ng-bind="participant.name"></span>
+									<md-icon ng-if="isAdmin(participant.$id)" title="Roster admin" style="font-size: 16px; line-height: 20px;">security</md-icon>
+								</p>
+								
+								<md-menu ng-if="canEdit(roster.admins)" ng-click="$event.stopPropagation()">
+									<md-button ng-click="$mdOpenMenu()" class="md-icon-button" aria-label="Open user options menu">
+										<md-icon>more_horiz</md-icon>
 									</md-button>
-								</div>
+									<md-menu-content>
+										<md-menu-item>
+											<md-button ng-click="removeUser($event.shiftKey, participant)" class="md-warn" aria-label="Remove participant">
+												<md-icon>close</md-icon>
+												Remove participant
+											</md-button>
+										</md-menu-item>
+										<md-menu-item>
+											<md-button ng-click="toggleAdmin($event.shiftKey, participant)" aria-label="{{ isAdmin(participant.$id) ? 'Demote' : 'Promote' }} admin">
+												<md-icon>security</md-icon>
+												{{ isAdmin(participant.$id) ? 'Demote' : 'Promote' }} admin
+											</md-button>
+										</md-menu-item>
+									</md-menu-content>
+								</md-menu>
 							</div>
 						</md-list-item>
 						<md-list-item ng-if=" ! (participants | length)" class="no-results">

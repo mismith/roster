@@ -452,6 +452,21 @@ angular.module('roster-io', ['ui.router', 'ngMaterial', 'firebaseHelper', 'ngTou
 				sendInviteEmail(inviteId);
 			}
 		};
+		
+		$scope.isAdmin = function (participantId) {
+			return $scope.roster && angular.isObject($scope.roster.admins) && $scope.roster.admins[participantId];
+		};
+		$scope.toggleAdmin = function (skipConfirm, participant) {
+			var isAdmin = $scope.isAdmin(participant.$id);
+			if (skipConfirm || confirm('Are you sure you want to ' + (isAdmin ? 'demote this' : 'promote this participant to') + ' roster admin?')) {
+				isAdmin = $scope.roster.admins[participant.$id] = $scope.roster.admins[participant.$id] ? null : participant.$id;
+				return $scope.roster.$save().then(function (){
+					$mdToast.showSimple({
+						content: '"' + participant.name + '" is ' + (isAdmin ? 'now' : 'no longer') + ' a roster admin.',
+					});
+				});
+			}
+		};
 	}])
 		
 	.controller('EventCtrl', ["$scope", "$rootScope", "$firebaseHelper", "$mdDialogForm", "$state", "$mdToast", "Auth", "RSVP", "$location", "API", "$stateParams", function ($scope, $rootScope, $firebaseHelper, $mdDialogForm, $state, $mdToast, Auth, RSVP, $location, API, $stateParams) {

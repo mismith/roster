@@ -19,10 +19,8 @@ Quickly poll your team roster's availability.
 - add proper auth to API
 - add proper auth to Firebase from Node
 - add offline app cache for homescreen app (or native app wrapper?)
-- fix buggy fast scrolling on touch
 - fix minor page loading flicker (using resolve?)
 
-- add way to edit admins
 - add (request) subs functionality
 - add one-touch access to next event
-- fix glitchy md-swipe-item bg's on mobile
+- fix floating fab scrolling/positioning on mobile
