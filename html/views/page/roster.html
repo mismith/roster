@@ -7,8 +7,9 @@
 						<img ng-src="{{ roster.avatar }}" width="96" height="96" />
 					</figure>
 					<h1 flex ng-bind="roster.name" style="margin: 16px;"></h1>
-					<div ng-if=" ! isAndroid && roster.name">
-						<a ng-href="{{ 'webcal://www.roster-io.com/api/v1/calendar/roster?rosterId=' + roster.$id }}" class="md-button md-raised"><md-icon style="margin-right: 8px;">event_available</md-icon> Add to Calendar</a>
+					<div class="button-list" layout="column" ng-if="roster.name">
+						<a ng-href="{{ 'webcal://www.roster-io.com/api/v1/calendar/roster?rosterId=' + roster.$id }}" ng-if=" ! isAndroid" class="md-button md-raised"><md-icon style="margin-right: 8px;">event_available</md-icon> Add to Calendar</a>
+						<a ng-href="{{ (isMobile ? 'fb-messenger://groupthreadfbid/' : 'https://www.facebook.com/messages/conversation-') + roster.messengerThreadId }}" ng-if="roster.messengerThreadId" class="md-button md-raised" target="_blank"><md-icon style="margin-right: 8px;">chat</md-icon> Chat in Messenger</a>
 					</div>
 				</div>
 				

@@ -45,7 +45,7 @@ angular.module('roster-io', ['ui.router', 'ngMaterial', 'firebaseHelper', 'ngTou
 		
 		// security
 		$sceProvider.enabled(false);
-		$compileProvider.aHrefSanitizationWhitelist(/^\s*(https?|ftp|mailto|tel|webcal):/);
+		$compileProvider.aHrefSanitizationWhitelist(/^\s*(https?|ftp|mailto|tel|webcal|fb\-messenger):/);
 	}])
 	
 	.factory('Auth', ["$rootScope", "$firebaseHelper", "$q", function ($rootScope, $firebaseHelper, $q) {
@@ -108,11 +108,16 @@ angular.module('roster-io', ['ui.router', 'ngMaterial', 'firebaseHelper', 'ngTou
 			$state.$previous.params = fromParams;
 		});
 		
+		// hacky browser detection
+		$rootScope.isMobile  = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+		$rootScope.isAndroid = /Android/i.test(navigator.userAgent);
+		$rootScope.isiOS     = /iPhone|iPad|iPod/i.test(navigator.userAgent);
+		
 		// auth
 		$rootScope.$authThen = function (callback) {
 			var authData = Auth.$getAuth();
 			if ( ! authData) {
-				Auth['$authWithOAuth' + (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ? 'Redirect' : 'Popup')]('facebook', {scope: 'email'}).then(function (authData) {
+				Auth['$authWithOAuth' + ($rootScope.isMobile ? 'Redirect' : 'Popup')]('facebook', {scope: 'email'}).then(function (authData) {
 					if(angular.isFunction(callback)) callback(authData);
 				}).catch(function (error) {
 					console.error(error);
@@ -121,10 +126,6 @@ angular.module('roster-io', ['ui.router', 'ngMaterial', 'firebaseHelper', 'ngTou
 				if(angular.isFunction(callback)) callback(authData);
 			}
 		};
-		
-		// hacky browser detection
-		$rootScope.isAndroid = /Android/i.test(navigator.userAgent);
-		$rootScope.isiOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
 		
 		// helpers
 		$rootScope.canEdit = function () {
