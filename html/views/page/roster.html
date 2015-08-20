@@ -102,9 +102,9 @@
 											</md-button>
 										</md-menu-item>
 										<md-menu-item>
-											<md-button ng-click="toggleAdmin($event.shiftKey, participant)" aria-label="{{ isAdmin(participant.$id) ? 'Demote' : 'Promote' }} admin">
+											<md-button ng-click="toggleAdmin(true, participant)" aria-label="{{ isAdmin(participant.$id) ? 'Demote' : 'Promote' }} admin">
 												<md-icon>security</md-icon>
-												{{ isAdmin(participant.$id) ? 'Demote' : 'Promote' }} admin
+												{{ isAdmin(participant.$id) ? 'Demote' : 'Promote to' }} admin
 											</md-button>
 										</md-menu-item>
 									</md-menu-content>

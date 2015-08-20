@@ -462,6 +462,7 @@ angular.module('roster-io', ['ui.router', 'ngMaterial', 'firebaseHelper', 'ngTou
 		$scope.toggleAdmin = function (skipConfirm, participant) {
 			var isAdmin = $scope.isAdmin(participant.$id);
 			if (skipConfirm || confirm('Are you sure you want to ' + (isAdmin ? 'demote this' : 'promote this participant to') + ' roster admin?')) {
+				$scope.roster.admins = $scope.roster.admins || {};
 				isAdmin = $scope.roster.admins[participant.$id] = $scope.roster.admins[participant.$id] ? null : participant.$id;
 				return $scope.roster.$save().then(function (){
 					$mdToast.showSimple({
