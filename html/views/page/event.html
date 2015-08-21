@@ -4,13 +4,13 @@
 		
 		<div flex layout="row" layout-sm="column">
 			<div flex ng-show="event.date">
-				<header class="md-subheader-simple">Date &amp; Time</header>
+				<md-subheader class="md-no-sticky">Date &amp; Time</md-subheader>
 				<h2 layout-margin>
 					<span ng-bind="event.date | date:'shortTime'"></span>, <span ng-bind="event.date | date:'EEEE'"></span> <br /><span ng-bind="event.date | date:'MMMM d, y'" style="white-space: nowrap;"></span>
 				</h2>
 			</div>
 			<div flex ng-show="event.location">
-				<header class="md-subheader-simple">Location</header>
+				<md-subheader class="md-no-sticky">Location</md-subheader>
 				<h2 layout-margin ng-show="event.location">
 					<span ng-bind="event.location" style="white-space: pre-wrap;"></span>
 				</h2>
@@ -75,23 +75,23 @@
 <md-fab-speed-dial ng-if="canEdit(roster.admins)" md-direction="up" class="md-scale md-fab-speed-dial-bottom-right">
 	<md-fab-trigger>
 		<div layout="row">
-			<label><div>Edit event</div></label>
-			<md-button ng-click="editEvent()" class="md-fab md-primary" aria-label="Edit event">
-				<md-icon>create</md-icon>
+			<label><div>Clone event</div></label>
+			<md-button ng-click="cloneEvent()" class="md-fab md-accent" aria-label="Clone event">
+				<md-icon>add</md-icon>
 			</md-button>
 		</div>
 	</md-fab-trigger>
 	<md-fab-actions>
 		<div layout="row">
-			<label><div>Delete event</div></label>
-			<md-button ng-click="deleteEvent($event.shiftKey)" class="md-fab md-mini md-raised md-warn" aria-label="Delete event">
-				<md-icon>delete</md-icon>
+			<label><div>Edit event</div></label>
+			<md-button ng-click="editEvent()" class="md-fab md-mini md-raised md-primary" aria-label="Edit event">
+				<md-icon>create</md-icon>
 			</md-button>
 		</div>
 		<div layout="row">
-			<label><div>Clone event</div></label>
-			<md-button ng-click="cloneEvent()" class="md-fab md-mini md-raised md-accent" aria-label="Clone event">
-				<md-icon>content_copy</md-icon>
+			<label><div>Delete event</div></label>
+			<md-button ng-click="deleteEvent($event.shiftKey)" class="md-fab md-mini md-raised md-warn" aria-label="Delete event">
+				<md-icon>delete</md-icon>
 			</md-button>
 		</div>
 	</md-fab-actions>
