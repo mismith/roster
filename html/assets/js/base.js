@@ -99,6 +99,8 @@ angular.module('roster-io', ['ui.router', 'ngMaterial', 'firebaseHelper', 'ngTou
 		$rootScope.$state          = $state;
 		$rootScope.$firebaseHelper = $firebaseHelper;
 		$rootScope.console         = console;
+		$rootScope.history         = history;
+		$rootScope.historyStart    = history.length + 0;
 		$rootScope.BASE_SHORT_URL  = 'http://rstr.io/';
 		
 		// state
