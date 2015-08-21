@@ -100,13 +100,12 @@ angular.module('roster-io', ['ui.router', 'ngMaterial', 'firebaseHelper', 'ngTou
 		$rootScope.$firebaseHelper = $firebaseHelper;
 		$rootScope.console         = console;
 		$rootScope.history         = history;
-		$rootScope.historyStart    = history.length + 0;
 		$rootScope.BASE_SHORT_URL  = 'http://rstr.io/';
 		
 		// state
 		$rootScope.$on('$stateChangeSuccess', function(e, toState, toParams, fromState, fromParams){
 			// highlight previous state for user convenience/orientation
-			$state.$previous = fromState;
+			$state.$previous        = fromState;
 			$state.$previous.params = fromParams;
 		});
 		
@@ -128,6 +127,11 @@ angular.module('roster-io', ['ui.router', 'ngMaterial', 'firebaseHelper', 'ngTou
 				if(angular.isFunction(callback)) callback(authData);
 			}
 		};
+		Auth.$onAuth(function (authData) {
+			if (authData) {
+				$rootScope.myRosters = $firebaseHelper.join([$rootScope.$me, 'rosters'], 'data/rosters');
+			}
+		});
 		
 		// helpers
 		$rootScope.canEdit = function () {
@@ -151,11 +155,7 @@ angular.module('roster-io', ['ui.router', 'ngMaterial', 'firebaseHelper', 'ngTou
 	
 	
 	
-	.controller('RostersCtrl', function ($scope, $rootScope, $firebaseHelper, $q, Auth, $mdDialogForm, $mdToast, $filter) {
-		Auth.$onAuth(function (authData) {
-			if (authData) {
-				$scope.myRosters = $firebaseHelper.join([$scope.$me, 'rosters'], 'data/rosters');
-				
+	.controller('RostersCtrl', function ($scope, $rootScope, $firebaseHelper, $q, $mdDialogForm, $mdToast, $filter) {
 /*
 				function concatChildren(parents, childrenKey) {
 					var children = [];
@@ -190,8 +190,6 @@ angular.module('roster-io', ['ui.router', 'ngMaterial', 'firebaseHelper', 'ngTou
 					}
 				});
 */
-			}
-		});
 		$rootScope.roster = $rootScope.event = null;
 		
 		$scope.newRoster = function () {
@@ -724,7 +722,7 @@ angular.module('roster-io', ['ui.router', 'ngMaterial', 'firebaseHelper', 'ngTou
 			}
 		};
 	})
-	.directive('avatar', function ($rootScope, $parse) {
+	.directive('avatar', function ($parse) {
 		return {
 			scope: {
 				roster: '=',
@@ -742,6 +740,16 @@ angular.module('roster-io', ['ui.router', 'ngMaterial', 'firebaseHelper', 'ngTou
 					}).join('');
 				};
 			},
+		}
+	})
+	.directive('datetime', function () {
+		return {
+			scope: {
+				date: '=',
+			},
+			restrict: 'E',
+			replace: true,
+			templateUrl: 'views/directive/datetime.html',
 		}
 	})
 	

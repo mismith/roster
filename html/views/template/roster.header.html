@@ -18,7 +18,7 @@
 			<md-icon md-svg-src="assets/img/facebook-messenger.svg"></md-icon>
 			Chat in Messenger
 		</a>
-		<a ng-href="{{ 'webcal://www.roster-io.com/api/v1/calendar/roster?rosterId=' + roster.$id }}" ng-if=" ! isAndroid && events.length" class="md-button md-raised">
+		<a ng-href="{{ 'webcal://www.roster-io.com/api/v1/calendar/roster?rosterId=' + roster.$id }}" ng-if=" ! isAndroid && (events.length || event.date)" class="md-button md-raised">
 			<md-icon>event</md-icon>
 			Add to Calendar
 		</a>

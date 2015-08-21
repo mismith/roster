@@ -46,6 +46,13 @@
 				<div flex>
 					<a ui-sref="rosters" class="home">Roster IO</a>
 				</div>
+				<div>
+					<div ng-repeat="myRoster in myRosters" ng-init="myRosterEvents = $firebaseHelper.array('data/rosters/' + myRoster.$id + '/events')">
+						<a ng-repeat="myRosterEvent in myRosterEvents | filterByTimegroup:'today'" ui-sref="event({roster: myRoster.$id, event: myRosterEvent.$id})" title="{{ myRosterEvent.name }}" style="display: block;">
+							<avatar roster="myRoster" size="32"></avatar>
+						</a>
+					</div>
+				</div>
 				<nav>
 					<md-button ng-if=" ! $me.$id" ng-click="$authThen()" class="md-facebook md-raised" aria-label="Login with Facebook" style="margin: 0;">
 						<md-icon md-font-set="fa" class="fa-facebook"></md-icon>

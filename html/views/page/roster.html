@@ -10,16 +10,7 @@
 				<md-list>
 					<md-list-item ng-repeat="event in timegroup.$events = (events | filterByTimegroup:timegroup.$id | orderBy:timegroup.orderBy)" ng-init="eventObj = $firebaseHelper.object(events, event.$id)" ng-class="{previous: $state.$previous.params.roster === roster.$id && $state.$previous.params.event === event.$id}" md-swipe-item="canEdit(roster.participants, roster.admins)" md-swipe-right-triggered="RSVP(eventObj).setParticipantStatus($me.$id, 1); mdSwipeItem.close();" md-swipe-right-most-triggered="RSVP(eventObj).setParticipantStatus($me.$id, -1); mdSwipeItem.close();" md-swipe-left-most-triggered="RSVP(eventObj).setParticipantStatus($me.$id, 0); mdSwipeItem.close();">
 						<div md-ink-ripple ng-click="$state.go('event', {roster: roster.$id, event: event.$id})" class="md-list-item-inner md-swipe-item-inner" style="padding-right: 8px;">
-							<div class="datetime" layout="row" layout-align="center center">
-								<div class="date" layout="column" layout-align="center center">
-									<div class="month" ng-bind="event.date | date:'MMM'"></div>
-									<div class="day" ng-bind="event.date | date:'d'"></div>
-								</div>
-								<div class="time" layout="column" layout-align="center center">
-									<div class="hour" ng-bind="event.date | date:'h:mm'"></div>
-									<div class="ampm" ng-bind="event.date | date:'a'"></div>
-								</div>
-							</div>
+							<datetime date="event.date"></datetime>
 							
 							<p ng-bind="event.name"></p>
 							

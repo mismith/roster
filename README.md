@@ -24,7 +24,6 @@ Quickly poll your team roster's availability.
 - fix minor page loading flicker (using resolve?)
 
 - add (request) subs functionality
-- add one-touch access to next event
 - fix floating fab scrolling/positioning on mobile
 - send notification when new event is added to roster
 - send notification when new feature is added
