@@ -37,8 +37,8 @@
 <body ng-controller="AppCtrl" layout="column" ng-class="{loaded: loaded}">
 
 	<div id="app" layout="column" layout-fill>
-		<md-toolbar id="header" layout="row">
-			<md-button ng-click="history.back()" class="md-icon-button" style="height: auto;">
+		<md-toolbar id="header" layout="row" layout-align="center center">
+			<md-button ng-click="history.back()" class="md-icon-button" style="margin-left: 8px;">
 				<md-icon>arrow_back</md-icon>
 			</md-button>
 			<div flex class="md-toolbar-tools">
@@ -46,12 +46,12 @@
 					<a ui-sref="rosters" class="home">Roster IO</a>
 				</div>
 				<nav>
-					<md-button ng-if=" ! $me.$id" ng-click="$authThen()" class="md-facebook md-raised" aria-label="Login with Facebook">
+					<md-button ng-if=" ! $me.$id" ng-click="$authThen()" class="md-facebook md-raised" aria-label="Login with Facebook" style="margin: 0;">
 						<md-icon md-font-set="fa" class="fa-facebook"></md-icon>
 						Login
 					</md-button>
 					<md-menu ng-if="$me.$id">
-						<md-button ng-click="$mdOpenMenu()" layout="row" layout-align="center center" layout-fill aria-label="Open user menu" class="md-icon-button">
+						<md-button ng-click="$mdOpenMenu()" layout="row" layout-align="center center" layout-fill aria-label="Open user menu" class="md-icon-button" style="margin-left: 8px;">
 							<img ng-src="{{ avatar($me.facebook.id) }}" width="48" height="48" class="md-avatar" />
 						</md-button>
 						<md-menu-content width="4">
