@@ -66,6 +66,9 @@ md-input-container {
 md-list-item {
 	position: relative;
 	
+	.avatar {
+		margin-right: @u*2;
+	}
 	[md-ink-ripple].md-list-item-inner {
 		flex: 1;
 		padding: 0 0 0 @u*2;
@@ -73,17 +76,6 @@ md-list-item {
 		
 		p {
 			padding-right: @u*2;
-		}
-	}
-	.md-avatar {
-		text-align: center;
-		margin-left: 0 !important;
-	}
-	> .md-avatar {
-		margin-left: @u*2;
-		
-		+ p {
-			margin-right: @u*2;
 		}
 	}
 	&.invitee {
@@ -264,9 +256,6 @@ md-icon {
 	vertical-align: middle;
 	border-radius: 50%;
 	
-	img {
-		vertical-align: middle;
-	}
 	&.online {
 		box-shadow: 0 0 0 2px @accent;
 	}
@@ -310,25 +299,6 @@ a {
 	&.passthru {
 		text-decoration: inherit;
 		color: inherit;
-	}
-}
-.list-unstyled {
-	list-style: none;
-	padding: 0;
-	margin: 0;
-}
-.list-avatars {
-	.list-unstyled;
-	padding: @u 0 @u @u*2;
-	
-	> * {
-		display: inline-block;
-		
-		.md-avatar {
-			border-radius: 50%;
-			margin-left: 4px !important;
-			vertical-align: middle;
-		}
 	}
 }
 .counter {
@@ -394,7 +364,6 @@ a {
 .initials {
 	background-color: @accent;
 	color: @lightest;
-	font-size: 12px;
 }
 .center-sm {
 	@media (max-width: @sm) {
@@ -414,6 +383,11 @@ a {
 			 margin-right: @u/2;
 		}
 	}
+}
+.avatar {
+	display: inline-block;
+	padding: 0;
+	margin: 0;
 }
 
 

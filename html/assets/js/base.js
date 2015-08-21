@@ -219,13 +219,6 @@ angular.module('roster-io', ['ui.router', 'ngMaterial', 'firebaseHelper', 'ngTou
 				},
 			});
 		};
-		
-		
-		$scope.initials = function (str) {
-			return (str || '').split(' ').map(function (word) {
-				return word ? word[0].toUpperCase() : '';
-			}).join('');
-		};
 	}])
 	
 	.controller('RosterCtrl', ["$scope", "$rootScope", "$firebaseHelper", "$mdDialogForm", "$state", "$mdToast", "$q", "RSVP", "$http", function ($scope, $rootScope, $firebaseHelper, $mdDialogForm, $state, $mdToast, $q, RSVP, $http) {
@@ -731,6 +724,26 @@ angular.module('roster-io', ['ui.router', 'ngMaterial', 'firebaseHelper', 'ngTou
 			}]
 		};
 	})
+	.directive('avatar', ["$rootScope", "$parse", function ($rootScope, $parse) {
+		return {
+			scope: {
+				roster: '=',
+			},
+			restrict: 'E',
+			replace: true,
+			templateUrl: 'views/directive/avatar.html',
+			controller: ["$scope", "$element", "$attrs", function ($scope, $element, $attrs) {
+				$scope.$size = parseInt($parse($attrs.size)($scope)) || 40;
+				
+				// helper function
+				$scope.initials = function (str) {
+					return (str || '').split(' ').map(function (word) {
+						return word ? word[0].toUpperCase() : '';
+					}).join('');
+				};
+			}],
+		}
+	}])
 	
 	
 	

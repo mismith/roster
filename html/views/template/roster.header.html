@@ -1,7 +1,7 @@
 <div layout="row" layout-align="start start" layout-sm="column" layout-align-sm="start center" style="padding-top: 8px;">
 	<div flex layout="row">
-		<div ng-if="roster.avatar">
-			<img ng-src="{{ roster.avatar }}" width="96" height="96" class="md-avatar" />
+		<div ng-if="roster.name">
+			<avatar roster="roster" size="96"></avatar>
 		</div>
 		
 		<div ng-if="$state.current.name === 'roster'" flex layout="column" layout-align="center start" style="margin: 0 16px;">

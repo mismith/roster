@@ -18,10 +18,7 @@
 			<md-card-content style="padding: 0;">
 				<md-list>
 					<md-list-item ng-repeat="roster in myRosters | orderBy:'name'" ng-click="$state.go('roster', {roster: roster.$id})" ng-class="{previous: $state.$previous.params.roster === roster.$id}">
-						<img ng-if="roster.avatar" ng-src="{{ roster.avatar }}"  class="md-avatar" alt="{{ roster.name }} Avatar" width="40" height="40" />
-						<figure ng-if=" ! roster.avatar" class="md-avatar initials" layout="column" layout-align="center center">
-							<span ng-bind="initials(roster.name)"></span>
-						</figure>
+						<avatar roster="roster"></avatar>
 						
 						<p flex ng-bind="roster.name"></p>
 						
