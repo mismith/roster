@@ -2,9 +2,7 @@
 	<header layout="column" layout-gt-md="row" class="center-sm" style="padding-top: 8px;">
 		<section flex layout-padding>
 			<div layout="row" layout-sm="column" layout-align="start center">
-				<figure class="md-avatar" ng-class="{online: user.online === true}">
-					<img ng-src="{{ avatar(user.facebook.id, 'width=192&height=192') }}" width="96" height="96" />
-				</figure>
+				<img ng-src="{{ avatar(user.facebook.id, 'width=192&height=192') }}" width="96" height="96" class="md-avatar" ng-class="{online: user.online === true}" />
 				<div style="margin: 16px;">
 					<div>
 						<h1 ng-bind="user.name" style="display: inline-block; margin: 0;"></h1>
@@ -22,11 +20,13 @@
 			<md-card-content style="padding: 0;">
 				<md-list>
 					<md-list-item ng-repeat="roster in userRosters | orderBy:'name'" ng-click="$state.go('roster', {roster: roster.$id})" ng-class="{previous: $state.$previous.params.roster === roster.$id}">
-						<figure class="md-avatar initials" layout="row" layout-align="center center">
-							<img ng-if="roster.avatar" ng-src="{{ roster.avatar }}" alt="{{ roster.name }} Avatar" width="40" height="40" />
-							<span ng-if=" ! roster.avatar" ng-bind="initials(roster.name)"></span>
+						<img ng-if="roster.avatar" ng-src="{{ roster.avatar }}"  class="md-avatar" alt="{{ roster.name }} Avatar" width="40" height="40" />
+						<figure ng-if=" ! roster.avatar" class="md-avatar initials" layout="column" layout-align="center center">
+							<span ng-bind="initials(roster.name)"></span>
 						</figure>
+						
 						<p flex ng-bind="roster.name"></p>
+						
 						<span class="counter">
 							<md-icon>event</md-icon> <span ng-bind="roster.events | length"></span>
 						</span>

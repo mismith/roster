@@ -264,12 +264,6 @@ md-icon {
 	vertical-align: middle;
 	border-radius: 50%;
 	
-	figure& {
-		display: inline-block;
-		overflow: hidden;
-		padding: 0;
-		margin: 0;
-	}
 	img {
 		vertical-align: middle;
 	}
@@ -352,15 +346,20 @@ a {
 		}
 	}
 }
-.calendar-day {
-	width: 40px;
-	height: 40px;
-	text-align: center;
-	margin-left: 0 !important;
-	margin-right: @u*2 !important;
-	border-radius: 50%;
-	box-sizing: content-box;
+.datetime {
+	@s: @u*5;
+	border: solid 1px @primary;
+	border-radius: @s;
 	overflow: hidden;
+	margin-right: @u*2;
+	
+	> * {
+		width: @s;
+		height: @s;
+		text-align: center;
+		margin: 0;
+		overflow: hidden;
+	}
 	
 	.month,
 	.ampm {
@@ -368,38 +367,21 @@ a {
 		font-size: 10px;
 		text-transform: uppercase;
 	}
-	.hour,
-	.month {
-		margin-top: 5px;
-	}
-	.day,
-	.hour {
+	.day {
 		line-height: 20px;
 		font-size: 20px;
 	}
 	.hour {
 		font-size: 13px;
+		line-height: 16px;
 	}
-	&.md-primary {
+	.date {
 		background-color: @primary;
 		color: @lightest;
-		margin-right: @u !important;
+		padding-left: @u/2;
 	}
-	&.md-accent {
-		box-shadow: 0 0 0 2px @accent;
-	}
-}
-.breadcrumbs {
-	overflow: hidden;
-	white-space: nowrap;
-	text-overflow: ellipsis;
-	
-	> * {
-		&:not(:first-child) {
-			&:before {
-				content: " \203A  ";
-			}
-		}
+	.time {
+		padding-right: @u/2;
 	}
 }
 .content-wrap {
@@ -432,13 +414,6 @@ a {
 			 margin-right: @u/2;
 		}
 	}
-}
-.md-subheader-simple {
-	color: rgba(0,0,0,0.54);
-	line-height: 24px;
-	font-size: 14px;
-	font-weight: 500;
-	padding: @u*2 @u*2 0;
 }
 
 
@@ -575,14 +550,4 @@ a {
 
 #header {
 	box-shadow: 0 0 4px rgba(0,0,0,.14), 0 4px 8px rgba(0,0,0,.28);
-	
-	.md-button-user {
-		padding: 0;
-		margin: 0;
-		border-radius: 24px;
-		
-		span {
-			margin-left: @u;
-		}
-	}
 }
