@@ -39,11 +39,11 @@
 
 	<div id="app" layout="column" layout-fill>
 		<md-toolbar id="header" layout="row" layout-align="center center">
-			<md-button ng-click="history.back()" class="md-icon-button" style="margin-left: 8px; visibility: {{ history.length > 1 ? 'visible' : 'hidden' }};">
+			<md-button ng-click="history.back()" ng-show="history.length > 1" class="md-icon-button" style="margin-left: 8px;">
 				<md-icon>arrow_back</md-icon>
 			</md-button>
 			<div flex class="md-toolbar-tools">
-				<div flex style="text-align: center;">
+				<div flex>
 					<a ui-sref="rosters" class="home">Roster IO</a>
 				</div>
 				<nav>
