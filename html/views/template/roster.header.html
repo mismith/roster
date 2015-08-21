@@ -4,10 +4,10 @@
 			<img ng-src="{{ roster.avatar }}" width="96" height="96" class="md-avatar" />
 		</div>
 		
-		<div ng-if=" ! event" flex layout="column" layout-align="center start" style="margin: 0 16px;">
+		<div ng-if="$state.current.name === 'roster'" flex layout="column" layout-align="center start" style="margin: 0 16px;">
 			<h1 ng-bind="roster.name"></h1>
 		</div>
-		<div ng-if="event" flex layout="column" layout-align="center start" style="text-align: left; margin: 0 16px;">
+		<div ng-if="$state.current.name === 'event'" flex layout="column" layout-align="center start" style="text-align: left; margin: 0 16px;">
 			<h2 style="margin: 0;"><a ui-sref="roster({roster: roster.$id})" ng-bind="roster.name" class="passthru"></a></h2>
 			<h1 ng-bind="event.name" style="margin: 0;"></h1>
 		</div>
@@ -18,11 +18,11 @@
 			<md-icon md-svg-src="assets/img/facebook-messenger.svg"></md-icon>
 			Chat in Messenger
 		</a>
-		<a ng-href="{{ 'webcal://www.roster-io.com/api/v1/calendar/roster?rosterId=' + roster.$id }}" ng-if=" ! isAndroid" class="md-button md-raised">
+		<a ng-href="{{ 'webcal://www.roster-io.com/api/v1/calendar/roster?rosterId=' + roster.$id }}" ng-if=" ! isAndroid && events.length" class="md-button md-raised">
 			<md-icon>event</md-icon>
 			Add to Calendar
 		</a>
-		<a ng-href="{{ (event.locationUrl || '').replace('google.ca', 'google.com') }}" ng-if="event.locationUrl" target="_blank" class="md-button md-raised">
+		<a ng-href="{{ (event.locationUrl || '').replace('google.ca', 'google.com') }}" ng-if="event && event.locationUrl" target="_blank" class="md-button md-raised">
 			<md-icon>pin_drop</md-icon>
 			Open in Maps
 		</a>

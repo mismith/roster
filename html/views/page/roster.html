@@ -1,10 +1,10 @@
 <div layout="column" layout-gt-md="row" class="content-wrap">
 	<section flex>
 		<header layout-margin ng-include="'views/template/roster.header.html'"></header>
-		<div ng-repeat="timegroup in timegroups" ng-show="timegroup.$id === 'upcoming' || (timegroup.$events | length)" ng-init="timegroup.$id === 'past' ? past = timegroup.$collapsed = true : null;">
-			<md-subheader class="md-no-sticky" ng-click="past ? timegroup.$collapsed = ! timegroup.$collapsed : null">
+		<div ng-repeat="timegroup in timegroups" ng-show="timegroup.$events.length || (timegroup.$id === 'upcoming' && events.length < 1)" ng-init="timegroup.$collapsed = timegroup.$id === 'past'">
+			<md-subheader class="md-no-sticky" ng-click="timegroup.$collapsed = ! timegroup.$collapsed">
 				<span ng-bind="timegroup.name"></span>
-				<md-icon ng-if="past" md-font-set="fa" ng-class="{'fa-plus-circle': timegroup.$collapsed, 'fa-minus-circle': ! timegroup.$collapsed}" style="font-size: 14px; line-height: 22px;"></md-icon>
+				<md-icon md-font-set="fa" ng-class="{'fa-plus-circle': timegroup.$collapsed, 'fa-minus-circle': ! timegroup.$collapsed}" style="font-size: 14px; line-height: 22px;"></md-icon>
 			</md-subheader>
 			<md-card ng-hide="timegroup.$collapsed">
 				<md-list>
@@ -45,8 +45,8 @@
 							</div>
 						</md-swipe-actions>
 					</md-list-item>
-					<md-list-item ng-if=" ! (timegroup.$events | length)" class="no-results">
-						No events found.
+					<md-list-item ng-if=" ! (timegroup.$events | length)" ng-click="newEvent()" class="no-results">
+						<span>No upcoming events. <strong>Create One.</strong></span>
 					</md-list-item>
 				</md-list>
 			</md-card>

@@ -763,7 +763,12 @@ angular.module('roster-io', ['ui.router', 'ngMaterial', 'firebaseHelper', 'ngTou
 			if ( ! angular.isArray(array)) return array;
 			
 			return array.filter(function (item) {
-				return (moment().diff(item.date) < 0 ? 'upcoming' : 'past') === timegroup;
+				var today = moment().isSame(item.date, 'day');
+				if (timegroup === 'today') {
+					return today;
+				} else {
+					return ! today && (timegroup === (moment().diff(item.date) < 0 ? 'upcoming' : 'past'));
+				}
 			});
 		};
 	})
