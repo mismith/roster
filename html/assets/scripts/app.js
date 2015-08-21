@@ -45,7 +45,7 @@ angular.module('roster-io', ['ui.router', 'ngMaterial', 'firebaseHelper', 'ngTou
 		
 		// security
 		$sceProvider.enabled(false);
-		$compileProvider.aHrefSanitizationWhitelist(/^\s*(https?|ftp|mailto|tel|webcal|fb\-messenger):/);
+		$compileProvider.aHrefSanitizationWhitelist(/^\s*(https?|ftp|mailto|tel|webcal|fb\-messenger|(comgoogle)?maps(url)?):/);
 	})
 	
 	.factory('Auth', function ($rootScope, $firebaseHelper, $q) {
@@ -150,6 +150,17 @@ angular.module('roster-io', ['ui.router', 'ngMaterial', 'firebaseHelper', 'ngTou
 		$rootScope.avatar = function (userId, query) {
 			query = query || 'type=square';
 			return '//graph.facebook.com/' + (userId ? userId + '/' : '') + 'picture?' + query;
+		};
+		$rootScope.mapsUrl = function (event) {
+			var protocol = $rootScope.isiOS ? 'comgooglemapsurl' : ($rootScope.isMobile ? 'maps' : 'http'),
+				url      = '';
+			if (event.locationUrl) {
+				url = event.locationUrl.replace(/^https?:\/\//, '');
+			} else if (event.location) {
+				url = 'maps.google.com/?q=' + encodeURIComponent(event.location.replace('\n', ' '));
+			}
+			
+			return protocol + '://' + url;
 		};
 	})
 	

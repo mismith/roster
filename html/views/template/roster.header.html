@@ -22,7 +22,7 @@
 			<md-icon>event</md-icon>
 			Add to Calendar
 		</a>
-		<a ng-href="{{ (event.locationUrl || '').replace('google.ca', 'google.com') }}" ng-if="event && event.locationUrl" target="_blank" class="md-button md-raised">
+		<a ng-href="{{ mapsUrl(event) }}" ng-if="event.location || event.locationUrl" target="_blank" class="md-button md-raised">
 			<md-icon>pin_drop</md-icon>
 			Open in Maps
 		</a>
