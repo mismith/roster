@@ -546,7 +546,7 @@ angular.module('roster-io', ['ui.router', 'ngMaterial', 'firebaseHelper', 'ngTou
 				},
 			});
 		};
-		$scope.cloneEvent = function () {
+		$scope.duplicateEvent = function () {
 			var event = {};
 			angular.forEach($scope.event, function (v, k) {
 				switch (k) {
@@ -563,7 +563,7 @@ angular.module('roster-io', ['ui.router', 'ngMaterial', 'firebaseHelper', 'ngTou
 				$state.go('event', {roster: $scope.roster.$id, event: eventRef.key()});
 				
 				$mdToast.showSimple({
-					content: 'Event cloned.',
+					content: 'Event duplicated.',
 				});
 			});
 		};
