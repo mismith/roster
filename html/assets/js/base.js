@@ -25,7 +25,7 @@ angular.module('roster-io', ['ui.router', 'ngMaterial', 'firebaseHelper', 'ngTou
 				controller: 'RosterCtrl',
 			})
 			.state('event', {
-				url: '/roster/:roster/:event?v',
+				url: '/roster/:roster/:event?v&edit',
 				templateUrl: 'views/page/event.html',
 				controller: 'EventCtrl',
 			})
@@ -546,6 +546,9 @@ angular.module('roster-io', ['ui.router', 'ngMaterial', 'firebaseHelper', 'ngTou
 				},
 			});
 		};
+		if ($state.params.edit) {
+			$scope.editEvent();
+		}
 		$scope.duplicateEvent = function () {
 			var event = {};
 			angular.forEach($scope.event, function (v, k) {
@@ -560,7 +563,7 @@ angular.module('roster-io', ['ui.router', 'ngMaterial', 'firebaseHelper', 'ngTou
 				}
 			});
 			return $firebaseHelper.array($scope.roster, 'events').$add(event).then(function (eventRef) {
-				$state.go('event', {roster: $scope.roster.$id, event: eventRef.key()});
+				$state.go('event', {roster: $scope.roster.$id, event: eventRef.key(), edit: 1});
 				
 				$mdToast.showSimple({
 					content: 'Event duplicated.',
