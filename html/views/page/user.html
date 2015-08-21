@@ -1,5 +1,5 @@
-<div layout="column" flex>
-	<header layout="column" layout-gt-md="row" class="content-wrap center-sm">
+<div layout="column" class="content-wrap">
+	<header layout="column" layout-gt-md="row" class="center-sm" style="padding-top: 8px;">
 		<section flex layout-padding>
 			<div layout="row" layout-sm="column" layout-align="start center">
 				<figure class="md-avatar" ng-class="{online: user.online === true}">
@@ -16,7 +16,7 @@
 		</section>
 	</header>
 	
-	<section class="content-wrap">
+	<section>
 		<md-subheader class="md-no-sticky">Rosters</md-subheader>
 		<md-card>
 			<md-card-content style="padding: 0;">
@@ -41,25 +41,25 @@
 			</md-card-content>
 		</md-card>
 	</section>
-	
-	<md-fab-speed-dial ng-if="canEdit(user.$id)" md-direction="up" class="md-scale md-fab-speed-dial-bottom-right">
-		<md-fab-trigger>
-			<div layout="row">
-				<label><div>Edit user</div></label>
-				<md-button ng-click="editUser()" class="md-fab md-primary" aria-label="Edit user">
-					<md-icon>create</md-icon>
-				</md-button>
-			</div>
-		</md-fab-trigger>
-<!--
-		<md-fab-actions>
-			<div layout="row">
-				<label><div>Delete user</div></label>
-				<md-button ng-click="deleteUser($event.shiftKey)" class="md-fab md-mini md-raised md-warn" aria-label="Delete user">
-					<md-icon>delete</md-icon>
-				</md-button>
-			</div>
-		</md-fab-actions>
--->
-	</md-fab-speed-dial>
 </div>
+	
+<md-fab-speed-dial ng-if="canEdit(user.$id)" md-direction="up" class="md-scale md-fab-speed-dial-bottom-right">
+	<md-fab-trigger>
+		<div layout="row">
+			<label><div>Edit user</div></label>
+			<md-button ng-click="editUser()" class="md-fab md-primary" aria-label="Edit user">
+				<md-icon>create</md-icon>
+			</md-button>
+		</div>
+	</md-fab-trigger>
+<!--
+	<md-fab-actions>
+		<div layout="row">
+			<label><div>Delete user</div></label>
+			<md-button ng-click="deleteUser($event.shiftKey)" class="md-fab md-mini md-raised md-warn" aria-label="Delete user">
+				<md-icon>delete</md-icon>
+			</md-button>
+		</div>
+	</md-fab-actions>
+-->
+</md-fab-speed-dial>

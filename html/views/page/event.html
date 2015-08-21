@@ -1,35 +1,28 @@
-<div layout="column" flex>
-	<header layout="column" layout-gt-md="row" class="content-wrap center-md">
-		<section flex>
-			<div ng-show="event.date">
-				<md-subheader class="md-no-sticky">Date &amp; Time</md-subheader>
-				<h2 layout-margin><span ng-bind="event.date | date:'shortTime'"></span>, <span ng-bind="event.date | date:'EEEE'"></span> <span ng-bind="event.date | date:'MMMM d, y'" style="white-space: nowrap;"></span></h2>
-			</div>
-			
-			<div ng-show="event.notes">
-				<md-subheader class="md-no-sticky">Notes</md-subheader>
-				<div layout-padding ng-bind="event.notes" style="white-space: pre-wrap;"></div>
-			</div>
-		</section>
-		<section>
-			<div ng-show="event.location || event.locationPin">
-				<md-subheader class="md-no-sticky">Location</md-subheader>
-				<h2 layout-margin ng-show="event.location">
-					<a ng-href="{{ event.locationUrl }}" target="_blank" class="passthru">
-						<span ng-bind="event.location" style="white-space: pre-wrap;"></span>
-						<md-icon ng-if="event.locationUrl" style="line-height: 16px;">place</md-icon>
-					</a>
+<div layout="column" class="content-wrap">
+	<header layout="column" class="center-sm">
+		<div layout-margin ng-include="'views/template/roster.header.html'"></div>
+		
+		<div flex layout="row" layout-sm="column">
+			<div flex ng-show="event.date">
+				<header class="md-subheader-simple">Date &amp; Time</header>
+				<h2 layout-margin>
+					<span ng-bind="event.date | date:'shortTime'"></span>, <span ng-bind="event.date | date:'EEEE'"></span> <br /><span ng-bind="event.date | date:'MMMM d, y'" style="white-space: nowrap;"></span>
 				</h2>
-				<md-card ng-show="event.locationPin" layout-padding>
-					<a ng-href="{{ event.locationUrl }}" target="_blank"><img ng-src="{{ 'http://maps.googleapis.com/maps/api/staticmap?markers=' + event.locationPin + '&zoom=15&size=300x200&maptype=hybrid' }}" width="300" height="200" /></a>
-				</md-card>
 			</div>
-			<div ng-if="event.name">
-				<a ng-click="shareEvent()" class="md-button md-raised"><md-icon>share</md-icon> Share Link</a>
+			<div flex ng-show="event.location">
+				<header class="md-subheader-simple">Location</header>
+				<h2 layout-margin ng-show="event.location">
+					<span ng-bind="event.location" style="white-space: pre-wrap;"></span>
+				</h2>
 			</div>
-		</section>
+		</div>
+		
+		<div ng-show="event.notes">
+			<md-subheader class="md-no-sticky">Notes</md-subheader>
+			<div layout-margin ng-bind="event.notes" style="white-space: pre-wrap;"></div>
+		</div>
 	</header>
-	<section ng-repeat="status in statuses" ng-show="status.$participants | length" class="content-wrap">
+	<section ng-repeat="status in statuses" ng-show="status.$participants | length">
 		<md-subheader class="md-no-sticky">
 			<div layout="row">
 				<span flex ng-bind="status.name"></span>
@@ -77,29 +70,29 @@
 			</md-list>
 		</md-card>
 	</section>
-
-	<md-fab-speed-dial ng-if="canEdit(roster.admins)" md-direction="up" class="md-scale md-fab-speed-dial-bottom-right">
-		<md-fab-trigger>
-			<div layout="row">
-				<label><div>Edit event</div></label>
-				<md-button ng-click="editEvent()" class="md-fab md-primary" aria-label="Edit event">
-					<md-icon>create</md-icon>
-				</md-button>
-			</div>
-		</md-fab-trigger>
-		<md-fab-actions>
-			<div layout="row">
-				<label><div>Delete event</div></label>
-				<md-button ng-click="deleteEvent($event.shiftKey)" class="md-fab md-mini md-raised md-warn" aria-label="Delete event">
-					<md-icon>delete</md-icon>
-				</md-button>
-			</div>
-			<div layout="row">
-				<label><div>Clone event</div></label>
-				<md-button ng-click="cloneEvent()" class="md-fab md-mini md-raised md-accent" aria-label="Clone event">
-					<md-icon>content_copy</md-icon>
-				</md-button>
-			</div>
-		</md-fab-actions>
-	</md-fab-speed-dial>
 </div>
+
+<md-fab-speed-dial ng-if="canEdit(roster.admins)" md-direction="up" class="md-scale md-fab-speed-dial-bottom-right">
+	<md-fab-trigger>
+		<div layout="row">
+			<label><div>Edit event</div></label>
+			<md-button ng-click="editEvent()" class="md-fab md-primary" aria-label="Edit event">
+				<md-icon>create</md-icon>
+			</md-button>
+		</div>
+	</md-fab-trigger>
+	<md-fab-actions>
+		<div layout="row">
+			<label><div>Delete event</div></label>
+			<md-button ng-click="deleteEvent($event.shiftKey)" class="md-fab md-mini md-raised md-warn" aria-label="Delete event">
+				<md-icon>delete</md-icon>
+			</md-button>
+		</div>
+		<div layout="row">
+			<label><div>Clone event</div></label>
+			<md-button ng-click="cloneEvent()" class="md-fab md-mini md-raised md-accent" aria-label="Clone event">
+				<md-icon>content_copy</md-icon>
+			</md-button>
+		</div>
+	</md-fab-actions>
+</md-fab-speed-dial>

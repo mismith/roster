@@ -1,5 +1,5 @@
-<div layout="column">
-	<section ng-if=" ! $me.$id" class="content-wrap" layout="column" layout-align="center center" layout-fill flex style="padding-top: 2%; padding-bottom: 4%;">
+<div layout="column" class="content-wrap">
+	<section ng-if=" ! $me.$id" layout="column" layout-align="center center" layout-fill flex style="padding-top: 2%; padding-bottom: 4%;">
 		<q>Quickly poll your team roster's availability.</q>
 		<p layout-padding>
 			<img src="/assets/img/favicon.svg" width="192" height="192" alt="Roster IO Logo" />
@@ -12,7 +12,7 @@
 		</md-button>
 	</section>
 	
-	<section ng-if="$me.$id" class="content-wrap">
+	<section ng-if="$me.$id">
 		<md-subheader class="md-no-sticky">Rosters</md-subheader>
 		<md-card>
 			<md-card-content style="padding: 0;">
@@ -37,15 +37,15 @@
 			</md-card-content>
 		</md-card>
 	</section>
-	
-	<md-fab-speed-dial ng-if="canEdit()" md-direction="up" class="md-scale md-fab-speed-dial-bottom-right">
-		<md-fab-trigger>
-			<div layout="row">
-				<label><div>Add new roster</div></label>
-				<md-button ng-click="newRoster()" class="md-fab" aria-label="Add new roster">
-					<md-icon>add</md-icon>
-				</md-button>
-			</div>
-		</md-fab-trigger>
-	</md-fab-speed-dial>
 </div>
+
+<md-fab-speed-dial ng-if="canEdit()" md-direction="up" class="md-scale md-fab-speed-dial-bottom-right">
+	<md-fab-trigger>
+		<div layout="row">
+			<label><div>Add new roster</div></label>
+			<md-button ng-click="newRoster()" class="md-fab" aria-label="Add new roster">
+				<md-icon>add</md-icon>
+			</md-button>
+		</div>
+	</md-fab-trigger>
+</md-fab-speed-dial>
