@@ -29,4 +29,4 @@ Quickly poll your team roster's availability.
 - send notification when new feature is added
 - send notification when user is removed from roster, or promoted/demoted to/from admin
 - add prompt to add to homescreen
-- fix back button (edge cases)
+- fix back button edge cases
