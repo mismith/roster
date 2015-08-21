@@ -909,14 +909,6 @@ angular.module('roster-io', ['ui.router', 'ngMaterial', 'firebaseHelper', 'ngTou
 					close = function () {
 						return move(true);
 					};
-					
-				var getStyle = function (el, prop) {
-					if (typeof getComputedStyle !== 'undefined') {
-						return getComputedStyle(el, null).getPropertyValue(prop);
-					} else {
-						return el.currentStyle[prop];
-					}
-				};
 				
 				$actions.on('click', function (e) {
 					close();
@@ -942,10 +934,6 @@ angular.module('roster-io', ['ui.router', 'ngMaterial', 'firebaseHelper', 'ngTou
 								$element.removeClass('md-swiping-right md-swiping-right-triggered');
 								triggered.right = false;
 								
-								var children   = $right.children();
-									firstChild = children[0];
-								width.right = $actions[0].offsetWidth - firstChild.offsetLeft + parseInt(getStyle(firstChild, 'margin-left'));
-								
 								if (x < -72) {
 									$element.addClass('md-swiping-left-triggered');
 									triggered.left = true;
@@ -954,19 +942,7 @@ angular.module('roster-io', ['ui.router', 'ngMaterial', 'firebaseHelper', 'ngTou
 									triggered.left = false;
 								}
 								
-								angular.forEach($right.children(), function(el) {
-									var $el         = angular.element(el),
-										w           = el.clientWidth,
-										offsetRight = $right[0].offsetWidth - el.offsetLeft - w;
-									
-									var transform = 'scale(' + Math.max(0,  Math.min((Math.abs(x) - offsetRight) / w, 1) ) + ')';
-									$el.css({
-										transform:       transform,
-										webkitTransform: transform,
-									});
-								});
-								
-								if (x < -$actions[0].offsetWidth * 0.66) {
+								if (x < -$actions[0].offsetWidth * 0.75) {
 									$element.addClass('md-swiping-left-most-triggered');
 									triggered.leftMost = true;
 								} else {
@@ -979,10 +955,6 @@ angular.module('roster-io', ['ui.router', 'ngMaterial', 'firebaseHelper', 'ngTou
 								$element.removeClass('md-swiping-left md-swiping-left-triggered');
 								triggered.left = false;
 								
-								var children  = $left.children(),
-									lastChild = children[children.length - 1];
-								width.left = lastChild.offsetLeft + lastChild.offsetWidth + parseInt(getStyle(lastChild, 'margin-right'));
-								
 								if (x > 72) {
 									$element.addClass('md-swiping-right-triggered');
 									triggered.right = true;
@@ -991,19 +963,7 @@ angular.module('roster-io', ['ui.router', 'ngMaterial', 'firebaseHelper', 'ngTou
 									triggered.right = false;
 								}
 								
-								angular.forEach($left.children(), function(el) {
-									var $el         = angular.element(el),
-										w           = el.clientWidth,
-										offsetRight = $left[0].offsetWidth - el.offsetLeft - w;
-									
-									var transform = 'scale(' + Math.max(0,  Math.min((Math.abs(x) - el.offsetLeft) / w, 1) ) + ')';
-									$el.css({
-										transform:       transform,
-										webkitTransform: transform,
-									});
-								});
-								
-								if (x > $actions[0].offsetWidth * 0.66) {
+								if (x > $actions[0].offsetWidth * 0.75) {
 									$element.addClass('md-swiping-right-most-triggered');
 									triggered.rightMost = true;
 								} else {
@@ -1033,7 +993,7 @@ angular.module('roster-io', ['ui.router', 'ngMaterial', 'firebaseHelper', 'ngTou
 								$parse($attrs.mdSwipeLeftMostTriggered)($scope);
 							} else if (triggered.left) {
 								$parse($attrs.mdSwipeLeftTriggered)($scope);
-								move(-width.right);
+								move(-172);
 							} else if (triggered.rightMost) {
 								$parse($attrs.mdSwipeRightMostTriggered)($scope);
 							} else if (triggered.right) {

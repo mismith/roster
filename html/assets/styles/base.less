@@ -448,8 +448,8 @@ a {
 		-webkit-backface-visibility: hidden;
 	}
 	.md-swipe-item-inner {
-		position: relative;
 		flex: 1;
+		position: relative;
 		background-color: @lightest;
 		padding: 0 @u*2;
 		z-index: 2;
@@ -508,20 +508,33 @@ a {
 	}
 	
 	// custom
+	&.md-swiping-right {
+		.md-button {
+			md-icon {
+				&:first-child {
+					display: inline-block;
+				}
+				&:last-child {
+					display: none;
+				}
+			}
+		}
+	}
 	&.md-swiping-right-triggered {
 		background-color: @success;
 	}
 	&.md-swiping-right-most-triggered {
 		background-color: @primary;
 		
-		md-icon {
-			&:not(.ng-hide) {
-				display: none;
+		.md-button {
+			md-icon {
+				&:first-child {
+					display: none;
+				}
+				&:last-child {
+					display: inline-block;
+				}
 			}
-			&.ng-hide {
-				display: inline-block !important;
-			}
-			
 		}
 	}
 	&.md-swiping-left-triggered {

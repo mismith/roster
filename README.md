@@ -14,6 +14,8 @@ Quickly poll your team roster's availability.
 - improve dialogs/forms
 	- fix dialog error handling and loading icon issues
 	- in dialogs, clone edited object so cancellable changes aren't visible locally
+	- allow enter to submit
+	- auto-focus first element
 - auto-accept invites if invited user's email logs in (and not necessarily to accept that invite)
 	- improve invites so someone can be invited to more than 1 roster
 - add proper auth to API
