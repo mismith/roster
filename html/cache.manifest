@@ -16,22 +16,18 @@ CACHE:
 //cdn.rawgit.com/mismith/angularfire-helper/2.1.5/angularfire-helper.min.js
 https://apis.google.com/js/client.js
 //cdnjs.cloudflare.com/ajax/libs/moment.js/2.9.0/moment.min.js
-/assets/js/base.js
-/assets/js/base.min.js
-/assets/css/base.css
-/assets/img/loading.gif
-/assets/img/favicon.png
-/assets/img/splash@750x1294.png
-/assets/img/touchicon.png
-/assets/img/facebook-messenger.svg
-/assets/img/favicon.svg
-/emails/added.html
-/emails/invite.html
-/emails/reminder.html
-/index.html
+assets/js/base.js
+assets/js/base.min.js
+assets/css/base.css
+assets/img/loading.gif
+assets/img/favicon.png
+assets/img/splash@750x1294.png
+assets/img/touchicon.png
+assets/img/facebook-messenger.svg
+assets/img/favicon.svg
 
 
 NETWORK:
 *
 
-# hash: eb7a8dcca4702c236907676b3d9285de5fe19afa5ba70cde490904905658ed9d
+# hash: 39af312f7c0ba9a7e1c04bd87a1e0ade312273c05a36d804be229882eb8c3762
