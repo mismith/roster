@@ -76,7 +76,6 @@
 		</md-toolbar>
 		<md-content role="main" flex ui-view autoscroll="false" id="main"></md-content>
 	</div>
-	<div id="fb-root"></div>
 
 	<script src="//ajax.googleapis.com/ajax/libs/angularjs/1.4.1/angular.min.js"></script>
 	<script src="//ajax.googleapis.com/ajax/libs/angularjs/1.4.1/angular-animate.min.js"></script>
@@ -84,7 +83,6 @@
 	<script src="//ajax.googleapis.com/ajax/libs/angularjs/1.4.1/angular-touch.min.js"></script>
 	<script src="//ajax.googleapis.com/ajax/libs/angular_material/0.10.1/angular-material.min.js"></script>
 	<!--<script src="//cdn.rawgit.com/angular/bower-material/v0.10.1/angular-material.min.js"></script>-->
-	
 	
 	<script src="//cdnjs.cloudflare.com/ajax/libs/angular-ui-router/0.2.15/angular-ui-router.min.js"></script>
 	<script src="//cdn.rawgit.com/nonplus/angular-ui-router-title/v0.0.4/angular-ui-router-title.js"></script>
@@ -96,22 +94,6 @@
 	<script src="https://apis.google.com/js/client.js"></script>
 	<script src="//cdnjs.cloudflare.com/ajax/libs/moment.js/2.9.0/moment.min.js"></script>
 	
-	<script src="/assets/js/base.min.js?v=4"></script>
-	<script>
-		// Load FB SDK asynchronously
-		window.fbAsyncInit = function() {
-			FB.init({
-				appId:   '842802542454811',
-				version: 'v2.2'
-			});
-		};
-		(function(d, s, id) {
-			var js, fjs = d.getElementsByTagName(s)[0];
-			if (d.getElementById(id)) return;
-			js = d.createElement(s); js.id = id;
-			js.src = "//connect.facebook.net/en_US/sdk.js";
-			fjs.parentNode.insertBefore(js, fjs);
-		}(document, 'script', 'facebook-jssdk'));
-	</script>
+	<script src="/assets/js/base.min.js?v=5"></script>
 </body>
 </html>

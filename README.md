@@ -11,6 +11,9 @@ Quickly poll your team roster's availability.
 - improve notifications with user-selectable preferences
 	- send email to roster members on event day to notify them
 	- add local notifications for reminders (including push notifications for home screen apps?)
+	- send notification when new event is added to roster
+	- send notification when new feature is added
+	- send notification when user is removed from roster, or promoted/demoted to/from admin
 - improve dialogs/forms
 	- fix dialog error handling and loading icon issues
 	- in dialogs, clone edited object so cancellable changes aren't visible locally
@@ -24,12 +27,8 @@ Quickly poll your team roster's availability.
 
 - add (request) subs functionality
 - fix floating fab scrolling/positioning on mobile
-- send notification when new event is added to roster
-- send notification when new feature is added
-- send notification when user is removed from roster, or promoted/demoted to/from admin
 - add prompt to add to homescreen
 - fix back button edge cases
-- fix issue where main page doesn't load some times
 - fix non-logged-in homepage spacing
 
 - handle missing/wrong IDs in resolves (e.g. what to show if invite is wrong/used?)
