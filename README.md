@@ -20,8 +20,7 @@ Quickly poll your team roster's availability.
 	- improve invites so someone can be invited to more than 1 roster
 - add proper auth to API
 - add proper auth to Firebase from Node
-- add offline app cache for homescreen app (or native app wrapper?)
-- fix minor page loading flicker (using resolve?)
+- add offline app cache for homescreen app (or native app wrapper?) [WIP]
 
 - add (request) subs functionality
 - fix floating fab scrolling/positioning on mobile
