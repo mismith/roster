@@ -48,7 +48,7 @@ angular.module('roster-io', ['ui.router', 'ngMaterial', 'firebaseHelper', 'ngTou
 		$compileProvider.aHrefSanitizationWhitelist(/^\s*(https?|ftp|mailto|tel|webcal|fb\-messenger|(comgoogle)?maps(url)?):/);
 	}])
 	
-	.factory('Auth', ["$rootScope", "$firebaseHelper", "$q", function ($rootScope, $firebaseHelper, $q) {
+	.factory('Auth', ["$rootScope", "$firebaseHelper", "$q", "$timeout", function ($rootScope, $firebaseHelper, $q, $timeout) {
 		var Auth = $firebaseHelper.auth();
 		
 		$rootScope.$me = {};
@@ -77,19 +77,17 @@ angular.module('roster-io', ['ui.router', 'ngMaterial', 'firebaseHelper', 'ngTou
 			var deferred = $q.defer();
 			
 			Auth.$waitForAuth().then(function (authData) {
-				if (authData) {
-					$firebaseHelper.object('data/users/' + authData.uid).$loaded().then(function ($me) {
-						authData.$me = $me;
-						deferred.resolve(authData);
-					});
-				} else {
-					deferred.resolve(authData);
-				}
+				$timeout(function () {
+					deferred.resolve($rootScope.$me);
+				});
 			});
 			
 			return deferred.promise;
 		};
 		
+		$rootScope.$auth = Auth.$auth = function () {
+			return $q.when(Auth.$getAuth() || Auth['$authWithOAuth' + ($rootScope.isMobile ? 'Redirect' : 'Popup')]('facebook', {scope: 'email'}));
+		};
 		$rootScope.$unauth = Auth.$unauth;
 		
 		return Auth;
@@ -115,25 +113,9 @@ angular.module('roster-io', ['ui.router', 'ngMaterial', 'firebaseHelper', 'ngTou
 		$rootScope.isiOS     = /iPhone|iPad|iPod/i.test(navigator.userAgent);
 		
 		// auth
-		$rootScope.$authThen = function (callback) {
-			var authData = Auth.$getAuth();
-			if ( ! authData) {
-				Auth['$authWithOAuth' + ($rootScope.isMobile ? 'Redirect' : 'Popup')]('facebook', {scope: 'email'}).then(function (authData) {
-					if(angular.isFunction(callback)) callback(authData);
-				}).catch(function (error) {
-					console.error(error);
-				});
-			} else {
-				if(angular.isFunction(callback)) callback(authData);
-			}
-		};
 		Auth.$onAuth(function (authData) {
-			if (authData) {
-				$rootScope.myRosters = $firebaseHelper.join([$rootScope.$me, 'rosters'], 'data/rosters');
-			}
+			$rootScope.myRosters = authData ? $firebaseHelper.join([$rootScope.$me, 'rosters'], 'data/rosters') : null;
 		});
-		
-		// helpers
 		$rootScope.canEdit = function () {
 			// returns false if not logged in
 			// returns true if any of the following:
@@ -147,6 +129,8 @@ angular.module('roster-io', ['ui.router', 'ngMaterial', 'firebaseHelper', 'ngTou
 				else return test ? test === $rootScope.$me.$id : false;
 			}).length || $rootScope.$me.admin;
 		};
+		
+		// helpers
 		$rootScope.avatar = function (userId, query) {
 			query = query || 'type=square';
 			return '//graph.facebook.com/' + (userId ? userId + '/' : '') + 'picture?' + query;
@@ -442,6 +426,11 @@ angular.module('roster-io', ['ui.router', 'ngMaterial', 'firebaseHelper', 'ngTou
 				},
 			});
 		};
+		$scope.resendInvite = function (skipConfirm, inviteId) {
+			if (skipConfirm || confirm('Are you sure you want to resend this user\'s invite?')) {
+				sendInviteEmail(inviteId);
+			}
+		};
 		$scope.rescindInvite = function (skipConfirm, participant, invites) {
 			invites = invites || $scope.invites;
 			
@@ -452,11 +441,6 @@ angular.module('roster-io', ['ui.router', 'ngMaterial', 'firebaseHelper', 'ngTou
 						content: 'Invite for "' + name + '" rescinded.',
 					});
 				});
-			}
-		};
-		$scope.resendInvite = function (skipConfirm, inviteId) {
-			if (skipConfirm || confirm('Are you sure you want to resend this user\'s invite?')) {
-				sendInviteEmail(inviteId);
 			}
 		};
 		
@@ -502,7 +486,7 @@ angular.module('roster-io', ['ui.router', 'ngMaterial', 'firebaseHelper', 'ngTou
 		
 		// sharing
 		var sharePrompt = function () {
-			prompt('Copy and paste this URL:', $rootScope.BASE_SHORT_URL + $scope.event.hash);
+			prompt('Copy and paste this URL:', $scope.BASE_SHORT_URL + $scope.event.hash);
 		};
 		$scope.shareEvent = function () {
 			if ($scope.event.hash) {
@@ -548,9 +532,7 @@ angular.module('roster-io', ['ui.router', 'ngMaterial', 'firebaseHelper', 'ngTou
 				},
 			});
 		};
-		if ($state.params.edit) {
-			$scope.editEvent();
-		}
+		if ($state.params.edit) $scope.editEvent();
 		$scope.duplicateEvent = function () {
 			var event = {};
 			angular.forEach($scope.event, function (v, k) {
@@ -593,7 +575,7 @@ angular.module('roster-io', ['ui.router', 'ngMaterial', 'firebaseHelper', 'ngTou
 		});
 		
 		$scope.acceptInvite = function () {
-			$scope.$authThen();
+			Auth.$auth();
 		};
 		Auth.$onAuth(function (authData) {
 			$scope.invite.$loaded().then(function (invite) {
