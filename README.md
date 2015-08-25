@@ -29,3 +29,5 @@ Quickly poll your team roster's availability.
 - send notification when user is removed from roster, or promoted/demoted to/from admin
 - add prompt to add to homescreen
 - fix back button edge cases
+- fix issue where main page doesn't load some times
+- fix non-logged-in homepage spacing

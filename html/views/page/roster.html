@@ -14,7 +14,7 @@
 							
 							<p ng-bind="event.name"></p>
 							
-							<rsvp ng-if="canEdit(roster.participants, roster.admins)" event="eventObj" participant="$me"></rsvp>
+							<rsvp event="eventObj" participant="$me" md-swipe-item-controller="mdSwipeItem" ng-if="canEdit(roster.participants, roster.admins)"></rsvp>
 						</div>
 						<md-swipe-actions hide-gt-sm layout="row">
 							<div class="md-swipe-action-left" layout="row" layout-align="start center">
