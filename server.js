@@ -116,7 +116,7 @@ function getReminderInfo(rosterId, eventId) {
 			var roster  = snapshot.val();
 			if (roster) {
 				roster.$id = rosterId;
-				roster.url = '#/roster/' + roster.$id;
+				roster.url = '/roster/' + roster.$id;
 				
 				if (eventId) {
 					var event = roster.events[eventId];
@@ -314,7 +314,7 @@ function getInviteInfo(inviteId) {
 			var invite = inviteSnap.val();
 			if (invite) {
 				invite.$id = inviteId;
-				invite.url = '#/invite/' + invite.$id;
+				invite.url = '/invite/' + invite.$id;
 				
 				new Firebase(FB_BASE_URL + '/data/users/' + invite.by).once('value', function (inviterSnap) {
 					var inviter = inviterSnap.val();
@@ -323,7 +323,7 @@ function getInviteInfo(inviteId) {
 					new Firebase(FB_BASE_URL + '/data/rosters/' + invite.to.params.roster).once('value', function (rosterSnap) {
 						var roster = rosterSnap.val();
 						roster.$id = rosterSnap.key();
-						roster.url = '#/roster/' + roster.$id;
+						roster.url = '/roster/' + roster.$id;
 						
 						deferred.resolve({
 							invite:  invite,
@@ -418,7 +418,7 @@ function getAddedInfo(rosterId, inviteeId, inviterId) {
 			var roster = rosterSnap.val();
 			if (roster) {
 				roster.$id = rosterId;
-				roster.url = '#/roster/' + roster.$id;
+				roster.url = '/roster/' + roster.$id;
 				
 				if (inviteeId) {
 					new Firebase(FB_BASE_URL + '/data/users/' + inviteeId).once('value', function (inviteeSnap) {
