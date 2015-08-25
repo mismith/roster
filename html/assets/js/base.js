@@ -243,6 +243,7 @@ angular.module('roster-io', ['ui.router', 'ngMaterial', 'firebaseHelper', 'ngTou
 	}])
 	
 	.controller('RosterCtrl', ["$scope", "$rootScope", "$firebaseHelper", "$mdDialogForm", "$state", "$mdToast", "$q", "RSVP", "$http", "Roster", function ($scope, $rootScope, $firebaseHelper, $mdDialogForm, $state, $mdToast, $q, RSVP, $http, Roster) {
+		$scope.roster       = Roster;
 		$scope.timegroups   = $firebaseHelper.array('constants/timegroups'); // constant
 		$scope.invites      = $firebaseHelper.join([Roster, 'invites'], 'data/invites');
 		$scope.participants = $firebaseHelper.join([Roster, 'participants'], 'data/users');
@@ -487,6 +488,7 @@ angular.module('roster-io', ['ui.router', 'ngMaterial', 'firebaseHelper', 'ngTou
 	}])
 		
 	.controller('EventCtrl', ["$scope", "$firebaseHelper", "$mdDialogForm", "$state", "$mdToast", "Auth", "RSVP", "$location", "API", "$stateParams", "Roster", "Event", function ($scope, $firebaseHelper, $mdDialogForm, $state, $mdToast, Auth, RSVP, $location, API, $stateParams, Roster, Event) {
+		$scope.roster = Roster;
 		$scope.event  = Event;
 		
 		if ($state.params.v !== undefined) {
@@ -582,6 +584,10 @@ angular.module('roster-io', ['ui.router', 'ngMaterial', 'firebaseHelper', 'ngTou
 	}])
 	
 	.controller('InviteCtrl', ["$scope", "$firebaseHelper", "$state", "$q", "Auth", "$mdToast", "$mdDialog", "Invite", "Inviter", "Roster", function ($scope, $firebaseHelper, $state, $q, Auth, $mdToast, $mdDialog, Invite, Inviter, Roster) {
+		$scope.invite  = Invite;
+		$scope.inviter = Inviter;
+		$scope.roster  = Roster;
+		
 		if (Invite.$value !== null) {
 			Invite.$$loaded = true;
 		} else {
@@ -651,6 +657,7 @@ angular.module('roster-io', ['ui.router', 'ngMaterial', 'firebaseHelper', 'ngTou
 	}])
 	
 	.controller('UserCtrl', ["$scope", "$firebaseHelper", "$state", "$mdToast", "$mdDialogForm", "User", function ($scope, $firebaseHelper, $state, $mdToast, $mdDialogForm, User) {
+		$scope.user        = User;
 		$scope.userRosters = $firebaseHelper.join([User, 'rosters'], 'data/rosters');
 		
 		$scope.editUser = function () {
