@@ -1,6 +1,6 @@
 window.STRICT_INVITE_CHECK = false;
 
-angular.module('roster-io', ['ui.router', 'ngMaterial', 'firebaseHelper', 'ngTouch'])
+angular.module('roster-io', ['ui.router', 'ui.router.title', 'ngMaterial', 'firebaseHelper', 'ngTouch'])
 	
 	.config(function ($locationProvider, $urlRouterProvider, $stateProvider, $firebaseHelperProvider, $sceProvider, $compileProvider) {
 		// routing
@@ -16,6 +16,9 @@ angular.module('roster-io', ['ui.router', 'ngMaterial', 'firebaseHelper', 'ngTou
 					currentAuth:  function (Auth) {
 						return Auth.$waitForMe();
 					},
+					$title: function () {
+						return 'My Rosters';
+					},
 				},
 				controller: 'RostersCtrl',
 			})
@@ -26,6 +29,9 @@ angular.module('roster-io', ['ui.router', 'ngMaterial', 'firebaseHelper', 'ngTou
 				resolve: {
 					Roster: function ($firebaseHelper, $stateParams) {
 						return $firebaseHelper.object('data/rosters', $stateParams.roster).$loaded();
+					},
+					$title: function (Roster) {
+						return Roster.name;
 					},
 				},
 			})
@@ -39,6 +45,9 @@ angular.module('roster-io', ['ui.router', 'ngMaterial', 'firebaseHelper', 'ngTou
 					},
 					Event: function ($firebaseHelper, $stateParams, Roster) {
 						return $firebaseHelper.object(Roster, 'events', $stateParams.event).$loaded();
+					},
+					$title: function (Roster, Event) {
+						return Event.name + ' • ' + Roster.name;
 					},
 				},
 			})
@@ -56,6 +65,9 @@ angular.module('roster-io', ['ui.router', 'ngMaterial', 'firebaseHelper', 'ngTou
 					Roster: function ($firebaseHelper, $stateParams, Invite) {
 						return $firebaseHelper.object('data/rosters', Invite.roster).$loaded();
 					},
+					$title: function () {
+						return 'Invitation';
+					},
 				},
 			})
 			.state('user', {
@@ -65,6 +77,9 @@ angular.module('roster-io', ['ui.router', 'ngMaterial', 'firebaseHelper', 'ngTou
 				resolve: {
 					User: function ($firebaseHelper, $stateParams) {
 						return $firebaseHelper.object('data/users', $stateParams.user).$loaded();
+					},
+					$title: function (User) {
+						return User.name;
 					},
 				},
 			});
@@ -245,9 +260,9 @@ angular.module('roster-io', ['ui.router', 'ngMaterial', 'firebaseHelper', 'ngTou
 	.controller('RosterCtrl', function ($scope, $rootScope, $firebaseHelper, $mdDialogForm, $state, $mdToast, $q, RSVP, $http, Roster) {
 		$scope.roster       = Roster;
 		$scope.timegroups   = $firebaseHelper.array('constants/timegroups'); // constant
-		$scope.invites      = $firebaseHelper.join([Roster, 'invites'], 'data/invites');
-		$scope.participants = $firebaseHelper.join([Roster, 'participants'], 'data/users');
 		$scope.events       = $firebaseHelper.array(Roster, 'events');
+		$scope.participants = $firebaseHelper.join([Roster, 'participants'], 'data/users');
+		$scope.invites      = $firebaseHelper.join([Roster, 'invites'], 'data/invites');
 		$scope.users        = $firebaseHelper.array('data/users');
 		$scope.RSVP         = RSVP;		
 		

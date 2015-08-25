@@ -31,3 +31,5 @@ Quickly poll your team roster's availability.
 - fix back button edge cases
 - fix issue where main page doesn't load some times
 - fix non-logged-in homepage spacing
+
+- handle missing/wrong IDs in resolves (e.g. what to show if invite is wrong/used?)

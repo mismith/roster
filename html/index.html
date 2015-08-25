@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en" ng-app="roster-io">
 <head>
-	<title>Roster IO</title>
+	<title ng-bind="($title ? $title + ' • ' : '') + 'Roster IO'">Roster IO</title>
 	
 	<base href="/" />
 	<meta charset="UTF-8" />
@@ -87,6 +87,7 @@
 	
 	
 	<script src="//cdnjs.cloudflare.com/ajax/libs/angular-ui-router/0.2.15/angular-ui-router.min.js"></script>
+	<script src="//cdn.rawgit.com/nonplus/angular-ui-router-title/v0.0.4/angular-ui-router-title.js"></script>
 	
 	<script src="//cdn.firebase.com/js/client/2.2.3/firebase.js"></script>
 	<script src="//cdn.firebase.com/libs/angularfire/1.1.2/angularfire.min.js"></script>
