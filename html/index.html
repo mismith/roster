@@ -44,7 +44,7 @@
 			</md-button>
 			<div flex class="md-toolbar-tools">
 				<div flex>
-					<a ui-sref="rosters" class="home">Roster IO</a>
+					<a ui-sref="home" class="home">Roster IO</a>
 				</div>
 				<div layout="row">
 					<div ng-repeat="myRoster in myRosters" ng-init="myRosterEvents = $firebaseHelper.array('data/rosters/' + myRoster.$id + '/events')" layout="row">

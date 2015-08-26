@@ -9,18 +9,16 @@ angular.module('roster-io', ['ui.router', 'ui.router.title', 'ngMaterial', 'fire
 		$urlRouterProvider.when('/rosters', '/');
 		$stateProvider
 			// pages
-			.state('rosters', {
+			.state('home', {
 				url: '/',
-				templateUrl: 'views/page/rosters.html',
+				templateUrl: 'views/page/home.html',
 				resolve: {
-					currentAuth:  ["Auth", function (Auth) {
-						return Auth.$waitForMe();
+					authed: ["Auth", "$state", function (Auth, $state) {
+						return Auth.$waitForMe().then(function ($me) {
+							if ($me.$id) $state.go('user', {user: $me.$id});
+						});
 					}],
-					$title: function () {
-						return 'My Rosters';
-					},
 				},
-				controller: 'RostersCtrl',
 			})
 			.state('roster', {
 				url: '/roster/:roster',
@@ -92,7 +90,7 @@ angular.module('roster-io', ['ui.router', 'ui.router.title', 'ngMaterial', 'fire
 		$compileProvider.aHrefSanitizationWhitelist(/^\s*(https?|ftp|mailto|tel|webcal|fb\-messenger|(comgoogle)?maps(url)?):/);
 	}])
 	
-	.factory('Auth', ["$rootScope", "$firebaseHelper", "$q", "$timeout", function ($rootScope, $firebaseHelper, $q, $timeout) {
+	.factory('Auth', ["$rootScope", "$firebaseHelper", "$state", "$q", "$timeout", function ($rootScope, $firebaseHelper, $state, $q, $timeout) {
 		var Auth = $firebaseHelper.auth();
 		
 		$rootScope.$me = {};
@@ -112,6 +110,11 @@ angular.module('roster-io', ['ui.router', 'ui.router.title', 'ngMaterial', 'fire
 				
 				// info
 				meRef.update(authData); // update it w/ any changes since last login
+				
+				// don't show login screen
+				if ($state.current.name === 'home') {
+					$state.reload();
+				}
 			} else {
 				// page loaded or refreshed while not logged in, or logging out
 				$rootScope.$me = {};
@@ -194,68 +197,6 @@ angular.module('roster-io', ['ui.router', 'ui.router.title', 'ngMaterial', 'fire
 	
 	
 	
-	.controller('RostersCtrl', ["$scope", "$firebaseHelper", "$q", "$mdDialogForm", "$mdToast", "$filter", function ($scope, $firebaseHelper, $q, $mdDialogForm, $mdToast, $filter) {
-/*
-				function concatChildren(parents, childrenKey) {
-					var children = [];
-					$firebaseHelper.ref(parents).on('child_added', function (parentSnap) {
-						parentSnap.child(childrenKey).forEach(function (childSnap) {
-							childSnap.ref().on('value', function (childSnap){
-								var child = childSnap.val();
-								child.$id = childSnap.key();
-								
-								var index = -1;
-								angular.forEach(children, function (c, i) {
-									if (c.$id === child.$id) {
-										index = i;
-										children[i] = child; // overwrite it
-									}
-								});
-								if (index < 0) {
-									// not found, so add it
-									children.push(child);
-								}
-							});
-						});
-					});
-					return children;
-				}
-				
-				$scope.allMyEvents = concatChildren('data/rosters', 'events');
-				$scope.$watch('allMyEvents', function (allMyEvents) {
-					console.log(allMyEvents);
-					if (allMyEvents !== undefined){
-						$scope.myEvents = $filter('orderBy')(allMyEvents, 'date');
-					}
-				});
-*/
-		
-		$scope.newRoster = function () {
-			$scope.roster = {
-				admins: {},
-				participants: {},
-			};
-			$mdDialogForm.show({
-				scope:         $scope,
-				title:         'Add new roster',
-				contentUrl:    'views/template/roster.html',
-				ok:            'Create',
-				onSubmit: function (scope) {
-					return $scope.myRosters.$add(scope.roster).then(function (rosterRef) {
-						$q.all([
-							$firebaseHelper.join([rosterRef, 'admins'], 'data/users').$link($scope.$me.$id),
-							$firebaseHelper.join([rosterRef, 'participants'], 'data/users').$link($scope.$me.$id),
-							$firebaseHelper.join([$scope.$me, 'rosters'], 'data/rosters').$link(rosterRef.key()),
-						]).then(function () {
-							$mdToast.showSimple({
-								content: 'Roster created.',
-							});
-						});
-					});
-				},
-			});
-		};
-	}])
 	
 	.controller('RosterCtrl', ["$scope", "$rootScope", "$firebaseHelper", "$mdDialogForm", "$state", "$mdToast", "$q", "RSVP", "$http", "Roster", function ($scope, $rootScope, $firebaseHelper, $mdDialogForm, $state, $mdToast, $q, RSVP, $http, Roster) {
 		$scope.roster       = Roster;
@@ -283,7 +224,7 @@ angular.module('roster-io', ['ui.router', 'ui.router.title', 'ngMaterial', 'fire
 				
 				// wait for all promises to complete the redirect and notify user
 				$q.all(deferreds).then(function () {
-					$state.go('rosters');
+					$state.go('home');
 					
 					$mdToast.showSimple({
 						content: 'Roster deleted.',
@@ -675,6 +616,7 @@ angular.module('roster-io', ['ui.router', 'ui.router.title', 'ngMaterial', 'fire
 		$scope.user        = User;
 		$scope.userRosters = $firebaseHelper.join([User, 'rosters'], 'data/rosters');
 		
+		// user
 		$scope.editUser = function () {
 			$mdDialogForm.show({
 				scope:         $scope,
@@ -685,6 +627,68 @@ angular.module('roster-io', ['ui.router', 'ui.router.title', 'ngMaterial', 'fire
 					return User.$save().then(function () {
 						$mdToast.showSimple({
 							content: 'User saved.',
+						});
+					});
+				},
+			});
+		};
+		
+/*
+				function concatChildren(parents, childrenKey) {
+					var children = [];
+					$firebaseHelper.ref(parents).on('child_added', function (parentSnap) {
+						parentSnap.child(childrenKey).forEach(function (childSnap) {
+							childSnap.ref().on('value', function (childSnap){
+								var child = childSnap.val();
+								child.$id = childSnap.key();
+								
+								var index = -1;
+								angular.forEach(children, function (c, i) {
+									if (c.$id === child.$id) {
+										index = i;
+										children[i] = child; // overwrite it
+									}
+								});
+								if (index < 0) {
+									// not found, so add it
+									children.push(child);
+								}
+							});
+						});
+					});
+					return children;
+				}
+				
+				$scope.allMyEvents = concatChildren('data/rosters', 'events');
+				$scope.$watch('allMyEvents', function (allMyEvents) {
+					console.log(allMyEvents);
+					if (allMyEvents !== undefined){
+						$scope.myEvents = $filter('orderBy')(allMyEvents, 'date');
+					}
+				});
+*/
+		
+		// rosters
+		$scope.newRoster = function () {
+			$scope.roster = {
+				admins: {},
+				participants: {},
+			};
+			$mdDialogForm.show({
+				scope:         $scope,
+				title:         'Add new roster',
+				contentUrl:    'views/template/roster.html',
+				ok:            'Create',
+				onSubmit: function (scope) {
+					return $scope.myRosters.$add(scope.roster).then(function (rosterRef) {
+						$q.all([
+							$firebaseHelper.join([rosterRef, 'admins'], 'data/users').$link($scope.$me.$id),
+							$firebaseHelper.join([rosterRef, 'participants'], 'data/users').$link($scope.$me.$id),
+							$firebaseHelper.join([$scope.$me, 'rosters'], 'data/rosters').$link(rosterRef.key()),
+						]).then(function () {
+							$mdToast.showSimple({
+								content: 'Roster created.',
+							});
 						});
 					});
 				},
