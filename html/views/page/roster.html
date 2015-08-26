@@ -1,4 +1,4 @@
-<div layout="column" layout-gt-md="row" class="content-wrap">
+<div layout-gt-md="row" class="content-wrap">
 	<section flex>
 		<header layout-margin ng-include="'views/template/roster.header.html'"></header>
 		<div ng-repeat="timegroup in timegroups" ng-show="timegroup.$events.length || (timegroup.$id === 'upcoming' && events.length < 1)" ng-init="timegroup.$collapsed = timegroup.$id === 'past'">
