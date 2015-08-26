@@ -32,3 +32,5 @@ Quickly poll your team roster's availability.
 - fix non-logged-in homepage spacing
 
 - handle missing/wrong IDs in resolves (e.g. what to show if invite is wrong/used?)
+- add calendar view
+- make sure page homepage, if logged in, or sign-in as home if not
