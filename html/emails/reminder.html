@@ -28,9 +28,13 @@
 			vertical-align: middle;
 			border: 0;
 		}
+		.tooltip {
+			/* @HACK: prevent weird single-letter wrapping in iOS Mail */
+			white-space: nowrap;
+		}
 	</style>
 </head>
-<body class="loaded" style="height: auto; padding: 20px;">
+<body class="loaded" style="min-width: 400px; height: auto; padding: 20px;">
 
 	<div style="max-width: 600px; margin: 8px auto; text-align: center;">
 		<div class="md-subheader" style="text-align: left">
@@ -38,7 +42,7 @@
 		</div>
 		<div class="md-whiteframe-z1" style="background-color: #FFF;">
 			<div style="box-sizing: border-box; position: relative; z-index: 2; font-size: 20px; min-height: 88px; width: 100%; background-color: #3f51b5; color: #FFF;">
-				<h2 style="padding: 24px; margin: 0;"><%= moment(event.date).format('h:mm A, dddd') %>, <span style="white-space: nowrap;"><%= moment(event.date).format('MMMM D, YYYY') %></span></h2>
+				<h2 style="padding: 24px; margin: 0; color: #FFF;"><%= moment(event.date).format('h:mm A, dddd') %>, <span style="white-space: nowrap; color: #FFF;"><%= moment(event.date).format('MMMM D, YYYY') %></span></h2>
 			</div>
 			<div style="padding: 8px;">
 				<h3 style="margin-bottom: 8px;"><a href="<%= roster.url %>" class="passthru"><%= roster.name %></a></h3>
