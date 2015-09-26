@@ -164,7 +164,7 @@ function getReminderEmailTemplate(rosterId, eventId) {
 	
 	return deferred.promise;
 }
-function sendReminderEmails(rosterId, eventId, callback) {
+function sendReminderEmails(rosterId, eventId, optionalUserId) {
 	// @TODO double check all the error handling in here
 	var deferred = Q.defer();
 	
@@ -173,40 +173,44 @@ function sendReminderEmails(rosterId, eventId, callback) {
 		
 		var deferreds = [];
 		Object.keys(template.info.roster.participants).forEach(function (userId) {
-			var d = Q.defer();
-			deferreds.push(d.promise);
-			(function (d) {
-				new Firebase(FB_BASE_URL + '/data/users/' + userId).once('value', function (userSnap) {
-					var user = userSnap.val();
-					if (user.email && ( ! template.info.event.rsvps || ! template.info.event.rsvps[userId] || template.info.event.rsvps[userId].status < 0)) {
-						// clone the data for each user so we don't mess anything up
-						var userInfo = extend({}, template.info, {user: user});
-						
-						getJuicedEmail(template.html, userInfo, function (html) {
-							// send email
-							sendEmail({
-								From:       EMAIL,
-								To:         user.name + ' <' + user.email + '>',
-								Subject:    template.info.subject,
-								HtmlBody:   html,
-								TrackOpens: true,
-							}).then(function () {
-								response.sent.push({userId: userId});
-								
-								d.resolve();
-							}).catch(function (err) {
-								response.failed.push({userId: userId, error: err});
-								response.success = false;
+			if (optionalUserId === undefined || userId === optionalUserId) {
+				var d = Q.defer();
+				deferreds.push(d.promise);
+				(function (d) {
+					new Firebase(FB_BASE_URL + '/data/users/' + userId).once('value', function (userSnap) {
+						var user = userSnap.val();
+						if (user.email && ( ! template.info.event.rsvps || ! template.info.event.rsvps[userId] || template.info.event.rsvps[userId].status < 0)) {
+							// clone the data for each user so we don't mess anything up
+							var userInfo = extend({}, template.info, {user: user});
+							
+							getJuicedEmail(template.html, userInfo, function (html) {
+								// send email
+								sendEmail({
+									From:       EMAIL,
+									To:         user.name + ' <' + user.email + '>',
+									Subject:    template.info.subject,
+									HtmlBody:   html,
+									TrackOpens: true,
+								}).then(function () {
+									response.sent.push({userId: userId});
 									
-								d.resolve();
+									d.resolve();
+								}).catch(function (err) {
+									response.failed.push({userId: userId, error: err});
+									response.success = false;
+										
+									d.resolve();
+								});
 							});
-						});
-					} else {
-						response.skipped.push({userId: userId});
-						d.resolve();
-					}
-				});
-			})(d);
+						} else {
+							response.skipped.push({userId: userId});
+							d.resolve();
+						}
+					});
+				})(d);
+			} else {
+				response.skipped.push({userId: userId});
+			}
 		});
 		Q.all(deferreds).then(function () {
 			deferred.resolve(response);
@@ -233,7 +237,7 @@ api.get('/email/reminder', function (req, res) {
 	});
 });
 api.post('/email/reminder', function (req, res) {
-	sendReminderEmails(req.query.rosterId, req.query.eventId).then(function (response) {
+	sendReminderEmails(req.query.rosterId, req.query.eventId, req.query.userId).then(function (response) {
 		res.json(response);
 	}).catch(function (err) {
 		res.json({
