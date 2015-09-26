@@ -79,7 +79,7 @@ function getJuicedEmail(template, data, callback) {
 	// juice email
 	juice.juiceResources(html, {
 		webResources: {
-			relativeTo: 'http://www.rstr.io/',
+			relativeTo: 'html/',
 			images: false,
 		}
 	}, function (err, juiced) {
