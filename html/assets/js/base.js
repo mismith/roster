@@ -567,7 +567,7 @@ angular.module('roster-io', ['ui.router', 'ui.router.title', 'ngMaterial', 'fire
 						if ( ! STRICT_INVITE_CHECK || (STRICT_INVITE_CHECK && Invite.email === me.email)) {
 							Roster.$loaded().then(function () {
 								// update user model
-								var rosters = [];
+								var rosters = {};
 								rosters[Invite.rosterId] = Invite.rosterId;
 								$scope.$me.$ref().update({
 									email:   Invite.email || me.facebook.email,
