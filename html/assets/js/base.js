@@ -58,10 +58,10 @@ angular.module('roster-io', ['ui.router', 'ui.router.title', 'ngMaterial', 'fire
 						return $firebaseHelper.object('data/invites', $stateParams.invite).$loaded();
 					}],
 					Inviter: ["$firebaseHelper", "$stateParams", "Invite", function ($firebaseHelper, $stateParams, Invite) {
-						return $firebaseHelper.object('data/users', Invite.by).$loaded();
+						return $firebaseHelper.object('data/users', Invite.inviterId).$loaded();
 					}],
 					Roster: ["$firebaseHelper", "$stateParams", "Invite", function ($firebaseHelper, $stateParams, Invite) {
-						return $firebaseHelper.object('data/rosters', Invite.roster).$loaded();
+						return $firebaseHelper.object('data/rosters', Invite.rosterId).$loaded();
 					}],
 					$title: function () {
 						return 'Invitation';
@@ -224,7 +224,7 @@ angular.module('roster-io', ['ui.router', 'ui.router.title', 'ngMaterial', 'fire
 				
 				// wait for all promises to complete the redirect and notify user
 				$q.all(deferreds).then(function () {
-					$state.go('home');
+					$state.go('rosters');
 					
 					$mdToast.showSimple({
 						content: 'Roster deleted.',
@@ -320,11 +320,8 @@ angular.module('roster-io', ['ui.router', 'ui.router.title', 'ngMaterial', 'fire
 		};
 		$scope.inviteUser = function () {
 			$scope.invite = {
-				by: $scope.$me.$id,
-				to: {
-					name: $state.current.name,
-					params: $state.params,
-				},
+				inviterId: $scope.$me.$id,
+				rosterId:  Roster.$id,
 			};
 			$scope.loadExistingUser = function (user) {
 				$scope.invite.name  = user.name;
@@ -344,7 +341,7 @@ angular.module('roster-io', ['ui.router', 'ui.router.title', 'ngMaterial', 'fire
 								angular.forEach(contact.gd$email, function (email) {
 									if (contact.title.$t) {
 										$scope.contacts.push({
-											name: contact.title.$t,
+											name:  contact.title.$t,
 											email: email.address,
 										});
 									}

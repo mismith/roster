@@ -320,11 +320,11 @@ function getInviteInfo(inviteId) {
 				invite.$id = inviteId;
 				invite.url = '/invite/' + invite.$id;
 				
-				new Firebase(FB_BASE_URL + '/data/users/' + invite.by).once('value', function (inviterSnap) {
+				new Firebase(FB_BASE_URL + '/data/users/' + invite.inviterId).once('value', function (inviterSnap) {
 					var inviter = inviterSnap.val();
 					inviter.$id = inviterSnap.key();
 		
-					new Firebase(FB_BASE_URL + '/data/rosters/' + invite.to.params.roster).once('value', function (rosterSnap) {
+					new Firebase(FB_BASE_URL + '/data/rosters/' + invite.rosterId).once('value', function (rosterSnap) {
 						var roster = rosterSnap.val();
 						roster.$id = rosterSnap.key();
 						roster.url = '/roster/' + roster.$id;
