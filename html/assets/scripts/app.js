@@ -559,7 +559,7 @@ angular.module('roster-io', ['ui.router', 'ui.router.title', 'ngMaterial', 'fire
 				});
 				
 				// redirect
-				return $state.go('roster', Invite.roster);
+				return $state.go('roster', Invite.rosterId);
 			}
 			if (authData) {
 				if( ! $scope.notFound) {
@@ -568,7 +568,7 @@ angular.module('roster-io', ['ui.router', 'ui.router.title', 'ngMaterial', 'fire
 							Roster.$loaded().then(function () {
 								// update user model
 								var rosters = [];
-								rosters[Inivte.roster] = Invite.roster;
+								rosters[Invite.rosterId] = Invite.rosterId;
 								$scope.$me.$ref().update({
 									email:   Invite.email || me.facebook.email,
 									name:    Invite.name || me.facebook.displayName,
@@ -590,7 +590,7 @@ angular.module('roster-io', ['ui.router', 'ui.router.title', 'ngMaterial', 'fire
 										});
 										
 										// redirect
-										return $state.go('roster', Invite.roster);
+										return $state.go('roster', Invite.rosterId);
 									});
 								});
 							});
