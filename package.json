@@ -24,17 +24,15 @@
     "npm": ">= 1.0.0"
   },
   "dependencies": {
+    "big-email": "^0.1.0",
     "cron": "^1.0.9",
-    "ejs": "^2.3.1",
     "express": "^4.13.3",
     "firebase": "^2.2.7",
     "ical-generator": "^0.2.2",
-    "juice": "^1.4.2",
     "lodash": "^3.10.1",
     "moment": "^2.10.3",
     "moment-timezone": "^0.4.0",
     "node.extend": "^1.1.5",
-    "postmark": "^1.0.0",
     "q": "^1.4.1"
   },
   "devDependencies": {

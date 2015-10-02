@@ -5,8 +5,8 @@ var NAME           = 'Roster IO',
 	BASE_URL       = 'http://www.' + DOMAIN,
 	FB_BASE_URL    = 'https://roster-io.firebaseio.com',
 	FB_AUTH_TOKEN  = 'xwYj28J4UELF5WgifokLbqjN71mFE9Y4cBwykmyI',
-	EMAIL          = 'support@' + DOMAIN,
 	POSTMARK_TOKEN = '75cdd97a-2c40-4319-a6a9-4576d0948d57',
+	EMAIL          = 'support@' + DOMAIN,
 	TIMEZONE       = 'America/Edmonton';
 
 var express   = require('express'),
@@ -18,7 +18,7 @@ var express   = require('express'),
 	_         = require('lodash'),
 	CronJob   = require('cron').CronJob,
 	ical      = require('ical-generator'),
-	bigEmail  = require('./big-email.js')(POSTMARK_TOKEN);
+	bigEmail  = require('big-email')(POSTMARK_TOKEN);
 
 // config
 moment.tz.setDefault(TIMEZONE);
