@@ -1,27 +1,24 @@
 #!/bin/env node
 
-var NAME          = 'Roster IO',
-	DOMAIN        = 'roster-io.com',
-	BASE_URL      = 'http://www.' + DOMAIN,
-	FB_BASE_URL   = 'https://roster-io.firebaseio.com',
-	FB_AUTH_TOKEN = 'xwYj28J4UELF5WgifokLbqjN71mFE9Y4cBwykmyI',
-	EMAIL         = 'support@' + DOMAIN,
-	TIMEZONE      = 'America/Edmonton';
+var NAME           = 'Roster IO',
+	DOMAIN         = 'roster-io.com',
+	BASE_URL       = 'http://www.' + DOMAIN,
+	FB_BASE_URL    = 'https://roster-io.firebaseio.com',
+	FB_AUTH_TOKEN  = 'xwYj28J4UELF5WgifokLbqjN71mFE9Y4cBwykmyI',
+	EMAIL          = 'support@' + DOMAIN,
+	POSTMARK_TOKEN = '75cdd97a-2c40-4319-a6a9-4576d0948d57',
+	TIMEZONE       = 'America/Edmonton';
 
-var fs        = require('fs'),
-	express   = require('express'),
+var express   = require('express'),
 	server    = express(),
-	Postmark  = require('postmark'),
-	postmark  = new Postmark.Client('75cdd97a-2c40-4319-a6a9-4576d0948d57'),
-	ejs       = require('ejs'),
-	juice     = require('juice'),
 	moment    = require('moment-timezone'),
 	Firebase  = require('firebase'),
 	extend    = require('node.extend'),
-	Q         = require('q')
+	Q         = require('q'),
 	_         = require('lodash'),
 	CronJob   = require('cron').CronJob,
-	ical      = require('ical-generator');
+	ical      = require('ical-generator'),
+	bigEmail  = require('./big-email.js')(POSTMARK_TOKEN);
 
 // config
 moment.tz.setDefault(TIMEZONE);
@@ -56,270 +53,10 @@ server.all('/*', function(req, res){
 server.listen(process.env.OPENSHIFT_NODEJS_PORT || 3030, process.env.OPENSHIFT_NODEJS_IP || '127.0.0.1');
 
 
+
 // api methods
-function getCompiledTemplate(templateId) {
-	var deferred = Q.defer();
-	
-	// read template
-	fs.readFile('html/emails/' + templateId + '.html', function (err, file) {
-		if (err) return deferred.reject(err);
-		
-		// compile it
-		var compiled = ejs.compile(file.toString());
-		
-		// return it
-		deferred.resolve(compiled);
-	});
-	
-	return deferred.promise;
-}
-function getJuicedEmail(template, data) {
-	var deferred = Q.defer();
-	
-	// render email
-	var html = template(data);
-	
-	// juice email
-	juice.juiceResources(html, {
-		webResources: {
-			relativeTo: 'html/',
-			images: false,
-		}
-	}, function (err, juiced) {
-		if (err) return deferred.reject(err);
-		
-		deferred.resolve(juiced);
-	});
-	
-	return deferred.promise;
-}
-function sendEmail(options) {
-	var deferred = Q.defer();
-	
-	postmark.sendEmail(options, function (err) {
-		if (err){
-			deferred.reject(err);
-		} else {
-			deferred.resolve();
-		}
-	});
-	
-	return deferred.promise;
-}
 
-
-
-function getReminderInfo(rosterId, eventId) {
-	var deferred = Q.defer();
-	
-	// fetch data
-	if (rosterId) {
-		new Firebase(FB_BASE_URL + '/data/rosters/' + rosterId).once('value', function (snapshot) {
-			var roster  = snapshot.val();
-			if (roster) {
-				roster.$id = rosterId;
-				roster.url = '/roster/' + roster.$id;
-				
-				if (eventId) {
-					var event = roster.events[eventId];
-					
-					if (event) {
-						event.$id  = eventId;
-						event.url  = roster.url + '/' + event.$id;
-						
-						deferred.resolve({
-							roster: roster,
-							event:  event,
-						});
-					} else {
-						deferred.reject(new Error('Event not found'));
-					}
-				} else {
-					deferred.reject(new Error('Event not specified'));
-				}
-			} else {
-				deferred.reject(new Error('Roster not found'));
-			}
-		});
-	} else {
-		deferred.reject(new Error('Roster not specified'));
-	}
-	
-	return deferred.promise;
-}
-function getReminderEmailTemplate(rosterId, eventId) {
-	var deferred = Q.defer();
-	
-	getCompiledTemplate('reminder').then(function (template) {
-		getReminderInfo(rosterId, eventId).then(function (info) {
-			info.subject = 'Reminder: RSVP Required - ' + info.roster.name + ' - ' + info.event.name;
-			info.moment  = moment;
-			
-			deferred.resolve({
-				html: template,
-				info: info,
-			});
-		}).catch(function (err) {
-			deferred.reject(err);
-		});
-	}).catch(function (err) {
-		deferred.reject(err);
-	});
-	
-	return deferred.promise;
-}
-function sendReminderEmails(rosterId, eventId, optionalUserId) {
-	// @TODO double check all the error handling in here
-	var deferred = Q.defer();
-	
-	getReminderEmailTemplate(rosterId, eventId).then(function (template) {
-		var response = {success: true, sent: [], skipped: [], failed: []};
-		
-		var deferreds = [];
-		Object.keys(template.info.roster.participants).forEach(function (userId) {
-			if (optionalUserId === undefined || userId === optionalUserId) {
-				var d = Q.defer();
-				deferreds.push(d.promise);
-				(function (d) {
-					new Firebase(FB_BASE_URL + '/data/users/' + userId).once('value', function (userSnap) {
-						var user = userSnap.val();
-						if (user.email && ( ! template.info.event.rsvps || ! template.info.event.rsvps[userId] || template.info.event.rsvps[userId].status < 0)) {
-							// clone the data for each user so we don't mess anything up
-							var userInfo = extend({}, template.info, {user: user});
-							
-							getJuicedEmail(template.html, userInfo).then(function (html) {
-								// send email
-								sendEmail({
-									From:       EMAIL,
-									To:         user.name + ' <' + user.email + '>',
-									Subject:    template.info.subject,
-									HtmlBody:   html,
-									TrackOpens: true,
-								}).then(function () {
-									response.sent.push({userId: userId});
-									
-									d.resolve();
-								}).catch(function (err) {
-									response.failed.push({userId: userId, error: err});
-									response.success = false;
-										
-									d.resolve();
-								});
-							}).catch(function (err) {
-								response.failed.push({userId: userId, error: err});
-								response.success = false;
-								
-								d.resolve();
-							});
-						} else {
-							response.skipped.push({userId: userId});
-							d.resolve();
-						}
-					});
-				})(d);
-			} else {
-				response.skipped.push({userId: userId});
-			}
-		});
-		Q.all(deferreds).then(function () {
-			deferred.resolve(response);
-		}).catch(function (err) {
-			deferred.reject(err);
-		});
-	}).catch(function (err) {
-		deferred.reject(err);
-	});
-	
-	return deferred.promise;
-}
-api.get('/email/reminder', function (req, res) {
-	getReminderEmailTemplate(req.query.rosterId, req.query.eventId).then(function (template) {
-		getJuicedEmail(template.html, template.info).then(function (html) {
-			// display email
-			res.send(html);
-		}).catch(function (err) {
-			// @TODO
-		});
-	}).catch(function (err) {
-		res.json({
-			success: false,
-			error: err,
-		});
-	});
-});
-api.post('/email/reminder', function (req, res) {
-	sendReminderEmails(req.query.rosterId, req.query.eventId, req.query.userId).then(function (response) {
-		res.json(response);
-	}).catch(function (err) {
-		res.json({
-			success: false,
-			error:   err,
-		});
-	});
-});
-
-
-
-
-function dispatchReminders(rosterId) {
-	new Firebase(FB_BASE_URL + '/data/rosters/' + rosterId + '/events').once('value', function (eventsSnap) {
-		var events = eventsSnap.val();
-		
-		_.each(events, function (event, eventId) {
-			// check if date matches a range that needs sending reminders for
-			var now  = moment(),
-				date = moment(event.date),
-				diff = date.diff(now, 'day');
-			if (0 <= diff && diff < 7) {
-				// send individual emails (to specific users based on logic within sentReminderEmails)
-				sendReminderEmails(rosterId, eventId).then(function (response) {
-					console.log('Event ' + eventId + ':\n', response); // @TODO: handle errors
-				}).catch(function (err) {
-					console.error(err); // @TODO
-				});
-			}
-		});
-	});
-}
-var runningJobs = {};
-var rostersRef = new Firebase(FB_BASE_URL + '/data/rosters');
-rostersRef.on('child_added', function (rosterSnap) {
-	var rosterId  = rosterSnap.key(),
-		rosterRef = rosterSnap.ref();
-	
-	rosterRef.child('cron').on('value', function (cronSnap) {
-		// stop any running job since we've changed how often it should run anyway
-		if (runningJobs[rosterId]){
-			runningJobs[rosterId].stop();
-			delete runningJobs[rosterId];
-		}
-		
-		var cron = cronSnap.val();
-		if (cron) {
-			try {
-				runningJobs[rosterId] = new CronJob(cron, function () {
-					console.log('Running cron for roster ' + rosterId + '.');
-					dispatchReminders(rosterId);
-				}, undefined, true, TIMEZONE);
-			} catch (err) {
-				console.error(err);
-			}
-		}
-	});	
-});
-rostersRef.on('child_removed', function (rosterSnap) {
-	var rosterId = rosterSnap.key();
-	
-	// stop any jobs for this roster
-	if (runningJobs[rosterId]){
-		runningJobs[rosterId].stop();
-		delete runningJobs[rosterId];
-	}
-});
-
-
-
-
+// invites
 function getInviteInfo(inviteId) {
 	var deferred = Q.defer();
 	
@@ -360,12 +97,12 @@ function getInviteInfo(inviteId) {
 function getInviteEmail(inviteId) {
 	var deferred = Q.defer();
 	
-	getCompiledTemplate('invite').then(function (template) {
+	bigEmail.getCompiledTemplate('invite').then(function (template) {
 		getInviteInfo(inviteId).then(function (info) {
 			info.inviter.avatar = 'http://graph.facebook.com/' + (info.inviter.facebook && info.inviter.facebook.id ? info.inviter.facebook.id + '/' : '') + 'picture?type=square';
 			info.subject = 'Invitation: Join ' + info.inviter.name + ' on the "' + info.roster.name + '" roster';
 				
-			getJuicedEmail(template, info).then(function (html) {
+			bigEmail.getJuicedEmail(template, info).then(function (html) {
 				deferred.resolve({
 					html: html,
 					info: info,
@@ -387,7 +124,7 @@ function sendInviteEmail(inviteId) {
 	
 	getInviteEmail(inviteId).then(function (email) {
 		// send email
-		return sendEmail({
+		return bigEmail.sendEmail({
 			From:       EMAIL,
 			To:         email.info.invite.name ? email.info.invite.name + ' <' + email.info.invite.email + '>' : email.info.invite.email,
 			Subject:    email.info.subject,
@@ -428,6 +165,7 @@ api.post('/email/invite', function (req, res) {
 
 
 
+// user added
 function getAddedInfo(rosterId, inviteeId, inviterId) {
 	var deferred = Q.defer();
 	
@@ -484,11 +222,11 @@ function getAddedInfo(rosterId, inviteeId, inviterId) {
 function getAddedEmail(rosterId, inviteeId, inviterId) {
 	var deferred = Q.defer();
 	
-	getCompiledTemplate('added').then(function (template) {
+	bigEmail.getCompiledTemplate('added').then(function (template) {
 		getAddedInfo(rosterId, inviteeId, inviterId).then(function (info) {
 			info.subject = info.inviter.name + ' added you to the "' + info.roster.name + '" roster';
 				
-			getJuicedEmail(template, info).then(function (html) {
+			bigEmail.getJuicedEmail(template, info).then(function (html) {
 				deferred.resolve({
 					html: html,
 					info: info,
@@ -510,7 +248,7 @@ function sendAddedEmail(rosterId, inviteeId, inviterId) {
 	
 	getAddedEmail(rosterId, inviteeId, inviterId).then(function (email) {
 		// send email
-		return sendEmail({
+		return bigEmail.sendEmail({
 			From:       EMAIL,
 			To:         email.info.invitee.name ? email.info.invitee.name + ' <' + email.info.invitee.email + '>' : email.info.invitee.email,
 			Subject:    email.info.subject,
@@ -550,43 +288,237 @@ api.post('/email/added', function (req, res) {
 });
 
 
-var emailQueueRef = new Firebase(FB_BASE_URL + '/email/queue');
-emailQueueRef.authWithCustomToken(FB_AUTH_TOKEN, function(err, authData) {
-	if (err) return console.error(err);
+
+// reminders
+function getReminderInfo(rosterId, eventId) {
+	var deferred = Q.defer();
 	
-	emailQueueRef.on('child_added', function (emailSnap) {
-		var email = emailSnap.val();
-		if (email) {
-			var promise;
+	// fetch data
+	if (rosterId) {
+		new Firebase(FB_BASE_URL + '/data/rosters/' + rosterId).once('value', function (snapshot) {
+			var roster  = snapshot.val();
+			if (roster) {
+				roster.$id = rosterId;
+				roster.url = '/roster/' + roster.$id;
+				
+				if (eventId) {
+					var event = roster.events[eventId];
+					
+					if (event) {
+						event.$id  = eventId;
+						event.url  = roster.url + '/' + event.$id;
+						
+						deferred.resolve({
+							roster: roster,
+							event:  event,
+						});
+					} else {
+						deferred.reject(new Error('Event not found'));
+					}
+				} else {
+					deferred.reject(new Error('Event not specified'));
+				}
+			} else {
+				deferred.reject(new Error('Roster not found'));
+			}
+		});
+	} else {
+		deferred.reject(new Error('Roster not specified'));
+	}
+	
+	return deferred.promise;
+}
+function getReminderEmailTemplate(rosterId, eventId) {
+	var deferred = Q.defer();
+	
+	bigEmail.getCompiledTemplate('reminder').then(function (template) {
+		getReminderInfo(rosterId, eventId).then(function (info) {
+			info.subject = 'Reminder: RSVP Required - ' + info.roster.name + ' - ' + info.event.name;
+			info.moment  = moment;
 			
-			switch (email.template) {
-				case 'added':
-					promise = sendAddedEmail(email.data.rosterId, email.data.inviteeId, email.data.inviterId);
-					break;
-				case 'invite':
-					promise = sendInviteEmail(email.data.inviteId).then(function () {
-						new Firebase(FB_BASE_URL + '/data/invites/' + email.data.inviteId).update({sent: moment().format()});
+			deferred.resolve({
+				html: template,
+				info: info,
+			});
+		}).catch(function (err) {
+			deferred.reject(err);
+		});
+	}).catch(function (err) {
+		deferred.reject(err);
+	});
+	
+	return deferred.promise;
+}
+function sendReminderEmails(rosterId, eventId, optionalUserId) {
+	// @TODO double check all the error handling in here
+	var deferred = Q.defer();
+	
+	getReminderEmailTemplate(rosterId, eventId).then(function (template) {
+		var response = {success: true, sent: [], skipped: [], failed: []};
+		
+		var deferreds = [];
+		Object.keys(template.info.roster.participants).forEach(function (userId) {
+			if (optionalUserId === undefined || userId === optionalUserId) {
+				var d = Q.defer();
+				deferreds.push(d.promise);
+				(function (d) {
+					new Firebase(FB_BASE_URL + '/data/users/' + userId).once('value', function (userSnap) {
+						var user = userSnap.val();
+						if (user.email && ( ! template.info.event.rsvps || ! template.info.event.rsvps[userId] || template.info.event.rsvps[userId].status < 0)) {
+							// clone the data for each user so we don't mess anything up
+							var userInfo = extend({}, template.info, {user: user});
+							
+							bigEmail.getJuicedEmail(template.html, userInfo).then(function (html) {
+								// send email
+								bigEmail.sendEmail({
+									From:       EMAIL,
+									To:         user.name + ' <' + user.email + '>',
+									Subject:    template.info.subject,
+									HtmlBody:   html,
+									TrackOpens: true,
+								}).then(function () {
+									response.sent.push({userId: userId});
+									
+									d.resolve();
+								}).catch(function (err) {
+									response.failed.push({userId: userId, error: err});
+									response.success = false;
+										
+									d.resolve();
+								});
+							}).catch(function (err) {
+								response.failed.push({userId: userId, error: err});
+								response.success = false;
+								
+								d.resolve();
+							});
+						} else {
+							response.skipped.push({userId: userId});
+							d.resolve();
+						}
 					});
-					break;
+				})(d);
+			} else {
+				response.skipped.push({userId: userId});
 			}
-			
-			if (promise) {
-				promise.then(function () {
-					emailSnap.ref().remove();
-				}).catch(function (err) {
-					email.error   = err;
-					email.errorAt = moment().format();
-					emailSnap.ref().update(email);
-				});
-			}
-		}
+		});
+		Q.all(deferreds).then(function () {
+			deferred.resolve(response);
+		}).catch(function (err) {
+			deferred.reject(err);
+		});
+	}).catch(function (err) {
+		deferred.reject(err);
+	});
+	
+	return deferred.promise;
+}
+api.get('/email/reminder', function (req, res) {
+	getReminderEmailTemplate(req.query.rosterId, req.query.eventId).then(function (template) {
+		bigEmail.getJuicedEmail(template.html, template.info).then(function (html) {
+			// display email
+			res.send(html);
+		}).catch(function (err) {
+			res.json({
+				success: false,
+				error: err,
+			});
+		});
+	}).catch(function (err) {
+		res.json({
+			success: false,
+			error: err,
+		});
 	});
 });
+api.post('/email/reminder', function (req, res) {
+	sendReminderEmails(req.query.rosterId, req.query.eventId, req.query.userId).then(function (response) {
+		res.json(response);
+	}).catch(function (err) {
+		res.json({
+			success: false,
+			error:   err,
+		});
+	});
+});
+
+function dispatchReminders(rosterId) {
+	new Firebase(FB_BASE_URL + '/data/rosters/' + rosterId + '/events').once('value', function (eventsSnap) {
+		var events = eventsSnap.val();
+		
+		_.each(events, function (event, eventId) {
+			// check if date matches a range that needs sending reminders for
+			var now  = moment(),
+				date = moment(event.date),
+				diff = date.diff(now, 'day');
+			if (0 <= diff && diff < 7) {
+				// send individual emails (only to certain users, based on logic within sentReminderEmails)
+				sendReminderEmails(rosterId, eventId).then(function (response) {
+					console.log('Event ' + eventId + ':\n', response);
+				}).catch(function (err) {
+					console.error(err); // @TODO
+				});
+			}
+		});
+	});
+}
+var runningJobs = {};
+var rostersRef = new Firebase(FB_BASE_URL + '/data/rosters');
+rostersRef.on('child_added', function (rosterSnap) {
+	var rosterId  = rosterSnap.key(),
+		rosterRef = rosterSnap.ref();
+	
+	rosterRef.child('cron').on('value', function (cronSnap) {
+		// stop any running job since we've changed how often it should run anyway
+		if (runningJobs[rosterId]){
+			runningJobs[rosterId].stop();
+			delete runningJobs[rosterId];
+		}
+		
+		var cron = cronSnap.val();
+		if (cron) {
+			try {
+				runningJobs[rosterId] = new CronJob(cron, function () {
+					console.log('Running cron for roster ' + rosterId + '.');
+					dispatchReminders(rosterId);
+				}, undefined, true, TIMEZONE);
+			} catch (err) {
+				console.error(err);
+			}
+		}
+	});	
+});
+rostersRef.on('child_removed', function (rosterSnap) {
+	var rosterId = rosterSnap.key();
+	
+	// stop any jobs for this roster
+	if (runningJobs[rosterId]){
+		runningJobs[rosterId].stop();
+		delete runningJobs[rosterId];
+	}
+});
+
+
+
+// email queueing
+bigEmail.firebaseQueue(new Firebase(FB_BASE_URL + '/email/queue'), FB_AUTH_TOKEN).watch(function (email) {
+	switch (email.template) {
+		case 'invite':
+			return sendInviteEmail(email.data.inviteId).then(function () {
+				new Firebase(FB_BASE_URL + '/data/invites/' + email.data.inviteId).update({sent: moment().format()});
+			});
+		case 'added':
+			return sendAddedEmail(email.data.rosterId, email.data.inviteeId, email.data.inviterId);
+		case 'reminder':
+			return sendReminderEmails(email.data.rosterId, email.data.eventId, email.data.userId);
+	}
+});
+
 
 
 // url shortening
 function generateHash(n) {
-	var alphabet = 'UteQA9bjVXygpBE2vchDdnKrk7xMFHGa3RmCf6uZws4Tl8zqNWYPJ',
+	var alphabet = 'UteQA9bjVXygpBE2vchDdnKrk7xMFHGa3RmCf6uZws4Tl8zqNWYPJ', // random order a-zA-Z0-9 non-similar
 		length   = alphabet.length;
 	
 	if(n > length) {
@@ -774,7 +706,7 @@ api.get('/calendar/roster', function (req, res) {
 	}).catch(function (err) {
 		res.json({
 			success: false,
-			error:   new Error('Roster not specified'),
+			error:   err,
 		});
 	});
 });
