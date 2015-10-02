@@ -57,22 +57,25 @@ server.listen(process.env.OPENSHIFT_NODEJS_PORT || 3030, process.env.OPENSHIFT_N
 
 
 // api methods
-function getCompiledTemplate(templateId, callback) {
+function getCompiledTemplate(templateId) {
+	var deferred = Q.defer();
+	
 	// read template
 	fs.readFile('html/emails/' + templateId + '.html', function (err, file) {
-		if (err) {
-			console.error(err);
-			return;
-		}
+		if (err) return deferred.reject(err);
 		
 		// compile it
 		var compiled = ejs.compile(file.toString());
 		
 		// return it
-		callback(compiled);
+		deferred.resolve(compiled);
 	});
+	
+	return deferred.promise;
 }
-function getJuicedEmail(template, data, callback) {
+function getJuicedEmail(template, data) {
+	var deferred = Q.defer();
+	
 	// render email
 	var html = template(data);
 	
@@ -83,13 +86,12 @@ function getJuicedEmail(template, data, callback) {
 			images: false,
 		}
 	}, function (err, juiced) {
-		if (err) {
-			console.error(err);
-			return;
-		}
+		if (err) return deferred.reject(err);
 		
-		callback(juiced);
+		deferred.resolve(juiced);
 	});
+	
+	return deferred.promise;
 }
 function sendEmail(options) {
 	var deferred = Q.defer();
@@ -148,7 +150,7 @@ function getReminderInfo(rosterId, eventId) {
 function getReminderEmailTemplate(rosterId, eventId) {
 	var deferred = Q.defer();
 	
-	getCompiledTemplate('reminder', function (template) {
+	getCompiledTemplate('reminder').then(function (template) {
 		getReminderInfo(rosterId, eventId).then(function (info) {
 			info.subject = 'Reminder: RSVP Required - ' + info.roster.name + ' - ' + info.event.name;
 			info.moment  = moment;
@@ -160,6 +162,8 @@ function getReminderEmailTemplate(rosterId, eventId) {
 		}).catch(function (err) {
 			deferred.reject(err);
 		});
+	}).catch(function (err) {
+		deferred.reject(err);
 	});
 	
 	return deferred.promise;
@@ -183,7 +187,7 @@ function sendReminderEmails(rosterId, eventId, optionalUserId) {
 							// clone the data for each user so we don't mess anything up
 							var userInfo = extend({}, template.info, {user: user});
 							
-							getJuicedEmail(template.html, userInfo, function (html) {
+							getJuicedEmail(template.html, userInfo).then(function (html) {
 								// send email
 								sendEmail({
 									From:       EMAIL,
@@ -201,6 +205,11 @@ function sendReminderEmails(rosterId, eventId, optionalUserId) {
 										
 									d.resolve();
 								});
+							}).catch(function (err) {
+								response.failed.push({userId: userId, error: err});
+								response.success = false;
+								
+								d.resolve();
 							});
 						} else {
 							response.skipped.push({userId: userId});
@@ -225,9 +234,11 @@ function sendReminderEmails(rosterId, eventId, optionalUserId) {
 }
 api.get('/email/reminder', function (req, res) {
 	getReminderEmailTemplate(req.query.rosterId, req.query.eventId).then(function (template) {
-		getJuicedEmail(template.html, template.info, function (html) {
+		getJuicedEmail(template.html, template.info).then(function (html) {
 			// display email
 			res.send(html);
+		}).catch(function (err) {
+			// @TODO
 		});
 	}).catch(function (err) {
 		res.json({
@@ -349,20 +360,24 @@ function getInviteInfo(inviteId) {
 function getInviteEmail(inviteId) {
 	var deferred = Q.defer();
 	
-	getCompiledTemplate('invite', function (template) {
+	getCompiledTemplate('invite').then(function (template) {
 		getInviteInfo(inviteId).then(function (info) {
 			info.inviter.avatar = 'http://graph.facebook.com/' + (info.inviter.facebook && info.inviter.facebook.id ? info.inviter.facebook.id + '/' : '') + 'picture?type=square';
 			info.subject = 'Invitation: Join ' + info.inviter.name + ' on the "' + info.roster.name + '" roster';
 				
-			getJuicedEmail(template, info, function (html) {
+			getJuicedEmail(template, info).then(function (html) {
 				deferred.resolve({
 					html: html,
 					info: info,
 				});
+			}).catch(function (err) {
+				deferred.reject(err);
 			});
 		}).catch(function (err) {
 			deferred.reject(err);
 		});
+	}).catch(function (err) {
+		deferred.reject(err);
 	});
 	
 	return deferred.promise;
@@ -469,19 +484,23 @@ function getAddedInfo(rosterId, inviteeId, inviterId) {
 function getAddedEmail(rosterId, inviteeId, inviterId) {
 	var deferred = Q.defer();
 	
-	getCompiledTemplate('added', function (template) {
+	getCompiledTemplate('added').then(function (template) {
 		getAddedInfo(rosterId, inviteeId, inviterId).then(function (info) {
 			info.subject = info.inviter.name + ' added you to the "' + info.roster.name + '" roster';
 				
-			getJuicedEmail(template, info, function (html) {
+			getJuicedEmail(template, info).then(function (html) {
 				deferred.resolve({
 					html: html,
 					info: info,
 				});
+			}).catch(function (err) {
+				deferred.reject(err);
 			});
 		}).catch(function (err) {
 			deferred.reject(err);
 		});
+	}).catch(function (err) {
+		deferred.reject(err);
 	});
 	
 	return deferred.promise;
