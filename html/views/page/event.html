@@ -1,4 +1,4 @@
-<div class="content-wrap">
+<div ng-if="event.$value !== null" class="content-wrap">
 	<header layout="column" class="center-sm">
 		<div layout-margin ng-include="'views/template/roster.header.html'"></div>
 		
@@ -71,6 +71,9 @@
 		</md-card>
 	</section>
 </div>
+<aside ng-if="event.$value === null" layout="column" flex class="content-wrap">
+	<h1 layout="row" layout-align="center center" flex>Sorry, this event doesn't seem to exist.</h1>
+</aside>
 
 <md-fab-speed-dial ng-if="canEdit(roster.admins)" md-direction="up" class="md-scale md-fab-speed-dial-bottom-right">
 	<md-fab-trigger>
