@@ -1,3 +1,27 @@
+// localized config
+var basePath  = 'html/',
+	overrides = {
+		manifest: {
+			cache: [
+				'//ajax.googleapis.com/ajax/libs/angular_material/0.10.1/angular-material.min.css',
+				'//fonts.googleapis.com/icon?family=Material+Icons',
+				'//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css',
+				'//ajax.googleapis.com/ajax/libs/angularjs/1.4.1/angular.min.js',
+				'//ajax.googleapis.com/ajax/libs/angularjs/1.4.1/angular-animate.min.js',
+				'//ajax.googleapis.com/ajax/libs/angularjs/1.4.1/angular-aria.min.js',
+				'//ajax.googleapis.com/ajax/libs/angularjs/1.4.1/angular-touch.min.js',
+				'//ajax.googleapis.com/ajax/libs/angular_material/0.10.1/angular-material.min.js',
+				'//cdnjs.cloudflare.com/ajax/libs/angular-ui-router/0.2.13/angular-ui-router.min.js',
+				'//cdn.firebase.com/js/client/2.2.3/firebase.js',
+				'//cdn.firebase.com/libs/angularfire/1.1.2/angularfire.min.js',
+				'//cdn.rawgit.com/mismith/angularfire-helper/2.1.5/angularfire-helper.min.js',
+				'https://apis.google.com/js/client.js',
+				'//cdnjs.cloudflare.com/ajax/libs/moment.js/2.9.0/moment.min.js',
+			],
+		},
+	};
+	
+
 // includes
 var gulp         = require('gulp'),
 
@@ -14,18 +38,11 @@ var gulp         = require('gulp'),
 
 	// js
 	concat       = require('gulp-concat'),
-	rename       = require('gulp-rename'),
-	uglify       = require('gulp-uglify'),
-	jsValidate   = require('gulp-jsvalidate'),
-	ngAnnotate   = require('gulp-ng-annotate'),
+	rename       = require('gulp-rename');
 
-	// css
-	less         = require('gulp-less'),
-	autoprefixer = require('gulp-autoprefixer'),
-	minifyCss    = require('gulp-minify-css');
 
 // config
-var defaults = {
+var config = merge.recursive({
 	autoprefixer: 'last 2 versions',
 	htmlhint: {
 		"doctype-first": false,
@@ -49,89 +66,90 @@ var defaults = {
 		reloadDebounce: 400,
 		notify: false,
 		server: {
-			baseDir: './',
+			baseDir: './' + basePath,
 			middleware: [ require('connect-history-api-fallback')() ],
 		},
-		//proxy: 'example.dev',
 	},
 	concat: {
 		js: 'base',
 	},
 	globs: {
 		excludes: [
-			'!node_modules/',
-			'!vendor/',
-			'!wp/',
+			'!node_modules/**/*',
+			'!vendor/**/*',
+			'!wp/**/*',
 		],
 		html: [
-			'**/*.{html,htm,php}',
+			basePath + '**/*.{html,htm,php}',
 		],
 		js: [
-			'assets/scripts/*/**/*.js', // subfolders first
-			'assets/scripts/**/*.js',
+			basePath + 'assets/scripts/*/**/*.js', // subfolders first
+			basePath + 'assets/scripts/**/*.js',
 		],
 		less: [
-			'assets/styles/**/*.less',
+			basePath + 'assets/styles/**/*.less',
 			// note that files ending in ".inc.less" will not be compiled (but they will be watched)
 		],
 		files: [
-			'**/*.{htaccess,jpg,jpeg,gif,png,svg}',
+			basePath + '**/*.{htaccess,jpg,jpeg,gif,png,svg}',
 		],
 		manifest: [
-			'assets/js/*',
-			'assets/css/*',
-			'assets/fonts/*',
-			'assets/webfonts/*',
-			'assets/img/*.{jpg,jpeg,gif,png,svg}',
-			'assets/**/*.{mp3,mp4,m4a,m4v,wav,flv,ogg,ogv,webm}',
-			'**/*.{html,htm,php}',
+			basePath + 'assets/js/*',
+			basePath + 'assets/css/*',
+			basePath + 'assets/fonts/*',
+			basePath + 'assets/webfonts/*',
+			basePath + 'assets/img/*.{jpg,jpeg,gif,png,svg}',
+			basePath + 'assets/**/*.{mp3,mp4,m4a,m4v,wav,flv,ogg,ogv,webm}',
+			basePath + '**/*.{html,htm,php}',
 		],
 	},
 	dests: {
-		js:   'assets/js',
-		less: 'assets/css',
-	}
-};
-var configPath = './gulpfile.config.js',
-	config     = merge.recursive(defaults, fs.existsSync(configPath) ? require(configPath) : {});
+		scripts: basePath + 'assets/js',
+		styles:  basePath + 'assets/css',
+	},
+}, overrides);
 
 
 // tasks
 gulp
 	// build
 	.task('html', function(){
-		return gulp.src(config.globs.html.concat(config.globs.excludes))
+		return gulp.src(config.globs.excludes.concat(config.globs.html))
 			.pipe(browserSync.reload({stream: true}));
 	})
 	.task('rev', function(){
-		return gulp.src(config.globs.html.concat(config.globs.excludes))
+		return gulp.src(config.globs.excludes.concat(config.globs.html))
 			.pipe(require('gulp-rev-append')())
-			.pipe(gulp.dest('.'))
+			.pipe(gulp.dest(basePath || '.'))
 	})
 	.task('js', function(){
-		return gulp.src(config.globs.js.concat(config.globs.excludes))
-			.pipe(jsValidate()).on('error', handleError)
-			.pipe(ngAnnotate()).on('error', handleError)
+		return gulp.src(config.globs.excludes.concat(config.globs.js))
+			.pipe(require('gulp-jsvalidate')(config.jsValidate)).on('error', handleError)
+			.pipe(require('gulp-babel')(config.babel)).on('error', handleError)
+			.pipe(require('gulp-ng-annotate')(config.ngAnnotate)).on('error', handleError)
 			.pipe(concat(config.concat.js + '.js'))
-			.pipe(gulp.dest(config.dests.js))
+			.pipe(gulp.dest(config.dests.scripts))
 			
 			.pipe(rename({suffix: '.min'}))
-			.pipe(uglify()).on('error', handleError)
-			.pipe(gulp.dest(config.dests.js))
+			.pipe(require('gulp-uglify')(config.uglify)).on('error', handleError)
+			.pipe(gulp.dest(config.dests.scripts))
 			
 			.pipe(browserSync.reload({stream: true}));
 	})
 	.task('less', function(){
-		return gulp.src(config.globs.less.concat(config.globs.excludes).concat('!**/*.inc.less')) // don't output .inc.less files as they are never accessed directly
-			.pipe(less()).on('error', handleError)
-			.pipe(autoprefixer(config.autoprefixer))
-			.pipe(minifyCss())
-			.pipe(gulp.dest(config.dests.less))
+		return gulp.src(config.globs.excludes.concat(config.globs.less).concat('!**/*.inc.less')) // don't output .inc.less files as they are never accessed directly
+			.pipe(require('gulp-less')(config.less)).on('error', handleError)
+			.pipe(require('gulp-autoprefixer')(config.autoprefixer))
+			.pipe(gulp.dest(config.dests.styles))
+			
+			.pipe(rename({suffix: '.min'}))
+			.pipe(require('gulp-minify-css')(config.minifyCss))
+			.pipe(gulp.dest(config.dests.styles))
 			
 			.pipe(browserSync.reload({stream: true}));
 	})
 	.task('manifest', function(){
-		return gulp.src(config.globs.manifest.concat(config.globs.excludes))
+		return gulp.src(config.globs.excludes.concat(config.globs.manifest))
 			.pipe(require('gulp-manifest')(config.manifest))
 			.pipe(gulp.dest('.'));
 	})
@@ -139,7 +157,7 @@ gulp
 	
 	// lint
 	.task('html.lint', function(){
-		return gulp.src(config.globs.html.concat(config.globs.excludes))
+		return gulp.src(config.globs.excludes.concat(config.globs.html))
 			.pipe(require('gulp-htmlhint')(config.htmlhint))
 			.pipe(htmlhint.reporter());
 	})
@@ -147,17 +165,17 @@ gulp
 	
 	// watch
 	.task('html.watch', function(){
-		return gulp.watch(config.globs.html.concat(config.globs.excludes), ['html']);
+		return gulp.watch(config.globs.excludes.concat(config.globs.html), ['html']);
 	})
 	.task('js.watch', function(){
-		return gulp.watch(config.globs.js.concat(config.globs.excludes), ['js']);
+		return gulp.watch(config.globs.excludes.concat(config.globs.js), ['js']);
 	})
 	.task('less.watch', function(){
-		return gulp.watch(config.globs.less.concat(config.globs.excludes), ['less']);
+		return gulp.watch(config.globs.excludes.concat(config.globs.less), ['less']);
 	})
 	.task('watch', ['html.watch','js.watch','less.watch'], function(){
 		var options = merge.recursive(config.browsersync || {}, {
-			files:     config.globs.files.concat(config.globs.excludes),
+			files:     config.globs.excludes.concat(config.globs.files),
 			ghostMode: !! (argv.g || gutil.env.ghost), // call `gulp -g` or `gulp --ghost` to start in ghostMode
 			open:      ! (argv.s || gutil.env.silent), // call `gulp -s` or `gulp --silent` to start gulp without opening a new browser window
 		});

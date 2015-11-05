@@ -33,4 +33,4 @@ Quickly poll your team roster's availability.
 
 - handle missing/wrong IDs in resolves (e.g. what to show if invite is wrong/used?)
 - add calendar view
-- make user page homepage, if logged in, or sign-in as home if not
+- allow users to add new rosters

@@ -40,6 +40,7 @@
     "connect-history-api-fallback": "^1.1.0",
     "gulp": "^3.8.6",
     "gulp-autoprefixer": "0.0.8",
+    "gulp-babel": "^6.1.0",
     "gulp-concat": "^2.3.4",
     "gulp-htmlhint": "^0.1.1",
     "gulp-jscs": "^1.6.0",
