@@ -219,9 +219,7 @@ angular.module('roster-io', ['ui.router', 'ui.router.title', 'ngMaterial', 'fire
 			$q.all(deferreds).then(function () {
 				$state.go('home');
 
-				$mdToast.showSimple({
-					content: 'Roster deleted.'
-				});
+				$mdToast.showSimple('Roster deleted.');
 			});
 		}
 	};
@@ -233,9 +231,7 @@ angular.module('roster-io', ['ui.router', 'ui.router.title', 'ngMaterial', 'fire
 			ok: 'Save',
 			onSubmit: function () {
 				return Roster.$save().then(function () {
-					$mdToast.showSimple({
-						content: 'Roster saved.'
-					});
+					$mdToast.showSimple('Roster saved.');
 				});
 			}
 		});
@@ -251,9 +247,7 @@ angular.module('roster-io', ['ui.router', 'ui.router.title', 'ngMaterial', 'fire
 				scope.event.date = moment(scope.event.$date).format();
 
 				return $scope.events.$add(scope.event).then(function () {
-					$mdToast.showSimple({
-						content: 'Event created.'
-					});
+					$mdToast.showSimple('Event created.');
 				});
 			}
 		});
@@ -268,9 +262,7 @@ angular.module('roster-io', ['ui.router', 'ui.router.title', 'ngMaterial', 'fire
 			$q.all([participants.$unlink(participant), // remove roster's particpants link
 			$firebaseHelper.object('data/users', participant.$id, 'rosters', Roster.$id).$remove()]). // remove user's rosters link
 			then(function () {
-				$mdToast.showSimple({
-					content: '"' + name + '" removed.'
-				});
+				$mdToast.showSimple('"' + name + '" removed.');
 			});
 		}
 	};
@@ -291,9 +283,7 @@ angular.module('roster-io', ['ui.router', 'ui.router.title', 'ngMaterial', 'fire
 						deferred.resolve();
 
 						// alert user
-						$mdToast.showSimple({
-							content: 'Invitation email sent to "' + (invite.name ? invite.name + ' ' : '') + '<' + invite.email + '>".'
-						});
+						$mdToast.showSimple('Invitation email sent to "' + (invite.name ? invite.name + ' ' : '') + '<' + invite.email + '>".');
 					}).catch(function (err) {
 						deferred.reject(err);
 					});
@@ -303,9 +293,7 @@ angular.module('roster-io', ['ui.router', 'ui.router.title', 'ngMaterial', 'fire
 			}).catch(function (err) {
 				deferred.reject(err);
 
-				$mdToast.showSimple({
-					content: 'Error ' + err.code + ': ' + err.message + '.'
-				});
+				$mdToast.showSimple('Error ' + err.code + ': ' + err.message + '.');
 			});
 		});
 		return deferred.promise;
@@ -316,6 +304,8 @@ angular.module('roster-io', ['ui.router', 'ui.router.title', 'ngMaterial', 'fire
 			rosterId: Roster.$id
 		};
 		$scope.loadExistingUser = function (user) {
+			user = user || {};
+
 			$scope.invite.name = user.name;
 			$scope.invite.email = user.email;
 		};
@@ -360,9 +350,7 @@ angular.module('roster-io', ['ui.router', 'ui.router.title', 'ngMaterial', 'fire
 						$q.all([$firebaseHelper.join(['data/users', user.$id, 'rosters'], 'data/rosters').$link(Roster.$id), $firebaseHelper.join(['data/rosters', Roster.$id, 'participants'], 'data/users').$link(user.$id), $firebaseHelper.array('email/queue').$add({ template: 'added', data: { rosterId: Roster.$id, inviteeId: user.$id, inviterId: $scope.$me.$id } })]).then(function () {
 							deferred.resolve();
 
-							$mdToast.showSimple({
-								content: '"' + user.name + '" added.'
-							});
+							$mdToast.showSimple('"' + user.name + '" added.');
 						}).catch(function (err) {
 							deferred.reject(err);
 						});
@@ -403,9 +391,7 @@ angular.module('roster-io', ['ui.router', 'ui.router.title', 'ngMaterial', 'fire
 		if (skipConfirm || confirm('Are you sure you want to rescind this user\'s invite?')) {
 			var name = participant.name || participant.email;
 			invites.$remove(participant).then(function () {
-				$mdToast.showSimple({
-					content: 'Invite for "' + name + '" rescinded.'
-				});
+				$mdToast.showSimple('Invite for "' + name + '" rescinded.');
 			});
 		}
 	};
@@ -418,12 +404,16 @@ angular.module('roster-io', ['ui.router', 'ui.router.title', 'ngMaterial', 'fire
 		var isAdmin = $scope.isAdmin(participant.$id);
 		if (skipConfirm || confirm('Are you sure you want to ' + (isAdmin ? 'demote this' : 'promote this participant to') + ' roster admin?')) {
 			Roster.admins = Roster.admins || {};
-			isAdmin = Roster.admins[participant.$id] = Roster.admins[participant.$id] ? null : participant.$id;
-			return Roster.$save().then(function () {
-				$mdToast.showSimple({
-					content: '"' + participant.name + '" is ' + (isAdmin ? 'now' : 'no longer') + ' a roster admin.'
+			if (!isAdmin || isAdmin && Object.keys(Roster.admins).length > 1) {
+				// other admins remain, so it's safe to demote this user
+				isAdmin = Roster.admins[participant.$id] = Roster.admins[participant.$id] ? null : participant.$id;
+				return Roster.$save().then(function () {
+					$mdToast.showSimple('"' + participant.name + '" is ' + (isAdmin ? 'now' : 'no longer') + ' a roster admin.');
 				});
-			});
+			} else {
+				// no other admins remain, so you cannot demote yourself
+				$mdToast.showSimple('Sorry, you can\'t demote yourself since you are the only admin for this roster.');
+			}
 		}
 	};
 }]).controller('EventCtrl', ["$scope", "$firebaseHelper", "$mdDialogForm", "$state", "$mdToast", "Auth", "RSVP", "$location", "API", "$stateParams", "Roster", "Event", function ($scope, $firebaseHelper, $mdDialogForm, $state, $mdToast, Auth, RSVP, $location, API, $stateParams, Roster, Event) {
@@ -473,9 +463,7 @@ angular.module('roster-io', ['ui.router', 'ui.router.title', 'ngMaterial', 'fire
 			$scope.event.$remove().then(function () {
 				$state.go('roster', { roster: Roster.$id });
 
-				$mdToast.showSimple({
-					content: 'Event deleted.'
-				});
+				$mdToast.showSimple('Event deleted.');
 			});
 		}
 	};
@@ -491,9 +479,7 @@ angular.module('roster-io', ['ui.router', 'ui.router.title', 'ngMaterial', 'fire
 				scope.event.date = moment(scope.event.$date).format();
 
 				return $scope.event.$save().then(function () {
-					$mdToast.showSimple({
-						content: 'Event saved.'
-					});
+					$mdToast.showSimple('Event saved.');
 				});
 			}
 		});
@@ -515,9 +501,7 @@ angular.module('roster-io', ['ui.router', 'ui.router.title', 'ngMaterial', 'fire
 		return $firebaseHelper.array(Roster, 'events').$add(event).then(function (eventRef) {
 			$state.go('event', { roster: Roster.$id, event: eventRef.key(), edit: 1 });
 
-			$mdToast.showSimple({
-				content: 'Event duplicated.'
-			});
+			$mdToast.showSimple('Event duplicated.');
 		});
 	};
 }]).controller('InviteCtrl', ["$scope", "$firebaseHelper", "$state", "$q", "Auth", "$mdToast", "$mdDialog", "Invite", "Inviter", "Roster", function ($scope, $firebaseHelper, $state, $q, Auth, $mdToast, $mdDialog, Invite, Inviter, Roster) {
@@ -538,9 +522,7 @@ angular.module('roster-io', ['ui.router', 'ui.router.title', 'ngMaterial', 'fire
 	Auth.$onAuth(function (authData) {
 		if (Invite.accepted) {
 			// notify user
-			$mdToast.showSimple({
-				content: 'Invitation already accepted.'
-			});
+			$mdToast.showSimple('Invitation already accepted.');
 
 			// redirect
 			return $state.go('roster', Invite.rosterId);
@@ -569,9 +551,7 @@ angular.module('roster-io', ['ui.router', 'ui.router.title', 'ngMaterial', 'fire
 								Invite.accepted = moment().format();
 								Invite.$save().then(function () {
 									// notify user
-									$mdToast.showSimple({
-										content: 'Invitation accepted.'
-									});
+									$mdToast.showSimple('Invitation accepted.');
 
 									// redirect
 									return $state.go('roster', Invite.rosterId);
@@ -604,9 +584,7 @@ angular.module('roster-io', ['ui.router', 'ui.router.title', 'ngMaterial', 'fire
 			ok: 'Save',
 			onSubmit: function () {
 				return User.$save().then(function () {
-					$mdToast.showSimple({
-						content: 'User saved.'
-					});
+					$mdToast.showSimple('User saved.');
 				});
 			}
 		});
@@ -666,9 +644,7 @@ angular.module('roster-io', ['ui.router', 'ui.router.title', 'ngMaterial', 'fire
 					$q.all([$firebaseHelper.join([rosterRef, 'admins'], 'data/users').$link($scope.$me.$id), $firebaseHelper.join([rosterRef, 'participants'], 'data/users').$link($scope.$me.$id), $firebaseHelper.join([$scope.$me, 'rosters'], 'data/rosters').$link(rosterRef.key())]).then(function () {
 						$state.go('roster', { roster: rosterRef.key() });
 
-						$mdToast.showSimple({
-							content: 'Roster created.'
-						});
+						$mdToast.showSimple('Roster created.');
 					});
 				});
 			}
@@ -704,7 +680,7 @@ angular.module('roster-io', ['ui.router', 'ui.router.title', 'ngMaterial', 'fire
 
 					if (options.showToast) {
 						$statuses.$loaded().then(function () {
-							$mdToast.showSimple({ content: 'Your RSVP saved as: "' + $statuses[status].name + '"' });
+							$mdToast.showSimple('Your RSVP saved as: "' + $statuses[status].name + '"');
 						});
 					}
 				});

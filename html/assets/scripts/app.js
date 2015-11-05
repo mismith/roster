@@ -424,12 +424,16 @@ angular.module('roster-io', ['ui.router', 'ui.router.title', 'ngMaterial', 'fire
 			var isAdmin = $scope.isAdmin(participant.$id);
 			if (skipConfirm || confirm('Are you sure you want to ' + (isAdmin ? 'demote this' : 'promote this participant to') + ' roster admin?')) {
 				Roster.admins = Roster.admins || {};
-				isAdmin = Roster.admins[participant.$id] = Roster.admins[participant.$id] ? null : participant.$id;
-				return Roster.$save().then(function (){
-					$mdToast.showSimple({
-						content: '"' + participant.name + '" is ' + (isAdmin ? 'now' : 'no longer') + ' a roster admin.',
+				if ( ! isAdmin || (isAdmin && Object.keys(Roster.admins).length > 1)) {
+					// other admins remain, so it's safe to demote this user
+					isAdmin = Roster.admins[participant.$id] = Roster.admins[participant.$id] ? null : participant.$id;
+					return Roster.$save().then(function (){
+						$mdToast.showSimple('"' + participant.name + '" is ' + (isAdmin ? 'now' : 'no longer') + ' a roster admin.');
 					});
-				});
+				} else {
+					// no other admins remain, so you cannot demote yourself
+					$mdToast.showSimple('Sorry, you can\'t demote yourself since you are the only admin for this roster.');
+				}
 			}
 		};
 	})
