@@ -224,7 +224,7 @@ angular.module('roster-io', ['ui.router', 'ui.router.title', 'ngMaterial', 'fire
 				
 				// wait for all promises to complete the redirect and notify user
 				$q.all(deferreds).then(function () {
-					$state.go('rosters');
+					$state.go('home');
 					
 					$mdToast.showSimple({
 						content: 'Roster deleted.',
@@ -609,7 +609,7 @@ angular.module('roster-io', ['ui.router', 'ui.router.title', 'ngMaterial', 'fire
 		});
 	})
 	
-	.controller('UserCtrl', function ($scope, $firebaseHelper, $state, $mdToast, $mdDialogForm, User) {
+	.controller('UserCtrl', function ($scope, $firebaseHelper, $state, $mdToast, $mdDialogForm, User, $q) {
 		$scope.user        = User;
 		$scope.userRosters = $firebaseHelper.join([User, 'rosters'], 'data/rosters');
 		
@@ -631,38 +631,38 @@ angular.module('roster-io', ['ui.router', 'ui.router.title', 'ngMaterial', 'fire
 		};
 		
 /*
-				function concatChildren(parents, childrenKey) {
-					var children = [];
-					$firebaseHelper.ref(parents).on('child_added', function (parentSnap) {
-						parentSnap.child(childrenKey).forEach(function (childSnap) {
-							childSnap.ref().on('value', function (childSnap){
-								var child = childSnap.val();
-								child.$id = childSnap.key();
-								
-								var index = -1;
-								angular.forEach(children, function (c, i) {
-									if (c.$id === child.$id) {
-										index = i;
-										children[i] = child; // overwrite it
-									}
-								});
-								if (index < 0) {
-									// not found, so add it
-									children.push(child);
-								}
-							});
+		function concatChildren(parents, childrenKey) {
+			var children = [];
+			$firebaseHelper.ref(parents).on('child_added', function (parentSnap) {
+				parentSnap.child(childrenKey).forEach(function (childSnap) {
+					childSnap.ref().on('value', function (childSnap){
+						var child = childSnap.val();
+						child.$id = childSnap.key();
+						
+						var index = -1;
+						angular.forEach(children, function (c, i) {
+							if (c.$id === child.$id) {
+								index = i;
+								children[i] = child; // overwrite it
+							}
 						});
+						if (index < 0) {
+							// not found, so add it
+							children.push(child);
+						}
 					});
-					return children;
-				}
-				
-				$scope.allMyEvents = concatChildren('data/rosters', 'events');
-				$scope.$watch('allMyEvents', function (allMyEvents) {
-					console.log(allMyEvents);
-					if (allMyEvents !== undefined){
-						$scope.myEvents = $filter('orderBy')(allMyEvents, 'date');
-					}
 				});
+			});
+			return children;
+		}
+		
+		$scope.allMyEvents = concatChildren('data/rosters', 'events');
+		$scope.$watch('allMyEvents', function (allMyEvents) {
+			console.log(allMyEvents);
+			if (allMyEvents !== undefined){
+				$scope.myEvents = $filter('orderBy')(allMyEvents, 'date');
+			}
+		});
 */
 		
 		// rosters
