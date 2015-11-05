@@ -101,16 +101,15 @@ angular.module('roster-io', ['ui.router', 'ui.router.title', 'ngMaterial', 'fire
 			});
 
 			// info
-			meRef.update(authData); // update it w/ any changes since last login
-			$rootScope.$me.$loaded(function ($me) {
-				// autofill details from facebook if necessary/possible
-				if ($me.facebook) {
-					$me.name = $me.name || $me.facebook.displayName;
-					$me.email = $me.email || $me.facebook.email;
-					$me.gender = $me.gender || $me.facebook.cachedUserProfile ? $me.facebook.cachedUserProfile.gender : null;
+			if (authData.facebook) {
+				$rootScope.$me.$loaded(function ($me) {
+					// autofill details from facebook if necessary/possible
+					$me.name = $me.name || authData.facebook.displayName;
+					$me.email = $me.email || authData.facebook.email;
+					$me.gender = $me.gender || authData.facebook.cachedUserProfile ? authData.facebook.cachedUserProfile.gender : null;
 					$me.$save();
-				}
-			});
+				});
+			}
 
 			// don't show login screen
 			if ($state.current.name === 'home') {
