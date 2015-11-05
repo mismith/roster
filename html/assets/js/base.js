@@ -653,6 +653,9 @@ angular.module('roster-io', ['ui.router', 'ui.router.title', 'ngMaterial', 'fire
 			admins: {},
 			participants: {}
 		};
+		$scope.roster.admins[$scope.$me.$id] = $scope.$me.$id;
+		$scope.roster.participants[$scope.$me.$id] = $scope.$me.$id;
+
 		$mdDialogForm.show({
 			scope: $scope,
 			title: 'Add new roster',
@@ -661,6 +664,8 @@ angular.module('roster-io', ['ui.router', 'ui.router.title', 'ngMaterial', 'fire
 			onSubmit: function (scope) {
 				return $scope.myRosters.$add(scope.roster).then(function (rosterRef) {
 					$q.all([$firebaseHelper.join([rosterRef, 'admins'], 'data/users').$link($scope.$me.$id), $firebaseHelper.join([rosterRef, 'participants'], 'data/users').$link($scope.$me.$id), $firebaseHelper.join([$scope.$me, 'rosters'], 'data/rosters').$link(rosterRef.key())]).then(function () {
+						$state.go('roster', { roster: rosterRef.key() });
+
 						$mdToast.showSimple({
 							content: 'Roster created.'
 						});

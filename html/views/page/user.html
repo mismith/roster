@@ -30,8 +30,8 @@
 							<md-icon>people</md-icon> <span ng-bind="roster.participants | length"></span>
 						</span>
 					</md-list-item>
-					<md-list-item ng-if=" ! (userRosters | length)" class="no-results">
-						No rosters found.
+					<md-list-item ng-if=" ! (userRosters | length)" ng-click="newRoster()" class="no-results">
+						<span>No rosters found. <strong>Create one.</strong></span>
 					</md-list-item>
 				</md-list>
 			</md-card-content>
@@ -42,20 +42,18 @@
 <md-fab-speed-dial ng-if="canEdit(user.$id)" md-direction="up" class="md-scale md-fab-speed-dial-bottom-right">
 	<md-fab-trigger>
 		<div layout="row">
-			<label><div>Edit user</div></label>
-			<md-button ng-click="editUser()" class="md-fab md-primary" aria-label="Edit user">
-				<md-icon>create</md-icon>
+			<label><div>Add new roster</div></label>
+			<md-button ng-click="newRoster()" class="md-fab" aria-label="Add new roster">
+				<md-icon>add</md-icon>
 			</md-button>
 		</div>
 	</md-fab-trigger>
-<!--
 	<md-fab-actions>
 		<div layout="row">
-			<label><div>Delete user</div></label>
-			<md-button ng-click="deleteUser($event.shiftKey)" class="md-fab md-mini md-raised md-warn" aria-label="Delete user">
-				<md-icon>delete</md-icon>
+			<label><div>Edit user</div></label>
+			<md-button ng-click="editUser()" class="md-fab md-mini md-raised md-primary" aria-label="Edit user">
+				<md-icon>create</md-icon>
 			</md-button>
 		</div>
 	</md-fab-actions>
--->
 </md-fab-speed-dial>
