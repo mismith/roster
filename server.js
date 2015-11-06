@@ -18,7 +18,7 @@ var express   = require('express'),
 	_         = require('lodash'),
 	CronJob   = require('cron').CronJob,
 	ical      = require('ical-generator'),
-	bigEmail  = require('big-email')(POSTMARK_TOKEN);
+	miEmail   = require('mi-node-email')(POSTMARK_TOKEN);
 
 // config
 moment.tz.setDefault(TIMEZONE);
@@ -97,12 +97,12 @@ function getInviteInfo(inviteId) {
 function getInviteEmail(inviteId) {
 	var deferred = Q.defer();
 	
-	bigEmail.getCompiledTemplate('invite').then(function (template) {
+	miEmail.getCompiledTemplate('invite').then(function (template) {
 		getInviteInfo(inviteId).then(function (info) {
 			info.inviter.avatar = 'http://graph.facebook.com/' + (info.inviter && info.inviter.facebookId ? info.inviter.facebookId + '/' : '') + 'picture?type=square';
 			info.subject = 'Invitation: Join ' + info.inviter.name + ' on the "' + info.roster.name + '" roster';
 				
-			bigEmail.getJuicedEmail(template, info).then(function (html) {
+			miEmail.getJuicedEmail(template, info).then(function (html) {
 				deferred.resolve({
 					html: html,
 					info: info,
@@ -124,7 +124,7 @@ function sendInviteEmail(inviteId) {
 	
 	getInviteEmail(inviteId).then(function (email) {
 		// send email
-		return bigEmail.sendEmail({
+		return miEmail.sendEmail({
 			From:       EMAIL,
 			To:         email.info.invite.name ? email.info.invite.name + ' <' + email.info.invite.email + '>' : email.info.invite.email,
 			Subject:    email.info.subject,
@@ -224,11 +224,11 @@ function getAddedInfo(rosterId, inviteeId, inviterId) {
 function getAddedEmail(rosterId, inviteeId, inviterId) {
 	var deferred = Q.defer();
 	
-	bigEmail.getCompiledTemplate('added').then(function (template) {
+	miEmail.getCompiledTemplate('added').then(function (template) {
 		getAddedInfo(rosterId, inviteeId, inviterId).then(function (info) {
 			info.subject = info.inviter.name + ' added you to the "' + info.roster.name + '" roster';
 				
-			bigEmail.getJuicedEmail(template, info).then(function (html) {
+			miEmail.getJuicedEmail(template, info).then(function (html) {
 				deferred.resolve({
 					html: html,
 					info: info,
@@ -250,7 +250,7 @@ function sendAddedEmail(rosterId, inviteeId, inviterId) {
 	
 	getAddedEmail(rosterId, inviteeId, inviterId).then(function (email) {
 		// send email
-		return bigEmail.sendEmail({
+		return miEmail.sendEmail({
 			From:       EMAIL,
 			To:         email.info.invitee.name ? email.info.invitee.name + ' <' + email.info.invitee.email + '>' : email.info.invitee.email,
 			Subject:    email.info.subject,
@@ -337,7 +337,7 @@ function getReminderInfo(rosterId, eventId) {
 function getReminderEmailTemplate(rosterId, eventId) {
 	var deferred = Q.defer();
 	
-	bigEmail.getCompiledTemplate('reminder').then(function (template) {
+	miEmail.getCompiledTemplate('reminder').then(function (template) {
 		getReminderInfo(rosterId, eventId).then(function (info) {
 			info.subject = 'Reminder: RSVP Required - ' + info.roster.name + ' - ' + info.event.name;
 			info.moment  = moment;
@@ -374,9 +374,9 @@ function sendReminderEmails(rosterId, eventId, optionalUserId) {
 							// clone the data for each user so we don't mess anything up
 							var userInfo = extend({}, template.info, {user: user});
 							
-							bigEmail.getJuicedEmail(template.html, userInfo).then(function (html) {
+							miEmail.getJuicedEmail(template.html, userInfo).then(function (html) {
 								// send email
-								bigEmail.sendEmail({
+								miEmail.sendEmail({
 									From:       EMAIL,
 									To:         user.name + ' <' + user.email + '>',
 									Subject:    template.info.subject,
@@ -422,7 +422,7 @@ function sendReminderEmails(rosterId, eventId, optionalUserId) {
 /*
 api.get('/email/reminder', function (req, res) {
 	getReminderEmailTemplate(req.query.rosterId, req.query.eventId).then(function (template) {
-		bigEmail.getJuicedEmail(template.html, template.info).then(function (html) {
+		miEmail.getJuicedEmail(template.html, template.info).then(function (html) {
 			// display email
 			res.send(html);
 		}).catch(function (err) {
@@ -509,7 +509,7 @@ rostersRef.on('child_removed', function (rosterSnap) {
 
 
 // email queueing
-bigEmail.firebaseQueue(new Firebase(FB_BASE_URL + '/queues/email'), FB_AUTH_TOKEN).watch(function (email) {
+miEmail.firebaseQueue(new Firebase(FB_BASE_URL + '/queues/email'), FB_AUTH_TOKEN).watch(function (email) {
 	switch (email.template) {
 		case 'invite':
 			return sendInviteEmail(email.data.inviteId).then(function () {

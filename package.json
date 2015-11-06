@@ -24,7 +24,7 @@
     "npm": ">= 1.0.0"
   },
   "dependencies": {
-    "big-email": "^0.1.0",
+    "mi-node-email": "^0.2.0",
     "cron": "^1.0.9",
     "express": "^4.13.3",
     "firebase": "^2.2.7",
