@@ -1,10 +1,11 @@
 window.STRICT_INVITE_CHECK = false;
 
-angular.module('roster-io', ['ui.router', 'ui.router.title', 'ngMaterial', 'firebaseHelper', 'ngTouch']).config(["$locationProvider", "$urlRouterProvider", "$stateProvider", "$firebaseHelperProvider", "$sceProvider", "$compileProvider", function ($locationProvider, $urlRouterProvider, $stateProvider, $firebaseHelperProvider, $sceProvider, $compileProvider) {
+angular.module('roster-io', ['ui.router', 'ui.router.title', 'ngMaterial', 'firebaseHelper', 'ngTouch']).config(["$locationProvider", "$urlRouterProvider", "$urlMatcherFactoryProvider", "$stateProvider", "$firebaseHelperProvider", "$sceProvider", "$compileProvider", function ($locationProvider, $urlRouterProvider, $urlMatcherFactoryProvider, $stateProvider, $firebaseHelperProvider, $sceProvider, $compileProvider) {
 	// routing
-	$locationProvider.html5Mode(true);
+	$locationProvider.html5Mode(true).hashPrefix('!');
 	$urlRouterProvider.when('', '/');
-	$urlRouterProvider.when('/rosters', '/');
+	$urlMatcherFactoryProvider.strictMode(false); // make trailing slashes optional
+
 	$stateProvider
 	// pages
 	.state('home', {
@@ -74,6 +75,15 @@ angular.module('roster-io', ['ui.router', 'ui.router.title', 'ngMaterial', 'fire
 				return User.name;
 			}]
 		}
+	})
+	// fallbacks
+	.state('404', {
+		templateUrl: 'views/page/404.html'
+	});
+	$urlRouterProvider.otherwise(function ($injector, $location) {
+		var $state = $injector.get('$state');
+		$state.go('404', null, { location: false });
+		return $location.path();
 	});
 
 	// data
