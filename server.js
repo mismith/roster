@@ -306,19 +306,21 @@ function getReminderInfo(rosterId, eventId) {
 				roster.url = '/roster/' + roster.$id;
 				
 				if (eventId) {
-					var event = roster.events[eventId];
-					
-					if (event) {
-						event.$id  = eventId;
-						event.url  = roster.url + '/' + event.$id;
+					new Firebase(FB_BASE_URL + '/data/rosterEvents/' + rosterId + '/' + eventId).once('value', function (eventSnap) {
+						var event = eventSnap.val();
 						
-						deferred.resolve({
-							roster: roster,
-							event:  event,
-						});
-					} else {
-						deferred.reject(new Error('Event not found'));
-					}
+						if (event) {
+							event.$id  = eventId;
+							event.url  = roster.url + '/' + event.$id;
+							
+							deferred.resolve({
+								roster: roster,
+								event:  event,
+							});
+						} else {
+							deferred.reject(new Error('Event not found'));
+						}
+					});
 				} else {
 					deferred.reject(new Error('Event not specified'));
 				}
@@ -449,7 +451,7 @@ api.post('/email/reminder', function (req, res) {
 */
 
 function dispatchReminders(rosterId) {
-	new Firebase(FB_BASE_URL + '/data/rosters/' + rosterId + '/events').once('value', function (eventsSnap) {
+	new Firebase(FB_BASE_URL + '/data/rosterEvents/' + rosterId).once('value', function (eventsSnap) {
 		var events = eventsSnap.val();
 		
 		_.each(events, function (event, eventId) {
@@ -634,7 +636,7 @@ function createCal(options) {
 		},
 	}, options || {}));
 }
-function getEventParticipantstatus(event, participantId) {
+function getEventParticipantStatus(event, participantId) {
 	var status = undefined;
 	if (event && event.rsvps && event.rsvps[participantId]) {
 		switch(event.rsvps[participantId].status) {
@@ -649,8 +651,9 @@ function getRosterCalendar(rosterId) {
 	var deferred = Q.defer();
 	if (rosterId) {
 		new Firebase(FB_BASE_URL + '/data/rosters/' + rosterId).once('value', function (rosterSnap) {
-			var roster = rosterSnap.val(),
-				cal    = createCal({
+			var rosterId = rosterSnap.key(),
+				roster   = rosterSnap.val(),
+				cal      = createCal({
 					name: roster.name,
 				});
 			
@@ -659,47 +662,51 @@ function getRosterCalendar(rosterId) {
 				
 				new Firebase(FB_BASE_URL + '/data/invites').once('value', function (invitesSnap) {
 					var invites = invitesSnap.val();
-					
-					_.each(roster.events, function (event, eventId) {
-						// populate event info
-						var calEvent = cal.createEvent({
-							id:          eventId,
-							summary:     event.name,
-							description: event.notes,
-							start:       moment(event.date).toDate(),
-							end:         moment(event.date).add(1, 'hours').toDate(),
-							location:    event.location,
-							url:         BASE_URL + '/roster/' + rosterId + '/' + eventId,
-							//status:      event.status,
+				
+					new Firebase(FB_BASE_URL + '/data/rosterEvents/' + rosterId).once('value', function (eventsSnap) {
+						var events = eventsSnap.val();
+						
+						_.each(events, function (event, eventId) {
+							// populate event info
+							var calEvent = cal.createEvent({
+								id:          eventId,
+								summary:     event.name,
+								description: event.notes,
+								start:       moment(event.date).toDate(),
+								end:         moment(event.date).add(1, 'hours').toDate(),
+								location:    event.location,
+								url:         BASE_URL + '/roster/' + rosterId + '/' + eventId,
+								//status:      event.status,
+							});
+							
+							// add attendees
+							if (users) {
+								_.each(roster.participants, function (participantId) {
+									var user = users[participantId];
+									if (user) {
+										calEvent.createAttendee({
+											name:   user.name,
+											email:  user.email,
+											status: getEventParticipantStatus(event, participantId),
+										});
+									}
+								});
+							}
+							if (invites) {
+								_.each(roster.invites, function (inviteId) {
+									var invite = invites[inviteId];
+									if (invite) {
+										calEvent.createAttendee({
+											name:  invite.name,
+											email: invite.email,
+										});
+									}
+								});
+							}
 						});
 						
-						// add attendees
-						if (users) {
-							_.each(roster.participants, function (participantId) {
-								var user = users[participantId];
-								if (user) {
-									calEvent.createAttendee({
-										name:   user.name,
-										email:  user.email,
-										status: getEventParticipantstatus(event, participantId),
-									});
-								}
-							});
-						}
-						if (invites) {
-							_.each(roster.invites, function (inviteId) {
-								var invite = invites[inviteId];
-								if (invite) {
-									calEvent.createAttendee({
-										name:  invite.name,
-										email: invite.email,
-									});
-								}
-							});
-						}
+						deferred.resolve(cal);
 					});
-					
-					deferred.resolve(cal);
 				});
 			});
 		});
