@@ -99,7 +99,7 @@ function getInviteEmail(inviteId) {
 	
 	bigEmail.getCompiledTemplate('invite').then(function (template) {
 		getInviteInfo(inviteId).then(function (info) {
-			info.inviter.avatar = 'http://graph.facebook.com/' + (info.inviter.facebook && info.inviter.facebook.id ? info.inviter.facebook.id + '/' : '') + 'picture?type=square';
+			info.inviter.avatar = 'http://graph.facebook.com/' + (info.inviter && info.inviter.facebookId ? info.inviter.facebookId + '/' : '') + 'picture?type=square';
 			info.subject = 'Invitation: Join ' + info.inviter.name + ' on the "' + info.roster.name + '" roster';
 				
 			bigEmail.getJuicedEmail(template, info).then(function (html) {
@@ -190,7 +190,7 @@ function getAddedInfo(rosterId, inviteeId, inviterId) {
 									var inviter = inviterSnap.val();
 									if (inviter) {
 										inviter.$id = inviterSnap.key();
-										inviter.avatar = 'http://graph.facebook.com/' + (inviter.facebook && inviter.facebook.id ? inviter.facebook.id + '/' : '') + 'picture?type=square';
+										inviter.avatar = 'http://graph.facebook.com/' + (inviter.facebookId ? inviter.facebookId + '/' : '') + 'picture?type=square';
 										
 										deferred.resolve({
 											roster:  roster,
