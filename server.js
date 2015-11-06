@@ -139,6 +139,7 @@ function sendInviteEmail(inviteId) {
 	
 	return deferred.promise;
 }
+/*
 api.get('/email/invite', function (req, res) {
 	getInviteEmail(req.query.inviteId).then(function (email) {
 		// return email as html
@@ -162,6 +163,7 @@ api.post('/email/invite', function (req, res) {
 		});
 	});
 });
+*/
 
 
 
@@ -263,6 +265,7 @@ function sendAddedEmail(rosterId, inviteeId, inviterId) {
 	
 	return deferred.promise;
 }
+/*
 api.get('/email/added', function (req, res) {
 	getAddedEmail(req.query.rosterId, req.query.inviteeId, req.query.inviterId).then(function (email) {
 		// return email as html
@@ -286,6 +289,7 @@ api.post('/email/added', function (req, res) {
 		});
 	});
 });
+*/
 
 
 
@@ -413,6 +417,7 @@ function sendReminderEmails(rosterId, eventId, optionalUserId) {
 	
 	return deferred.promise;
 }
+/*
 api.get('/email/reminder', function (req, res) {
 	getReminderEmailTemplate(req.query.rosterId, req.query.eventId).then(function (template) {
 		bigEmail.getJuicedEmail(template.html, template.info).then(function (html) {
@@ -441,6 +446,7 @@ api.post('/email/reminder', function (req, res) {
 		});
 	});
 });
+*/
 
 function dispatchReminders(rosterId) {
 	new Firebase(FB_BASE_URL + '/data/rosters/' + rosterId + '/events').once('value', function (eventsSnap) {
@@ -516,6 +522,7 @@ bigEmail.firebaseQueue(new Firebase(FB_BASE_URL + '/email/queue'), FB_AUTH_TOKEN
 
 
 
+/*
 // url shortening
 function generateHash(n) {
 	var alphabet = 'UteQA9bjVXygpBE2vchDdnKrk7xMFHGa3RmCf6uZws4Tl8zqNWYPJ', // random order a-zA-Z0-9 non-similar
@@ -611,6 +618,7 @@ api.all('/url/redirect', function (req, res) {
 		res.redirect(BASE_URL);
 	}
 });
+*/
 
 
 
