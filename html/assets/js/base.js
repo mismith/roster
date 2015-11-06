@@ -307,7 +307,7 @@ angular.module('roster-io', ['ui.router', 'ui.router.title', 'ngMaterial', 'fire
 		inviteRef.once('value', function (inviteSnap) {
 			var invite = inviteSnap.val();
 
-			$firebaseHelper.array('email/queue').$add({ template: 'invite', data: { inviteId: inviteId } }).then(function () {
+			$firebaseHelper.array('queues/email').$add({ template: 'invite', data: { inviteId: inviteId } }).then(function () {
 				// add to roster's invites list
 				$firebaseHelper.object(Roster, 'invites').$loaded().then(function ($invites) {
 					$invites[inviteId] = inviteId;
@@ -379,7 +379,7 @@ angular.module('roster-io', ['ui.router', 'ui.router.title', 'ngMaterial', 'fire
 				angular.forEach($scope.users, function (user) {
 					if (user.email === $scope.invite.email) {
 						alreadyExists = true;
-						$q.all([$firebaseHelper.join(['data/users', user.$id, 'rosters'], 'data/rosters').$link(Roster.$id), $firebaseHelper.join(['data/rosters', Roster.$id, 'participants'], 'data/users').$link(user.$id), $firebaseHelper.array('email/queue').$add({ template: 'added', data: { rosterId: Roster.$id, inviteeId: user.$id, inviterId: $scope.$me.$id } })]).then(function () {
+						$q.all([$firebaseHelper.join(['data/users', user.$id, 'rosters'], 'data/rosters').$link(Roster.$id), $firebaseHelper.join(['data/rosters', Roster.$id, 'participants'], 'data/users').$link(user.$id), $firebaseHelper.array('queues/email').$add({ template: 'added', data: { rosterId: Roster.$id, inviteeId: user.$id, inviterId: $scope.$me.$id } })]).then(function () {
 							deferred.resolve();
 
 							$mdToast.showSimple('"' + user.name + '" added.');

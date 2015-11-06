@@ -507,7 +507,7 @@ rostersRef.on('child_removed', function (rosterSnap) {
 
 
 // email queueing
-bigEmail.firebaseQueue(new Firebase(FB_BASE_URL + '/email/queue'), FB_AUTH_TOKEN).watch(function (email) {
+bigEmail.firebaseQueue(new Firebase(FB_BASE_URL + '/queues/email'), FB_AUTH_TOKEN).watch(function (email) {
 	switch (email.template) {
 		case 'invite':
 			return sendInviteEmail(email.data.inviteId).then(function () {
