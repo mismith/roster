@@ -38,8 +38,11 @@
 		</md-card>
 	</section>
 </div>
-<aside ng-if="user.$value === null" layout="column" flex class="content-wrap">
-	<h1 layout="row" layout-align="center center" flex>Sorry, this user doesn't seem to exist.</h1>
+<aside ng-if="user.$value === null" layout="column" layout-align="center center" flex>
+	<div layout="column">
+		<md-icon ng-class="{'md-hero': true}">error</md-icon>
+		<h1>Sorry, this user doesn't seem to exist.</h1>
+	</div>
 </aside>
 	
 <md-fab-speed-dial ng-if="canEdit(user.$id)" md-direction="up" class="md-scale md-fab-speed-dial-bottom-right">

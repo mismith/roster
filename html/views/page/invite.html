@@ -1,33 +1,25 @@
-<div layout="column" flex>
-	<md-content ng-if=" ! notFound && invite.$$loaded" class="content-wrap">
-		<md-subheader class="md-no-sticky">You've been invited to join:</md-subheader>
-		<div layout="column">
-			<md-card-content layout="column">
-				<md-card layout-align="center center" layout-padding>
-					<md-card-content>
-						<h1 ng-bind="roster.name" style="margin-top: 0;"></h1>
-						<div>
-							<small>by</small>
-							<img ng-src="{{ avatar(inviter.facebook.id) }}" width="32" height="32" class="md-avatar" alt="{{ inviter.name }}" style="margin: 8px;" />
-							<span ng-bind="inviter.name"></span>
-						</div>
-					</md-card-content>
-				</md-card>
-			</md-card-content>
-			<div class="md-actions" layout="row" layout-align="center" layout-padding>
-				<md-button ng-click="acceptInvite()" class="md-facebook" aria-label="Accept invitation">
-					<md-icon md-font-set="fa" class="fa-facebook"></md-icon>
-					Accept Invitation
-				</md-button>
+<div ng-if="invite.$value !== null" class="content-wrap" layout="column" layout-align="center" flex>
+	<md-subheader class="md-no-sticky">You've been invited to join:</md-subheader>
+	<md-card layout-align="center center" layout-padding>
+		<md-card-content>
+			<h1 ng-bind="roster.name" style="margin-top: 0;"></h1>
+			<div>
+				<small>by</small>
+				<img ng-src="{{ avatar(inviter.facebook.id) }}" width="32" height="32" class="md-avatar" alt="{{ inviter.name }}" style="margin: 8px;" />
+				<span ng-bind="inviter.name"></span>
 			</div>
-		</md-card>
-	</md-content>
-	
-	<md-content ng-if="notFound" layout="column" layout-align="center center" flex>
-		<div layout="column" layout-align="center center">
-			<md-icon class="md-hero">do_not_disturb</md-icon>
-			<md-subheader class="md-no-sticky">Invitation not found.</md-subheader>
-		</div>
-	</md-content>
-	<loading ng-if=" ! notFound && ! invite.$$loaded"></loading>
+		</md-card-content>
+	</md-card>
+	<div class="md-actions" layout="row" layout-align="center" layout-padding>
+		<md-button ng-click="acceptInvite()" class="md-facebook" aria-label="Accept invitation">
+			<md-icon md-font-set="fa" class="fa-facebook"></md-icon>
+			Accept Invitation
+		</md-button>
+	</div>
 </div>
+<aside ng-if="invite.$value === null" layout="column" layout-align="center center" flex>
+	<div layout="column">
+		<md-icon ng-class="{'md-hero': true}">error</md-icon>
+		<h1>Sorry, this invitation doesn't seem to exist.</h1>
+	</div>
+</aside>

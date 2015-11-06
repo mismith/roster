@@ -508,13 +508,6 @@ angular.module('roster-io', ['ui.router', 'ui.router.title', 'ngMaterial', 'fire
 	$scope.inviter = Inviter;
 	$scope.roster = Roster;
 
-	if (Invite.$value !== null) {
-		Invite.$$loaded = true;
-	} else {
-		// invite doesn't exist
-		$scope.notFound = true;
-	}
-
 	$scope.acceptInvite = function () {
 		Auth.$auth();
 	};
