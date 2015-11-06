@@ -23,8 +23,11 @@ angular.module('roster-io', ['ui.router', 'ui.router.title', 'ngMaterial', 'fire
 		templateUrl: 'views/page/roster.html',
 		controller: 'RosterCtrl',
 		resolve: {
-			Roster: ["$firebaseHelper", "$stateParams", function ($firebaseHelper, $stateParams) {
-				return $firebaseHelper.object('data/rosters', $stateParams.roster).$loaded();
+			Roster: ["$firebaseHelper", "$stateParams", "$state", function ($firebaseHelper, $stateParams, $state) {
+				return $firebaseHelper.object('data/rosters', $stateParams.roster).$loaded(function ($roster) {
+					if ($roster.$value === null) return $state.go('404', { model: 'roster' }, { location: false });
+					return $roster;
+				});
 			}],
 			$title: ["Roster", function (Roster) {
 				return Roster.name;
@@ -35,11 +38,17 @@ angular.module('roster-io', ['ui.router', 'ui.router.title', 'ngMaterial', 'fire
 		templateUrl: 'views/page/event.html',
 		controller: 'EventCtrl',
 		resolve: {
-			Roster: ["$firebaseHelper", "$stateParams", function ($firebaseHelper, $stateParams) {
-				return $firebaseHelper.object('data/rosters', $stateParams.roster).$loaded();
+			Roster: ["$firebaseHelper", "$stateParams", "$state", function ($firebaseHelper, $stateParams, $state) {
+				return $firebaseHelper.object('data/rosters', $stateParams.roster).$loaded(function ($roster) {
+					if ($roster.$value === null) return $state.go('404', { model: 'roster' }, { location: false });
+					return $roster;
+				});
 			}],
-			Event: ["$firebaseHelper", "$stateParams", "Roster", function ($firebaseHelper, $stateParams, Roster) {
-				return $firebaseHelper.object(Roster, 'events', $stateParams.event).$loaded();
+			Event: ["$firebaseHelper", "$stateParams", "$state", "Roster", function ($firebaseHelper, $stateParams, $state, Roster) {
+				return $firebaseHelper.object(Roster, 'events', $stateParams.event).$loaded(function ($event) {
+					if ($event.$value === null) return $state.go('404', { model: 'event' }, { location: false });
+					return $event;
+				});
 			}],
 			$title: ["Roster", "Event", function (Roster, Event) {
 				return Event.name + ' • ' + Roster.name;
@@ -50,8 +59,11 @@ angular.module('roster-io', ['ui.router', 'ui.router.title', 'ngMaterial', 'fire
 		templateUrl: 'views/page/invite.html',
 		controller: 'InviteCtrl',
 		resolve: {
-			Invite: ["$firebaseHelper", "$stateParams", function ($firebaseHelper, $stateParams) {
-				return $firebaseHelper.object('data/invites', $stateParams.invite).$loaded();
+			Invite: ["$firebaseHelper", "$stateParams", "$state", function ($firebaseHelper, $stateParams, $state) {
+				return $firebaseHelper.object('data/invites', $stateParams.invite).$loaded(function ($invite) {
+					if ($invite.$value === null) return $state.go('404', { model: 'invite' }, { location: false });
+					return $invite;
+				});
 			}],
 			Inviter: ["$firebaseHelper", "$stateParams", "Invite", function ($firebaseHelper, $stateParams, Invite) {
 				return $firebaseHelper.object('data/users', Invite.inviterId).$loaded();
@@ -68,8 +80,11 @@ angular.module('roster-io', ['ui.router', 'ui.router.title', 'ngMaterial', 'fire
 		templateUrl: 'views/page/user.html',
 		controller: 'UserCtrl',
 		resolve: {
-			User: ["$firebaseHelper", "$stateParams", function ($firebaseHelper, $stateParams) {
-				return $firebaseHelper.object('data/users', $stateParams.user).$loaded();
+			User: ["$firebaseHelper", "$stateParams", "$state", function ($firebaseHelper, $stateParams, $state) {
+				return $firebaseHelper.object('data/users', $stateParams.user).$loaded(function ($user) {
+					if ($user.$value === null) return $state.go('404', { model: 'user' }, { location: false });
+					return $user;
+				});
 			}],
 			$title: ["User", function (User) {
 				return User.name;
@@ -78,7 +93,11 @@ angular.module('roster-io', ['ui.router', 'ui.router.title', 'ngMaterial', 'fire
 	})
 	// fallbacks
 	.state('404', {
-		templateUrl: 'views/page/404.html'
+		templateUrl: 'views/page/404.html',
+		params: { model: 'page' },
+		controller: ["$scope", "$stateParams", function ($scope, $stateParams) {
+			$scope.model = $stateParams.model;
+		}]
 	});
 	$urlRouterProvider.otherwise(function ($injector, $location) {
 		var $state = $injector.get('$state');

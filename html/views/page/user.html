@@ -1,4 +1,4 @@
-<div ng-if="user.$value !== null" class="content-wrap">
+<div class="content-wrap">
 	<header layout="column" layout-gt-md="row" class="center-sm" style="padding-top: 8px;">
 		<section flex layout-padding>
 			<div layout="row" layout-sm="column" layout-align="start center">
@@ -38,12 +38,6 @@
 		</md-card>
 	</section>
 </div>
-<aside ng-if="user.$value === null" layout="column" layout-align="center center" flex>
-	<div layout="column">
-		<md-icon ng-class="{'md-hero': true}">error</md-icon>
-		<h1>Sorry, this user doesn't seem to exist.</h1>
-	</div>
-</aside>
 	
 <md-fab-speed-dial ng-if="canEdit(user.$id)" md-direction="up" class="md-scale md-fab-speed-dial-bottom-right">
 	<md-fab-trigger>

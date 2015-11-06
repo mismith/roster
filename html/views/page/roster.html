@@ -1,4 +1,4 @@
-<div ng-if="roster.$value !== null" layout-gt-md="row" class="content-wrap">
+<div layout-gt-md="row" class="content-wrap">
 	<section flex>
 		<header layout-margin ng-include="'views/template/roster.header.html'"></header>
 		<div ng-repeat="timegroup in timegroups" ng-show="timegroup.$events.length || (timegroup.$id === 'upcoming' && events.length < 1)" ng-init="timegroup.$collapsed = timegroup.$id === 'past'">
@@ -126,12 +126,6 @@
 		</div>
 	</section>
 </div>
-<aside ng-if="roster.$value === null" layout="column" layout-align="center center" flex>
-	<div layout="column">
-		<md-icon ng-class="{'md-hero': true}">error</md-icon>
-		<h1>Sorry, this roster doesn't seem to exist.</h1>
-	</div>
-</aside>
 
 <md-fab-speed-dial ng-if="canEdit(roster.admins)" md-direction="up" class="md-scale md-fab-speed-dial-bottom-right">
 	<md-fab-trigger>

@@ -1,4 +1,4 @@
-<div ng-if="invite.$value !== null" class="content-wrap" layout="column" layout-align="center" flex>
+<div class="content-wrap" layout="column" layout-align="center" flex>
 	<md-subheader class="md-no-sticky">You've been invited to join:</md-subheader>
 	<md-card layout-align="center center" layout-padding>
 		<md-card-content>
@@ -17,9 +17,3 @@
 		</md-button>
 	</div>
 </div>
-<aside ng-if="invite.$value === null" layout="column" layout-align="center center" flex>
-	<div layout="column">
-		<md-icon ng-class="{'md-hero': true}">error</md-icon>
-		<h1>Sorry, this invitation doesn't seem to exist.</h1>
-	</div>
-</aside>
