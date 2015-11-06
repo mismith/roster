@@ -5,7 +5,7 @@
 			<h1 ng-bind="roster.name" style="margin-top: 0;"></h1>
 			<div>
 				<small>by</small>
-				<img ng-src="{{ avatar(inviter.facebook.id) }}" width="32" height="32" class="md-avatar" alt="{{ inviter.name }}" style="margin: 8px;" />
+				<img ng-src="{{ avatar(inviter) }}" width="32" height="32" class="md-avatar" alt="{{ inviter.name }}" style="margin: 8px;" />
 				<span ng-bind="inviter.name"></span>
 			</div>
 		</md-card-content>

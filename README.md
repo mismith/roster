@@ -29,4 +29,3 @@ Quickly poll your team roster's availability.
 - fix floating fab scrolling/positioning on mobile
 - add prompt to add to homescreen
 - fix back button edge cases
-- fix non-logged-in homepage spacing
