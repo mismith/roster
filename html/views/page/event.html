@@ -42,7 +42,7 @@
 			<md-list>
 				<md-list-item ng-repeat="participant in status.$participants = (participants | filterByRsvp:event.rsvps:status.$id | orderBy:'name')" ng-class="{previous: $state.$previous.params.user === participant.$id}" md-swipe-item="canEdit(participant.$id, roster.admins)" md-swipe-right-triggered="RSVP(event).setParticipantStatus(participant.$id, 1); mdSwipeItem.close();" md-swipe-right-most-triggered="RSVP(event).setParticipantStatus(participant.$id, -1); mdSwipeItem.close();" md-swipe-left-most-triggered="RSVP(event).setParticipantStatus(participant.$id, 0); mdSwipeItem.close();">
 					<div md-ink-ripple ng-click="$state.go('user', {user: participant.$id})" class="md-list-item-inner md-swipe-item-inner" style="padding-right: 8px;">
-						<img ng-src="{{ avatar(participant.facebook.id) }}" width="40" height="40" class="md-avatar" ng-class="{online: participant.online === true}" alt="{{ participant.name }}" />
+						<img ng-src="{{ avatar(participant) }}" width="40" height="40" class="md-avatar" ng-class="{online: participant.online === true}" alt="{{ participant.name }}" />
 						<p ng-bind="participant.name"></p>
 						
 						<rsvp event="event" participant="participant" md-swipe-item-controller="mdSwipeItem" readonly=" ! canEdit(participant.$id, roster.admins)"></rsvp>

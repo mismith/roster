@@ -1,6 +1,6 @@
 <md-autocomplete md-items="user in filteredUsers = (users | concat:contacts | filter:{name: invite.name})" md-search-text="invite.name" md-selected-item="existingUser" md-selected-item-change="loadExistingUser(existingUser)" md-item-text="user.name" md-floating-label="Name">
 	<md-item-template>
-		<img ng-src="{{ avatar(user.facebook.id) }}" width="24" height="24" alt="{{ user.name }}" class="md-avatar" ng-class="{online: user.online === true}" />
+		<img ng-src="{{ avatar(user) }}" width="24" height="24" alt="{{ user.name }}" class="md-avatar" ng-class="{online: user.online === true}" />
 		&nbsp;&nbsp;
 		<span md-highlight-text="invite.name" md-highlight-flags="i">{{ user.name }}</span>
 		&nbsp;&nbsp;

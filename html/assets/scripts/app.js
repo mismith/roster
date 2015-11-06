@@ -140,9 +140,10 @@ angular.module('roster-io', ['ui.router', 'ui.router.title', 'ngMaterial', 'fire
 				// info
 				if (authData.facebook) {
 					$rootScope.$me.$loaded(function ($me) { // autofill details from facebook if necessary/possible
-						$me.name   = $me.name   || authData.facebook.displayName;
-						$me.email  = $me.email  || authData.facebook.email;
-						$me.gender = $me.gender || authData.facebook.cachedUserProfile ? authData.facebook.cachedUserProfile.gender : null;
+						$me.facebookId = $me.facebookId || authData.facebook.id;
+						$me.name       = $me.name       || authData.facebook.displayName;
+						$me.email      = $me.email      || authData.facebook.email;
+						$me.gender     = $me.gender     || authData.facebook.cachedUserProfile ? authData.facebook.cachedUserProfile.gender : null;
 						$me.$save();
 					});
 				}
@@ -214,8 +215,11 @@ angular.module('roster-io', ['ui.router', 'ui.router.title', 'ngMaterial', 'fire
 		};
 		
 		// helpers
-		$rootScope.avatar = function (userId, query) {
+		$rootScope.avatar = function (user, query) {
 			query = query || 'type=square';
+			
+			var userId = user ? user.facebookId : false;
+			
 			return '//graph.facebook.com/' + (userId ? userId + '/' : '') + 'picture?' + query;
 		};
 		$rootScope.mapsUrl = function (event) {
