@@ -174,7 +174,7 @@ angular.module('roster-io', ['ui.router', 'ui.router.title', 'ngMaterial', 'fire
 	$rootScope.$firebaseHelper = $firebaseHelper;
 	$rootScope.console = console;
 	$rootScope.history = history;
-	$rootScope.BASE_SHORT_URL = 'http://rstr.io/';
+	$rootScope.BASE_SHORT_URL = 'http://www.roster-io.com/';
 
 	// state
 	$rootScope.$on('$stateChangeSuccess', function (e, toState, toParams, fromState, fromParams) {
