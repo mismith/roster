@@ -584,10 +584,11 @@ angular.module('roster-io', ['ui.router', 'ui.router.title', 'ngMaterial', 'fire
 								// update user model
 								var rosters = {};
 								rosters[Invite.rosterId] = Invite.rosterId;
+
 								$scope.$me.$ref().update({
-									email:   Invite.email || me.facebook.email,
-									name:    Invite.name || me.facebook.displayName,
-									gender:  (me.facebook.cachedUserProfile ? me.facebook.cachedUserProfile.gender : false) || 'male',
+									name:    Invite.name || authData.facebook.displayName,
+									email:   Invite.email || authData.facebook.email,
+									gender:  (authData.facebook.cachedUserProfile ? authData.facebook.cachedUserProfile.gender : false) || 'male',
 									rosters: rosters,
 								});
 								
