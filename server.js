@@ -50,7 +50,7 @@ server.all('/*', function(req, res){
 });
 
 // server
-server.listen(process.env.OPENSHIFT_NODEJS_PORT || 3030, process.env.OPENSHIFT_NODEJS_IP || '127.0.0.1');
+server.listen(process.env.NODE_PORT || 3030, process.env.NODE_IP || 'localhost');
 
 
 
