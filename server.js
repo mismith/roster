@@ -50,7 +50,7 @@ server.all('/*', function(req, res){
 });
 
 // server
-server.listen(process.env.NODE_PORT || 3030, process.env.NODE_IP || 'localhost');
+server.listen(process.env.PORT || 3030);
 
 
 
