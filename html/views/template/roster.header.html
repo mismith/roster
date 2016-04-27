@@ -1,0 +1,30 @@
+<div layout="row" layout-align="start start" layout-sm="column" layout-align-sm="start center" style="padding-top: 8px;">
+	<div flex layout="row">
+		<div ng-if="roster.name">
+			<avatar roster="roster" size="96"></avatar>
+		</div>
+		
+		<div ng-if="$state.current.name === 'roster'" flex layout="column" layout-align="center start" style="margin: 0 16px;">
+			<h1 ng-bind="roster.name"></h1>
+		</div>
+		<div ng-if="$state.current.name === 'event'" flex layout="column" layout-align="center start" style="text-align: left; margin: 0 16px;">
+			<h2 style="margin: 0;"><a ui-sref="roster({roster: roster.$id})" ng-bind="roster.name" class="passthru"></a></h2>
+			<h1 ng-bind="event.name" style="margin: 0;"></h1>
+		</div>
+	</div>
+	
+	<div class="button-list" layout="column" ng-if="roster.name">
+		<a ng-href="{{ (isMobile ? 'fb-messenger://groupthreadfbid/' : 'https://www.facebook.com/messages/conversation-') + roster.messengerThreadId }}" ng-if="roster.messengerThreadId" class="md-button md-raised" target="_blank">
+			<md-icon md-svg-src="assets/img/facebook-messenger.svg"></md-icon>
+			Chat in Messenger
+		</a>
+		<a ng-href="{{ 'webcal://www.roster-io.com/api/v1/calendar/roster?rosterId=' + roster.$id }}" ng-if=" ! isAndroid && (events.length || event.date)" class="md-button md-raised">
+			<md-icon>event</md-icon>
+			Add to Calendar
+		</a>
+		<a ng-href="{{ mapsUrl(event) }}" ng-if="event.location || event.locationUrl" target="_blank" class="md-button md-raised">
+			<md-icon>pin_drop</md-icon>
+			Open in Maps
+		</a>
+	</div>
+</div>

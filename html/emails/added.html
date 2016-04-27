@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<title><%= subject %></title>
+	<base href="http://www.roster-io.com/" />
+	
+	<meta charset="UTF-8" />
+	<meta name="viewport" content="initial-scale=1" />
+	
+	<link rel="stylesheet" href="http://ajax.googleapis.com/ajax/libs/angular_material/0.10.0/angular-material.min.css" />
+	<link rel="stylesheet" href="assets/css/base.css" type="text/css" />
+	<style>
+		a {
+			text-decoration: none;
+		}
+		a.passthru {
+			color: inherit;
+		}
+		small a {
+			color: #666;
+			text-decoration: underline;
+		}
+		a.md-button,
+		.md-button {
+			border-radius: 3px;
+		}
+		.md-button.md-raised.md-primary {
+			background-color: rgb(63,81,181);
+			color: rgba(255,255,255,0.87);
+		}
+		img {
+			vertical-align: middle;
+			border: 0;
+		}
+	</style>
+</head>
+<body class="loaded" style="height: auto; padding: 20px;">
+
+	<div style="max-width: 600px; margin: 8px auto; text-align: center;">
+		
+		<h2 class="md-subheader" style="text-align: left;">
+			<div class="md-subheader-inner">You've been added to:</div>
+		</h2>
+		<div class="md-whiteframe-z1" style="background-color: #FFF; padding: 24px;">
+			<h1 style="margin-top: 0;"><a href="<%= roster.url %>" class="passthru"><%= roster.name %></a></h1>
+			<div>
+				<small>by</small>
+				<img src="<%= inviter.avatar %>" width="32" height="32" class="md-avatar" alt="<%= inviter.name %>" style="margin: 8px;">
+				<span><%= inviter.name %></span>
+			</div>
+		</div>
+		<br />
+		<div class="md-actions">
+			<a href="<%= roster.url %>" class="md-button md-primary md-raised">View Roster &rsaquo;</a>
+		</div>
+		
+		<br />
+		<br />
+		<small style="font-size: 12px; color: #999;">This email was sent to <% if (locals.invitee) { %><a href="mailto:<%= invitee.email %>"><%= invitee.email %></a><% } else { %>you<% } %> by <a href="/">Roster IO</a>.</small>
+	
+	</div>
+
+</body>
+</html>

@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="roster-io">
+<head>
+	<title ng-bind="($title ? $title + ' • ' : '') + 'Roster IO'">Roster IO</title>
+	
+	<base href="/" />
+	<meta charset="UTF-8" />
+	
+	<!-- search engines -->
+	<link rel="canonical" href="http://www.roster-io.com/" />
+	<meta name="description" content="Quickly poll your team roster's availability." />
+	
+	<!-- facebook -->
+	<meta property="og:type" content="website" />
+	<meta property="og:title" content="Roster IO" />
+	<meta property="og:site_name" content="Roster IO" />
+	<meta property="og:description" content="Quickly poll your team roster's availability." />
+	<meta property="og:image" content="http://www.roster-io.com/assets/img/touchicon.png" />
+	
+	<!-- mobile -->
+	<meta name="viewport" content="initial-scale=1" />
+	<meta name="mobile-web-app-capable" content="yes" />
+	<meta name="apple-mobile-web-app-capable" content="yes" />
+	<meta name="apple-mobile-web-app-status-bar-style" content="black" />
+	<link rel="manifest" href="manifest.json" />
+	<link rel="apple-touch-icon-precomposed" href="assets/img/touchicon.png?rev=bd27ac53984429746eecaac49a5a13cb" type="image/png" />
+	<link rel="shortcut icon" href="assets/img/favicon.png?rev=d812eb167fd7cdfe77a0aba9d04f8a69" type="image/png" />
+	<link rel="apple-touch-startup-image" href="assets/img/splash@750x1294.png" media="(device-width: 375px) and (device-height: 667px) and (-webkit-device-pixel-ratio: 2)" />
+	
+	<link rel="stylesheet" href="//ajax.googleapis.com/ajax/libs/angular_material/0.10.1/angular-material.min.css" />
+	<link rel="stylesheet" href="//fonts.googleapis.com/icon?family=Material+Icons" />
+	<link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" />
+	<link rel="stylesheet" href="assets/css/base.min.css?rev=bfef400a80459d3df3e0ea30092bee86" />
+	
+	<!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+</head>
+<body ng-controller="AppCtrl" layout="column" ng-class="{loaded: loaded}">
+
+	<div id="app" layout="column" layout-fill>
+		<md-toolbar id="header" layout="row" layout-align="center center">
+			<md-button ng-click="history.back()" ng-show="history.length > 1" class="md-icon-button" style="margin-left: 8px;">
+				<md-icon>arrow_back</md-icon>
+			</md-button>
+			<div flex class="md-toolbar-tools">
+				<div flex>
+					<a ui-sref="home" class="home">Roster IO</a>
+				</div>
+				<div layout="row">
+					<div ng-repeat="myRoster in myRosters" ng-init="myRosterEvents = $firebaseHelper.array('data/rosters/' + myRoster.$id + '/events')" layout="row">
+						<a ng-repeat="myRosterEvent in myRosterEvents | filterByTimegroup:'today'" ui-sref="event({roster: myRoster.$id, event: myRosterEvent.$id})" title="{{ myRosterEvent.name }}" style="display: block;">
+							<avatar roster="myRoster" size="32"></avatar>
+						</a>
+					</div>
+				</div>
+				<nav>
+					<md-button ng-if=" ! $me.$id" ng-click="$auth()" class="md-facebook md-raised" aria-label="Login with Facebook" style="margin: 0;">
+						<md-icon md-font-set="fa" class="fa-facebook"></md-icon>
+						Login
+					</md-button>
+					<md-menu ng-if="$me.$id">
+						<md-button ng-click="$mdOpenMenu()" layout="row" layout-align="center center" layout-fill aria-label="Open user menu" class="md-icon-button" style="margin-left: 8px;">
+							<img ng-src="{{ avatar($me) }}" width="48" height="48" class="md-avatar" />
+						</md-button>
+						<md-menu-content width="4">
+							<md-menu-item>
+								<md-button ng-click="$state.go('user', {user: $me.$id})" aria-label="My Account">My Profile</md-button>
+							</md-menu-item>
+							<md-menu-item>
+								<md-button ng-click="$unauth()" class="md-warn" aria-label="Logout">Logout</md-button>
+							</md-menu-item>
+						</md-menu-content>
+					</md-menu>
+				</nav>
+			</div>
+		</md-toolbar>
+		<md-content role="main" layout="column" flex ui-view autoscroll="false" id="main"></md-content>
+	</div>
+
+	<script src="//ajax.googleapis.com/ajax/libs/angularjs/1.4.1/angular.min.js"></script>
+	<script src="//ajax.googleapis.com/ajax/libs/angularjs/1.4.1/angular-animate.min.js"></script>
+	<script src="//ajax.googleapis.com/ajax/libs/angularjs/1.4.1/angular-aria.min.js"></script>
+	<script src="//ajax.googleapis.com/ajax/libs/angularjs/1.4.1/angular-touch.min.js"></script>
+	<script src="//ajax.googleapis.com/ajax/libs/angular_material/0.10.1/angular-material.min.js"></script>
+	
+	<script src="//cdnjs.cloudflare.com/ajax/libs/angular-ui-router/0.2.15/angular-ui-router.min.js"></script>
+	<script src="//cdn.rawgit.com/nonplus/angular-ui-router-title/v0.0.4/angular-ui-router-title.js"></script>
+	
+	<script src="//cdn.firebase.com/js/client/2.2.3/firebase.js"></script>
+	<script src="//cdn.firebase.com/libs/angularfire/1.1.2/angularfire.min.js"></script>
+	<script src="//cdn.rawgit.com/mismith/angularfire-helper/2.1.5/angularfire-helper.min.js"></script>
+	
+	<script src="https://apis.google.com/js/client.js"></script>
+	<script src="//cdnjs.cloudflare.com/ajax/libs/moment.js/2.9.0/moment.min.js"></script>
+	
+	<script src="assets/js/base.min.js?rev=315a6e5dc29bb12db4b0592f38381127"></script>
+</body>
+</html>
