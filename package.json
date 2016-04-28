@@ -24,12 +24,12 @@
     "npm": ">= 1.0.0"
   },
   "dependencies": {
-    "mi-node-email": "^0.2.0",
     "cron": "^1.0.9",
     "express": "^4.13.3",
     "firebase": "^2.2.7",
     "ical-generator": "^0.2.2",
     "lodash": "^3.10.1",
+    "mi-node-email": "^0.2.0",
     "moment": "^2.10.3",
     "moment-timezone": "^0.4.0",
     "node.extend": "^1.1.5",
@@ -65,6 +65,6 @@
   "private": true,
   "main": "server.js",
   "scripts": {
-    "start": "node server.js"
+    "start": "nodemon"
   }
 }
