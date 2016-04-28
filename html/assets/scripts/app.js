@@ -1,5 +1,3 @@
-window.STRICT_INVITE_CHECK = false;
-
 angular.module('roster-io', ['ui.router', 'ui.router.title', 'ngMaterial', 'firebaseHelper', 'ngTouch'])
 	
 	.config(function ($locationProvider, $urlRouterProvider, $urlMatcherFactoryProvider, $stateProvider, $firebaseHelperProvider, $sceProvider, $compileProvider) {
@@ -576,49 +574,35 @@ angular.module('roster-io', ['ui.router', 'ui.router.title', 'ngMaterial', 'fire
 				// redirect
 				return $state.go('roster', Invite.rosterId);
 			}
-			if (authData) {
-				if( ! $scope.notFound) {
-					$scope.$me.$loaded().then(function (me) {
-						if ( ! STRICT_INVITE_CHECK || (STRICT_INVITE_CHECK && Invite.email === me.email)) {
-							Roster.$loaded().then(function () {
-								// update user model
-								var rosters = {};
-								rosters[Invite.rosterId] = Invite.rosterId;
+			if (authData && ! $scope.notFound) {
+				Roster.$loaded().then(function () {
+					// update user model
+					var rosters = {};
+					rosters[Invite.rosterId] = Invite.rosterId;
 
-								$scope.$me.$ref().update({
-									name:    Invite.name || authData.facebook.displayName,
-									email:   Invite.email || authData.facebook.email,
-									gender:  (authData.facebook.cachedUserProfile ? authData.facebook.cachedUserProfile.gender : false) || 'male',
-									rosters: rosters,
-								});
-								
-								// update roster
-								if(Roster.invites) delete Roster.invites[Invite.$id];
-								if( ! Roster.participants) Roster.participants = {};
-								Roster.participants[me.uid] = me.uid;
-								Roster.$save().then(function () {
-									// update invite
-									Invite.accepted = moment().format();
-									Invite.$save().then(function () {
-										// notify user
-										$mdToast.showSimple('Invitation accepted.');
-										
-										// redirect
-										return $state.go('roster', Invite.rosterId);
-									});
-								});
-							});
-						} else {
-							// emails don't match
-							
-							// notify user
-							$mdDialog.show($mdDialog.alert({
-								content: 'Sorry, your Facebook email (' + me.email + ') does not match the email this invite was sent to (' + Invite.email + ').',
-								ok: 'OK',
-							}));
-						}
+					$scope.$me.$ref().update({
+						name:    Invite.name || authData.facebook.displayName,
+						email:   Invite.email || authData.facebook.email,
+						gender:  (authData.facebook.cachedUserProfile ? authData.facebook.cachedUserProfile.gender : false) || 'male',
+						rosters: rosters,
 					});
-				}
+					
+					// update roster
+					if(Roster.invites) delete Roster.invites[Invite.$id];
+					if( ! Roster.participants) Roster.participants = {};
+					Roster.participants[authData.uid] = authData.uid;
+					Roster.$save().then(function () {
+						// update invite
+						Invite.accepted = moment().format();
+						Invite.$save().then(function () {
+							// notify user
+							$mdToast.showSimple('Invitation accepted.');
+							
+							// redirect
+							return $state.go('roster', {roster: Invite.rosterId});
+						});
+					});
+				});
 			}
 		});
 	})
