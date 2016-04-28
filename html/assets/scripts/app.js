@@ -1,4 +1,10 @@
-angular.module('roster-io', ['ui.router', 'ui.router.title', 'ngMaterial', 'firebaseHelper', 'ngTouch'])
+angular.module('roster-io', [
+	'ui.router',
+	'ui.router.title',
+	'ngMaterial',
+	'firebaseHelper',
+	'ngTouch',
+])
 	
 	.config(function ($locationProvider, $urlRouterProvider, $urlMatcherFactoryProvider, $stateProvider, $firebaseHelperProvider, $sceProvider, $compileProvider) {
 		// routing

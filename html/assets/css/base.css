@@ -36,9 +36,8 @@ md-list-item {
   position: relative;
 }
 md-list-item [md-ink-ripple].md-list-item-inner {
-  -webkit-flex: 1;
-      -ms-flex: 1;
-          flex: 1;
+  -ms-flex: 1;
+      flex: 1;
   padding: 0 0 0 16px;
   outline: none;
 }
@@ -423,9 +422,8 @@ md-list-item .avatar {
   -webkit-backface-visibility: hidden;
 }
 .md-swipe-item .md-swipe-item-inner {
-  -webkit-flex: 1;
-      -ms-flex: 1;
-          flex: 1;
+  -ms-flex: 1;
+      flex: 1;
   position: relative;
   background-color: #ffffff;
   padding: 0 16px;
@@ -444,9 +442,8 @@ md-list-item .avatar {
   color: #ffffff;
 }
 .md-swipe-item md-swipe-actions > * {
-  -webkit-flex: 1;
-      -ms-flex: 1;
-          flex: 1;
+  -ms-flex: 1;
+      flex: 1;
 }
 .md-swipe-item.md-swiping-left .md-swipe-item-inner,
 .md-swipe-item.md-swiping-left-triggered .md-swipe-item-inner,
