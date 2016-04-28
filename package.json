@@ -2,6 +2,8 @@
   "name": "roster-io",
   "version": "0.1.0",
   "description": "Quickly poll your team roster's availability.",
+  "private": true,
+  "homepage": "https://www.roster-io.com",
   "keywords": [
     "rsvp",
     "roster",
@@ -9,19 +11,15 @@
     "availability",
     "scheduling"
   ],
+  "license": "ISC",
   "author": {
     "name": "Murray Smith",
     "email": "murray@mismith.info",
     "url": "http://mismith.info/"
   },
-  "homepage": "http://www.roster-io.com",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/mismith/roster-io"
-  },
-  "engines": {
-    "node": ">= 0.6.0",
-    "npm": ">= 1.0.0"
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
   },
   "dependencies": {
     "cron": "^1.0.9",
@@ -60,11 +58,5 @@
     "merge": "^1.2.0",
     "node-notifier": "^4.1.2",
     "yargs": "^3.8.0"
-  },
-  "bundleDependencies": [],
-  "private": true,
-  "main": "server.js",
-  "scripts": {
-    "start": "nodemon"
   }
 }
