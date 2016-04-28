@@ -1,5 +1,11 @@
 #!/bin/env node
 
+var opbeat = require('opbeat').start({
+	appId: '29ee5b27da',
+	organizationId: '6b3a8bba7de440a9905bf3ddf30b8c7e',
+	secretToken: '599934ab6d5b9da42ed137275c6929ac5899a0f5',
+});
+
 var NAME           = 'Roster IO',
 	DOMAIN         = 'roster-io.com',
 	BASE_URL       = 'http://www.' + DOMAIN,
