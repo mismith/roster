@@ -1,4 +1,5 @@
 angular.module('roster-io', [
+	'ngOpbeat',
 	'ui.router',
 	'ui.router.title',
 	'ngMaterial',
@@ -6,7 +7,13 @@ angular.module('roster-io', [
 	'ngTouch',
 ])
 	
-	.config(function ($locationProvider, $urlRouterProvider, $urlMatcherFactoryProvider, $stateProvider, $firebaseHelperProvider, $sceProvider, $compileProvider) {
+	.config(function ($opbeatProvider, $locationProvider, $urlRouterProvider, $urlMatcherFactoryProvider, $stateProvider, $firebaseHelperProvider, $sceProvider, $compileProvider) {
+		// error reporting/loggined
+		$opbeatProvider.config({
+			orgId: '6b3a8bba7de440a9905bf3ddf30b8c7e',
+			appId: '110a8e5771',
+		});
+
 		// routing
 		$locationProvider.html5Mode(true).hashPrefix('!');
 		$urlRouterProvider.when('', '/');
