@@ -1,0 +1,4 @@
+<figure class="avatar">
+	<img ng-if="roster.avatar" ng-src="{{ roster.avatar }}"  class="md-avatar" alt="Avatar for {{ roster.name }}" width="{{ $size }}" height="{{ $size }}" />
+	<span ng-if=" ! roster.avatar" class="md-avatar initials" layout="column" layout-align="center center" ng-bind="initials(roster.name)" style="width: {{ $size }}px; height: {{ $size }}px;"></span>
+</figure>

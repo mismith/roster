@@ -1,0 +1,10 @@
+<div class="datetime" layout="row" layout-align="center center">
+	<div class="date" layout="column" layout-align="center center">
+		<div class="month" ng-bind="date | date:'MMM'"></div>
+		<div class="day" ng-bind="date | date:'d'"></div>
+	</div>
+	<div class="time" layout="column" layout-align="center center">
+		<div class="hour" ng-bind="date | date:'h:mm'"></div>
+		<div class="ampm" ng-bind="date | date:'a'"></div>
+	</div>
+</div>
