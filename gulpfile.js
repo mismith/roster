@@ -1,111 +1,87 @@
 // localized config
-var basePath  = 'html/',
+var srcPath   = 'src/',
+	destPath  = 'build/',
 	overrides = {
-		manifest: {
-			cache: [
-				'//ajax.googleapis.com/ajax/libs/angular_material/0.10.1/angular-material.min.css',
-				'//fonts.googleapis.com/icon?family=Material+Icons',
-				'//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css',
-				'//ajax.googleapis.com/ajax/libs/angularjs/1.4.1/angular.min.js',
-				'//ajax.googleapis.com/ajax/libs/angularjs/1.4.1/angular-animate.min.js',
-				'//ajax.googleapis.com/ajax/libs/angularjs/1.4.1/angular-aria.min.js',
-				'//ajax.googleapis.com/ajax/libs/angularjs/1.4.1/angular-touch.min.js',
-				'//ajax.googleapis.com/ajax/libs/angular_material/0.10.1/angular-material.min.js',
-				'//cdnjs.cloudflare.com/ajax/libs/angular-ui-router/0.2.13/angular-ui-router.min.js',
-				'//cdn.firebase.com/js/client/2.2.3/firebase.js',
-				'//cdn.firebase.com/libs/angularfire/1.1.2/angularfire.min.js',
-				'//cdn.rawgit.com/mismith/angularfire-helper/2.1.5/angularfire-helper.min.js',
-				'https://apis.google.com/js/client.js',
-				'//cdnjs.cloudflare.com/ajax/libs/moment.js/2.9.0/moment.min.js',
-			],
-		},
+		// browsersync: {
+		// 	proxy: 'http://localhost:3030',
+		// },
 	};
-	
+
 
 // includes
-var gulp         = require('gulp'),
-
-	// build
-	fs           = require('fs'),
-	merge        = require('merge'),
-
-	// utility
-	gutil        = require('gulp-util'),
-	argv         = require('yargs').argv,
-
-	// watching
-	browserSync  = require('browser-sync'),
-
-	// js
-	concat       = require('gulp-concat'),
-	rename       = require('gulp-rename');
+var gulp        = require('gulp'),
+	_           = require('lodash'),
+	argv        = require('yargs').argv,
+	gutil       = require('gulp-util'),
+	rename      = require('gulp-rename'),
+	browserSync = require('browser-sync');
 
 
 // config
-var config = merge.recursive({
-	autoprefixer: 'last 2 versions',
-	htmlhint: {
-		"doctype-first": false,
-		"spec-char-escape": false,
-		"attr-lowercase": false,
-		"tagname-lowercase": false,
-		"img-alt-require": true,
-		"attr-unsafe-chars": true,
-		"space-tab-mixed-disabled": true,
-	},
-	manifest: {
-		basePath: __dirname.replace(/[^\w\s]/g, "\\$&"),
-		filename: 'cache.manifest',
-		exclude: 'cache.manifest',
-		preferOnline: true,
-		hash: true,
-	},
-	browsersync: {
-		ui: false,
-		watchOptions: {debounce: 400},
-		reloadDebounce: 400,
-		notify: false,
-		server: {
-			baseDir: './' + basePath,
-			middleware: [ require('connect-history-api-fallback')() ],
-		},
-	},
-	concat: {
-		js: 'base',
-	},
-	globs: {
-		excludes: [
-			'!node_modules/**/*',
-			'!vendor/**/*',
-			'!wp/**/*',
-		],
-		html: [
-			basePath + '**/*.{html,htm,php}',
-		],
-		js: [
-			basePath + 'assets/scripts/*/**/*.js', // subfolders first
-			basePath + 'assets/scripts/**/*.js',
-		],
-		less: [
-			basePath + 'assets/styles/**/*.less',
-			// note that files ending in ".inc.less" will not be compiled (but they will be watched)
-		],
+var config = _.merge({
+	// paths
+	srcs: {
 		files: [
-			basePath + '**/*.{htaccess,jpg,jpeg,gif,png,svg}',
+			srcPath + '**/*',
+			'!' + srcPath + '**/*.{DS_Store,gitkeep}',
+			'!' + srcPath + 'assets/{scripts,styles,images,icons}/**/*', // ignore special folders
 		],
-		manifest: [
-			basePath + 'assets/js/*',
-			basePath + 'assets/css/*',
-			basePath + 'assets/fonts/*',
-			basePath + 'assets/webfonts/*',
-			basePath + 'assets/img/*.{jpg,jpeg,gif,png,svg}',
-			basePath + 'assets/**/*.{mp3,mp4,m4a,m4v,wav,flv,ogg,ogv,webm}',
-			basePath + '**/*.{html,htm,php}',
+		scripts: [
+			srcPath + 'assets/scripts/*/**/*.js', // subfolders first
+			srcPath + 'assets/scripts/**/*.js',
+		],
+		styles: [
+			srcPath + 'assets/styles/**/*.{css,scss}',
+		],
+		images: [
+			srcPath + 'assets/images/**/*.{png,jpeg,jpg,gif,svg}',
+		],
+		icons: [
+			srcPath + 'assets/icons/**/*.svg',
 		],
 	},
 	dests: {
-		scripts: basePath + 'assets/js',
-		styles:  basePath + 'assets/css',
+		files:   destPath,
+		scripts: destPath + 'assets/js',
+		styles:  destPath + 'assets/css',
+		images:  destPath + 'assets/img',
+		icons:   destPath + 'assets',
+	},
+
+	// plugins
+	babel: {
+		presets: ['es2015'],
+	},
+	imagemin: {
+		progressive: true,
+		interlaced: true,
+		multipass: true,
+	},
+	svgSprite: {
+		mode: {
+			symbol: {
+				dest: '.',
+				sprite: 'icons.svg',
+			},
+		},
+	},
+	autoprefixer: {
+		browsers: ['last 2 versions'],
+	},
+	browsersync: {
+		ui: false,
+		notify: false,
+		reloadDebounce: 400,
+		watchOptions: {debounce: 400},
+		server: {
+			baseDir: './' + destPath,
+		},
+	},
+	nodemon: {
+		ignore: [
+			srcPath,
+			destPath,
+		],
 	},
 }, overrides);
 
@@ -113,91 +89,130 @@ var config = merge.recursive({
 // tasks
 gulp
 	// build
-	.task('html', function(){
-		return gulp.src(config.globs.excludes.concat(config.globs.html))
+	.task('files', function () {
+		return gulp.src(config.srcs.files, {dot: true})
+			// .pipe(require('gulp-rev-append')()) // @TODO: not working
+			.pipe(gulp.dest(config.dests.files))
+
 			.pipe(browserSync.reload({stream: true}));
 	})
-	.task('rev', function(){
-		return gulp.src(config.globs.excludes.concat(config.globs.html))
-			.pipe(require('gulp-rev-append')())
-			.pipe(gulp.dest(basePath || '.'))
-	})
-	.task('js', function(){
-		return gulp.src(config.globs.excludes.concat(config.globs.js))
-			.pipe(require('gulp-jsvalidate')(config.jsValidate)).on('error', handleError)
+	.task('scripts', function () {
+		return gulp.src(config.srcs.scripts)
 			.pipe(require('gulp-babel')(config.babel)).on('error', handleError)
 			.pipe(require('gulp-ng-annotate')(config.ngAnnotate)).on('error', handleError)
-			.pipe(concat(config.concat.js + '.js'))
+			.pipe(require('gulp-concat')('main.js'))
 			.pipe(gulp.dest(config.dests.scripts))
-			
+
 			.pipe(rename({suffix: '.min'}))
 			.pipe(require('gulp-uglify')(config.uglify)).on('error', handleError)
 			.pipe(gulp.dest(config.dests.scripts))
-			
+
 			.pipe(browserSync.reload({stream: true}));
 	})
-	.task('less', function(){
-		return gulp.src(config.globs.excludes.concat(config.globs.less).concat('!**/*.inc.less')) // don't output .inc.less files as they are never accessed directly
-			.pipe(require('gulp-less')(config.less)).on('error', handleError)
-			.pipe(require('gulp-autoprefixer')(config.autoprefixer))
+	.task('styles', function () {
+		var postcss = require('gulp-postcss');
+		return gulp.src(config.srcs.styles)
+			.pipe(require('gulp-sass')(config.sass)).on('error', handleError)
+			.pipe(postcss([
+				require('autoprefixer')(config.autoprefixer)
+			])).on('error', handleError)
 			.pipe(gulp.dest(config.dests.styles))
-			
+
 			.pipe(rename({suffix: '.min'}))
-			.pipe(require('gulp-minify-css')(config.minifyCss))
+			.pipe(postcss([
+				require('cssnano')(config.cssnano)
+			])).on('error', handleError)
 			.pipe(gulp.dest(config.dests.styles))
-			
+
 			.pipe(browserSync.reload({stream: true}));
 	})
-	.task('manifest', function(){
-		return gulp.src(config.globs.excludes.concat(config.globs.manifest))
-			.pipe(require('gulp-manifest')(config.manifest))
-			.pipe(gulp.dest('.'));
+	.task('images', function () {
+		return gulp.src(config.srcs.images)
+			.pipe(require('gulp-imagemin')(config.imagemin)).on('error', handleError)
+
+			.pipe(gulp.dest(config.dests.images))
+
+			.pipe(browserSync.reload({stream: true}));
 	})
-	.task('build', ['html','rev','js','less','manifest'])
-	
-	// lint
-	.task('html.lint', function(){
-		return gulp.src(config.globs.excludes.concat(config.globs.html))
-			.pipe(require('gulp-htmlhint')(config.htmlhint))
-			.pipe(htmlhint.reporter());
+	.task('icons', function () {
+		return gulp.src(config.srcs.icons)
+			.pipe(require('gulp-svg-sprite')(config.svgSprite)).on('error', handleError)
+
+			.pipe(gulp.dest(config.dests.icons))
+
+			.pipe(browserSync.reload({stream: true}));
 	})
-	.task('lint', ['html.lint'])
-	
+	.task('build', ['files', 'scripts', 'styles', 'images', 'icons'])
+	.task('clean', function () {
+		return gulp.src(destPath, {read: false})
+			.pipe(require('gulp-clean')());
+	})
+
 	// watch
-	.task('html.watch', function(){
-		return gulp.watch(config.globs.excludes.concat(config.globs.html), ['html']);
+	.task('files.watch', ['files'], function () {
+		return gulp.watch(config.srcs.files, ['files']);
 	})
-	.task('js.watch', function(){
-		return gulp.watch(config.globs.excludes.concat(config.globs.js), ['js']);
+	.task('scripts.watch', ['scripts'], function () {
+		return gulp.watch(config.srcs.scripts, ['scripts']);
 	})
-	.task('less.watch', function(){
-		return gulp.watch(config.globs.excludes.concat(config.globs.less), ['less']);
+	.task('styles.watch', ['styles'], function () {
+		return gulp.watch(config.srcs.styles, ['styles']);
 	})
-	.task('watch', ['html.watch','js.watch','less.watch'], function(){
-		var options = merge.recursive(config.browsersync || {}, {
-			files:     config.globs.excludes.concat(config.globs.files),
-			ghostMode: !! (argv.g || gutil.env.ghost), // call `gulp -g` or `gulp --ghost` to start in ghostMode
-			open:      ! (argv.s || gutil.env.silent), // call `gulp -s` or `gulp --silent` to start gulp without opening a new browser window
+	.task('images.watch', ['images'], function () {
+		return gulp.watch(config.srcs.images, ['images']);
+	})
+	.task('icons.watch', ['icons'], function () {
+		return gulp.watch(config.srcs.icons, ['icons']);
+	})
+	.task('watch', ['files.watch', 'scripts.watch', 'styles.watch', 'images.watch', 'icons.watch'], function () {
+		var options = _.merge(config.browsersync || {}, {
+			// call `gulp -g` or `gulp --ghost` to start in ghostMode
+			ghostMode: !! (argv.g || gutil.env.ghost),
+
+			// call `gulp -s` or `gulp --silent` to start gulp without opening a new browser window
+			open: ! (argv.s || gutil.env.silent),
 		});
-		if (options.proxy) delete options.server; // prefer proxy to server
+		options.proxy = options.proxy || argv.p || gutil.env.proxy;
+		if (options.proxy) {
+			// prefer proxy to server
+			delete options.server;
+
+			if (options.proxy === true) options.proxy = 'http://localhost:3030';
+		} else if (options.server) {
+			delete options.proxy;
+			// direct all requests to index.html
+			// (since we're launching a node server, .htaccess files won't work)
+			options.server.middleware = options.server.middleware || [];
+			options.server.middleware.push(require('connect-history-api-fallback')());
+		}
 		browserSync.init(options);
 	})
-	
-	
+
+	// node
+	.task('nodemon', function () {
+		require('gulp-nodemon')(config.nodemon)
+			.on('start', function () {
+				config.browsersync = config.browsersync || {};
+				config.browsersync.proxy = true;
+
+				gulp.start('watch'); // @HACK?
+			});
+	})
+
 	// default
 	.task('default', ['watch']);
 
 
 // error handling
-var handleError = function(error, type){
+function handleError(error, type){
 	//console.log(error);
-	
+
 	// remove any leading error marker
 	error.message = error.message.replace(/^error:\s*/i, '');
-	
+
 	// shorten fileName
 	var fileName = error.fileName ? error.fileName.replace(__dirname, '') : '';
-	
+
 	// show an OS-level notification to make sure we catch our attention
 	// (do this before we format things since it can't handle the formatting)
 	require('node-notifier').notify({
@@ -207,7 +222,7 @@ var handleError = function(error, type){
 		sound: 'Basso',
 		activate: 'com.apple.Terminal',
 	});
-	
+
 	// colour the problematic line for higher visibility
 	if(error.extract){
 		var middleIndex = Math.floor(error.extract.length / 2);
@@ -223,25 +238,25 @@ var handleError = function(error, type){
 	}
 	// process line numbers
 	var line = error.lineNumber || error.line;
-	
+
 	// output the formatted error
 	gutil.log(
 		// error and plugin
 		gutil.colors.red('ERROR(' + error.plugin + '): ') +
-		
+
 		// message
 		error.message +
-		
+
 		// offending line number and column
 		(line ? ' [' + gutil.colors.cyan(line) + ':' + gutil.colors.cyan(error.column) + ']' : '') +
-		
+
 		// preview the offending code
 		(error.extract ? '\n\n\t' + error.extract.join('\n\t') : '') +
-		
+
 		// finish with a new line
 		'\n'
 	);
-	
+
 	// prevent this error from breaking/stopping watchers
 	this.emit('end');
 };
