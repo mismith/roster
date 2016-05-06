@@ -1,9 +1,9 @@
 {
   "name": "roster-io",
   "description": "Quickly poll your team roster's availability.",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "private": true,
-  "homepage": "https://www.roster-io.com",
+  "homepage": "https://roster.mismith.io/",
   "keywords": [
     "rsvp",
     "roster",

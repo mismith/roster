@@ -7,8 +7,8 @@ var opbeat = require('opbeat').start({
 });
 
 var NAME           = 'Roster IO',
-	DOMAIN         = 'roster-io.com',
-	BASE_URL       = 'http://www.' + DOMAIN,
+	DOMAIN         = 'roster.mismith.io',
+	BASE_URL       = 'https://' + DOMAIN,
 	FB_BASE_URL    = 'https://roster-io.firebaseio.com',
 	FB_AUTH_TOKEN  = 'xwYj28J4UELF5WgifokLbqjN71mFE9Y4cBwykmyI',
 	POSTMARK_TOKEN = '75cdd97a-2c40-4319-a6a9-4576d0948d57',
@@ -44,7 +44,7 @@ Object.defineProperty(Error.prototype, 'toJSON', {
 });
 
 // web app
-server.use(express.static('html'));
+server.use(express.static('build'));
 
 // api
 var api = express.Router();
@@ -52,7 +52,7 @@ server.use('/api/v1', api);
 
 // routes
 server.all('/*', function(req, res){
-	res.sendFile(__dirname + '/html/index.html');
+	res.sendFile(__dirname + '/build/index.html');
 });
 
 // server
@@ -105,7 +105,7 @@ function getInviteEmail(inviteId) {
 	
 	miEmail.getCompiledTemplate('invite').then(function (template) {
 		getInviteInfo(inviteId).then(function (info) {
-			info.inviter.avatar = 'http://graph.facebook.com/' + (info.inviter && info.inviter.facebookId ? info.inviter.facebookId + '/' : '') + 'picture?type=square';
+			info.inviter.avatar = 'https://graph.facebook.com/' + (info.inviter && info.inviter.facebookId ? info.inviter.facebookId + '/' : '') + 'picture?type=square';
 			info.subject = 'Invitation: Join ' + info.inviter.name + ' on the "' + info.roster.name + '" roster';
 				
 			miEmail.getJuicedEmail(template, info).then(function (html) {
