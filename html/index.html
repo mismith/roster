@@ -46,7 +46,7 @@
 					<a ui-sref="home" class="home">Roster IO</a>
 				</div>
 				<div layout="row">
-					<div ng-repeat="myRoster in myRosters" ng-init="myRosterEvents = $firebaseHelper.array('data/rosters/' + myRoster.$id + '/events')" layout="row">
+					<div ng-repeat="myRoster in myRosters" ng-init="myRosterEvents = $firebaseHelper.array('data/rosters:events/' + myRoster.$id)" layout="row">
 						<a ng-repeat="myRosterEvent in myRosterEvents | filterByTimegroup:'today'" ui-sref="event({roster: myRoster.$id, event: myRosterEvent.$id})" title="{{ myRosterEvent.name }}" style="display: block;">
 							<avatar roster="myRoster" size="32"></avatar>
 						</a>

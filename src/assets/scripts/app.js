@@ -60,7 +60,7 @@ angular.module('roster-io', [
 						});
 					},
 					Event: function ($firebaseHelper, $stateParams, $state, Roster) {
-						return $firebaseHelper.object('data/rosterEvents', Roster.$id, $stateParams.event).$loaded(function ($event) {
+						return $firebaseHelper.object('data/rosters:events', Roster.$id, $stateParams.event).$loaded(function ($event) {
 							if ($event.$value === null) return $state.go('404', {model: 'event'}, {location: false});
 							return $event;
 						});
@@ -251,7 +251,7 @@ angular.module('roster-io', [
 	.controller('RosterCtrl', function ($scope, $rootScope, $firebaseHelper, $mdDialogForm, $state, $mdToast, $q, RSVP, $http, Roster) {
 		$scope.roster       = Roster;
 		$scope.timegroups   = $firebaseHelper.array('constants/timegroups'); // constant
-		$scope.events       = $firebaseHelper.array('data', 'rosterEvents', Roster.$id);
+		$scope.events       = $firebaseHelper.array('data', 'rosters:events', Roster.$id);
 		$scope.participants = $firebaseHelper.join([Roster, 'participants'], 'data/users');
 		$scope.invites      = $firebaseHelper.join([Roster, 'invites'], 'data/invites');
 		$scope.users        = $firebaseHelper.array('data/users');
@@ -543,7 +543,7 @@ angular.module('roster-io', [
 						break;
 				}
 			});
-			return $firebaseHelper.array('data', 'rosterEvents', Roster.$id).$add(event).then(function (eventRef) {
+			return $firebaseHelper.array('data', 'rosters:events', Roster.$id).$add(event).then(function (eventRef) {
 				$state.go('event', {roster: Roster.$id, event: eventRef.key(), edit: 1});
 				
 				$mdToast.showSimple('Event duplicated.');
