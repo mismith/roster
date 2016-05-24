@@ -12,7 +12,7 @@ var NAME           = 'Roster IO',
 	FB_BASE_URL    = 'https://roster-io.firebaseio.com',
 	FB_AUTH_TOKEN  = 'xwYj28J4UELF5WgifokLbqjN71mFE9Y4cBwykmyI',
 	POSTMARK_TOKEN = '75cdd97a-2c40-4319-a6a9-4576d0948d57',
-	EMAIL          = 'support@' + DOMAIN,
+	EMAIL          = 'roster@mismith.io',
 	TIMEZONE       = 'America/Edmonton';
 
 var express   = require('express'),
