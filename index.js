@@ -44,7 +44,7 @@ Object.defineProperty(Error.prototype, 'toJSON', {
 });
 
 // web app
-server.use(express.static('build'));
+server.use(express.static('html'));
 
 // api
 var api = express.Router();
@@ -52,7 +52,7 @@ server.use('/api/v1', api);
 
 // routes
 server.all('/*', function(req, res){
-	res.sendFile(__dirname + '/build/index.html');
+	res.sendFile(__dirname + '/html/index.html');
 });
 
 // server

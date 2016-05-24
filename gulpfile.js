@@ -1,6 +1,6 @@
 // localized config
 var srcPath   = 'src/',
-	destPath  = 'build/',
+	destPath  = 'html/',
 	overrides = {
 		// browsersync: {
 		// 	proxy: 'http://localhost:3030',
@@ -24,7 +24,7 @@ var config = _.merge({
 		files: [
 			srcPath + '**/*',
 			'!' + srcPath + '**/*.{DS_Store,gitkeep}',
-			'!' + srcPath + 'assets/{scripts,styles,images,icons}/**/*', // ignore special folders
+			'!' + srcPath + 'assets/{scripts,styles,images,icons}{,/**}', // ignore special folders
 		],
 		scripts: [
 			srcPath + 'assets/scripts/*/**/*.js', // subfolders first
