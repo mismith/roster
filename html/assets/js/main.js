@@ -218,7 +218,7 @@ angular.module('roster-io', ['ngOpbeat', 'ui.router', 'ui.router.title', 'ngMate
 		return '//graph.facebook.com/' + (userId ? userId + '/' : '') + 'picture?' + query;
 	};
 	$rootScope.mapsUrl = function (event) {
-		var protocol = $rootScope.isiOS ? 'comgooglemapsurl' : $rootScope.isMobile ? 'maps' : 'http',
+		var protocol = $rootScope.isiOS ? 'comgooglemapsurl' : $rootScope.isMobile && !$rootScope.isAndroid ? 'maps' : 'http',
 		    url = '';
 		if (event.locationUrl) {
 			url = event.locationUrl.replace(/^https?:\/\//, '');
