@@ -312,7 +312,7 @@ function getReminderInfo(rosterId, eventId) {
 				roster.url = '/roster/' + roster.$id;
 				
 				if (eventId) {
-					new Firebase(FB_BASE_URL + '/data/rosterEvents/' + rosterId + '/' + eventId).once('value', function (eventSnap) {
+					new Firebase(FB_BASE_URL + '/data/rosters:events/' + rosterId + '/' + eventId).once('value', function (eventSnap) {
 						var event = eventSnap.val();
 						
 						if (event) {
@@ -457,7 +457,7 @@ api.post('/email/reminder', function (req, res) {
 */
 
 function dispatchReminders(rosterId) {
-	new Firebase(FB_BASE_URL + '/data/rosterEvents/' + rosterId).once('value', function (eventsSnap) {
+	new Firebase(FB_BASE_URL + '/data/rosters:events/' + rosterId).once('value', function (eventsSnap) {
 		var events = eventsSnap.val();
 		
 		_.each(events, function (event, eventId) {
@@ -669,7 +669,7 @@ function getRosterCalendar(rosterId) {
 				new Firebase(FB_BASE_URL + '/data/invites').once('value', function (invitesSnap) {
 					var invites = invitesSnap.val();
 				
-					new Firebase(FB_BASE_URL + '/data/rosterEvents/' + rosterId).once('value', function (eventsSnap) {
+					new Firebase(FB_BASE_URL + '/data/rosters:events/' + rosterId).once('value', function (eventsSnap) {
 						var events = eventsSnap.val();
 						
 						_.each(events, function (event, eventId) {
