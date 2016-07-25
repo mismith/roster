@@ -670,7 +670,7 @@ angular.module('roster-io', ['ngOpbeat', 'ui.router', 'ui.router.title', 'ngMate
 
 				var deferred = $q.defer();
 
-				return $firebaseHelper.ref($rsvps, participantId).update({
+				$firebaseHelper.ref($rsvps, participantId).update({
 					status: status,
 					updated: moment().format()
 				}, function () {

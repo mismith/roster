@@ -707,7 +707,7 @@ angular.module('roster-io', [
 					
 					var deferred = $q.defer();
 					
-					return $firebaseHelper.ref($rsvps, participantId).update({
+					$firebaseHelper.ref($rsvps, participantId).update({
 						status: status,
 						updated: moment().format(),
 					}, function () {
